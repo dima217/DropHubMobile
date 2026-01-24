@@ -8,7 +8,7 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
     flexDirection: "column",
     gap: 4,
-    width: "90%",
+    width: "100%",
   },
   inputContainer: {
     width: "100%",
@@ -19,7 +19,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     flexDirection: "row",
     justifyContent: "space-between",
-    backgroundColor: Colors.inactive,
   },
   input: {
     width: "90%",

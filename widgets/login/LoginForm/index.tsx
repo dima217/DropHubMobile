@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   button: {
-    marginTop: 80,
+    marginTop: 20,
   },
   errorText: {
     alignSelf: "flex-start",

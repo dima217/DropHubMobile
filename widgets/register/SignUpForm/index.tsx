@@ -163,14 +163,14 @@ const SignUpForm = () => {
 
 const styles = StyleSheet.create({
   container: {
-    display: "flex",
     width: "100%",
-    gap: 5,
+    display: "flex",
+    gap: 10,
     justifyContent: "center",
     alignItems: "center",
   },
   button: {
-    marginTop: 60,
+    marginTop: 20,
   },
   errorText: {
     alignSelf: "flex-start",

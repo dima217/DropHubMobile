@@ -8,7 +8,7 @@ export const Colors = {
   inactive: "#1A1A1A",
   background: "#060D18",
   tab: "#232323",
-  border: "#5B5B5B",
+  border: "#2788E6",
   grey: "#404349",
   gradient: ["#1A1A1A", "#242424"] as const,
   reject: "#ff4a75",
