@@ -93,24 +93,31 @@ const LoginForm = () => {
         )}
       />
 
-      <Controller
-        control={control}
-        name="password"
-        rules={{
-          required: "Password is required",
-          minLength: {
-            value: 6,
-            message: "Password must be at least 6 characters",
-          },
-        }}
-        render={({ field: { value, onChange }, fieldState }) => (
-          <PasswordInput
-            value={value}
-            onChangeText={onChange}
-            errorMessage={fieldState.error?.message}
-          />
-        )}
-      />
+      <View style={styles.passwordContainer}>
+        <Controller
+          control={control}
+          name="password"
+          rules={{
+            required: "Password is required",
+            minLength: {
+              value: 6,
+              message: "Password must be at least 6 characters",
+            },
+          }}
+          render={({ field: { value, onChange }, fieldState }) => (
+            <PasswordInput
+              value={value}
+              onChangeText={onChange}
+              errorMessage={fieldState.error?.message}
+            />
+          )}
+        />
+        <View style={styles.resetTextContainer}>
+          <ThemedText type="medium" highlightLastWord>
+            Forgot Password? Reset
+          </ThemedText>
+        </View>
+      </View>
 
       {apiError && (
         <ThemedText type="error" style={styles.apiErrorText}>
@@ -136,8 +143,16 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  passwordContainer: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "flex-end",
+  },
+  resetTextContainer: {
+    marginRight: 20,
+  },
   button: {
-    marginTop: 20,
+    marginTop: 30,
   },
   errorText: {
     alignSelf: "flex-start",

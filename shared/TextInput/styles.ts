@@ -7,15 +7,14 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "flex-start",
     flexDirection: "column",
-    gap: 4,
     width: "100%",
   },
   inputContainer: {
     width: "100%",
     borderRadius: 29,
     height: 58,
-    paddingHorizontal: 20,
-    borderColor: Colors.border,
+    paddingHorizontal: 15,
+    backgroundColor: Colors.border,
     borderWidth: 1,
     flexDirection: "row",
     justifyContent: "space-between",
@@ -23,10 +22,12 @@ const styles = StyleSheet.create({
   input: {
     width: "90%",
     color: Colors.text,
+    fontSize: 16,
   },
   label: {
     fontSize: 12,
-    color: Colors.border,
+    color: Colors.text,
+    opacity: 100,
     paddingLeft: 15,
   },
   disabledInputContainer: {
@@ -51,6 +52,7 @@ const styles = StyleSheet.create({
   },
   labelContainer: {
     paddingHorizontal: 8,
+    paddingBottom: 6,
   },
   leftContainer: {
     alignItems: "center",

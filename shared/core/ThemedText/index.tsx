@@ -9,16 +9,41 @@ export type ThemedTextProps = TextProps & {
     | "subtitle"
     | "link"
     | "error"
-    | "small";
+    | "small"
+    | "medium"
+    | "megaTitle";
   fontFamilyType?: "sans" | "serif" | "rounded" | "mono";
+  highlightLastWord?: boolean;
 };
 
 export function ThemedText({
   style,
   type = "default",
   fontFamilyType = "sans",
+  highlightLastWord = false,
+  children,
   ...rest
 }: ThemedTextProps) {
+  if (highlightLastWord && typeof children === "string") {
+    const words = children.trim().split(" ");
+    const lastWord = words.pop();
+    const restText = words.join(" ");
+
+    return (
+      <Text
+        style={[
+          { color: Colors.text, fontFamily: Fonts[fontFamilyType] },
+          typeStyles[type],
+          style,
+        ]}
+        {...rest}
+      >
+        {restText ? restText + " " : ""}
+        <Text style={{ color: Colors.primary }}>{lastWord}</Text>
+      </Text>
+    );
+  }
+
   return (
     <Text
       style={[
@@ -27,7 +52,9 @@ export function ThemedText({
         style,
       ]}
       {...rest}
-    />
+    >
+      {children}
+    </Text>
   );
 }
 
@@ -51,10 +78,18 @@ const typeStyles = StyleSheet.create({
     fontWeight: "500",
     lineHeight: 28,
   },
+  megaTitle: {
+    fontSize: 26,
+    color: Colors.brightText,
+    lineHeight: 50,
+  },
   link: {
     lineHeight: 24,
     fontSize: 14,
     color: Colors.primary,
+  },
+  medium: {
+    fontSize: 12,
   },
   small: {
     fontSize: 10,
