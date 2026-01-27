@@ -7,6 +7,7 @@ import { Controller, useForm } from "react-hook-form";
 import { StyleSheet, View } from "react-native";
 import { useDispatch } from "react-redux";
 
+import AuthPrompt from "@/shared/ui/AuthPrompt";
 import Button from "../../../shared/Button";
 import EmailInput from "../../../shared/EmailInput";
 import PasswordInput from "../../../shared/PasswordInput";
@@ -113,9 +114,12 @@ const LoginForm = () => {
           )}
         />
         <View style={styles.resetTextContainer}>
-          <ThemedText type="medium" highlightLastWord>
-            Forgot Password? Reset
-          </ThemedText>
+          <AuthPrompt
+            textType="medium"
+            promptText="Forgot Password?"
+            actionText="Reset"
+            onPressAction={() => router.navigate("/(auth)/reset-password")}
+          />
         </View>
       </View>
 

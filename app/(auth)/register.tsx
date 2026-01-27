@@ -1,4 +1,7 @@
+import { useSignUpInitMutation } from "@/api/authApi";
 import Header from "@/shared/Header";
+import ErrorModal from "@/shared/Modals/ErrorModal";
+import VerificationCodeModal from "@/shared/Modals/VerificationCodeModal";
 import AuthPrompt from "@/shared/ui/AuthPrompt";
 import View from "@/shared/View";
 import SignUpFormWrapper from "@/widgets/register/components/FormWrapper";
@@ -25,10 +28,41 @@ const SignUpContent = () => {
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [codeSent, setCodeSent] = useState(false);
+  const [signUpInit] = useSignUpInitMutation();
 
   useEffect(() => {
     setTotalSteps(4);
   }, [setTotalSteps]);
+
+  /*useEffect(() => {
+    const sendCode = async () => {
+      if (step === 1 && formData.email && !codeSent) {
+        try {
+          await signUpInit({ email: formData.email }).unwrap();
+          setCodeSent(true);
+          setShowCodeModal(true);
+        } catch (error: any) {
+          let errorMsg =
+            "Failed to send code";
+
+          const status = error?.status;
+          const data = error?.data;
+
+          if (status === 409) {
+            errorMsg = "Email already exists";
+          } else if (data?.message) {
+            errorMsg = data.message;
+          }
+
+          setErrorMessage(errorMsg);
+          setShowErrorModal(true);
+          setStep(0);
+          setCodeSent(false);
+        }
+      }
+    };
+    sendCode();
+  }, [step, formData.email, codeSent, signUpInit, setStep]); */
 
   const handleFinalSubmit = () => {};
 
@@ -75,6 +109,21 @@ const SignUpContent = () => {
         >
           {renderStepComponent()}
         </SignUpFormWrapper>
+
+        <VerificationCodeModal
+          isVisible={showCodeModal}
+          email={formData.email || ""}
+          onClose={() => setShowCodeModal(false)}
+        />
+
+        <ErrorModal
+          isVisible={showErrorModal}
+          message={errorMessage}
+          onClose={() => {
+          setShowErrorModal(false);
+        }}
+        />
+
         <RNView style={styles.innerContainer}>
           {step === 0 && (
             <AuthPrompt

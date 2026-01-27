@@ -1,15 +1,16 @@
+//import { useTranslation } from "@/hooks/useTranslation";
 import { ThemedText } from "@/shared/core/ThemedText";
-import TextInput from "@/shared/TextInput";
-import { useRouter } from "expo-router";
+import EmailInput from "@/shared/EmailInput";
+
 import { Controller, useFormContext } from "react-hook-form";
 import { StyleSheet, View } from "react-native";
 
-const CodeScreen = () => {
+const ResetPasswordEmailScreen = () => {
   const {
     control,
     formState: { errors },
   } = useFormContext();
-  const router = useRouter();
+  //const { t } = useTranslation();
 
   const getErrorMessage = (field: string): string | undefined => {
     const error = errors[field];
@@ -23,67 +24,50 @@ const CodeScreen = () => {
     <View style={styles.stepContainer}>
       <View style={styles.infoContainer}>
         <ThemedText type="megaTitle" style={styles.title}>
-          Verify Email
+            Reset Password
         </ThemedText>
         <ThemedText type="medium">
-          We&apos;ve sent you a 6-digit code via email. If you haven&apos;t
-          received the code, please request it again or check your spam folder
+            Enter your email to receive a password reset code
         </ThemedText>
       </View>
       <View style={styles.inputWrapper}>
         <Controller
           control={control}
-          name="code"
+          name="email"
           render={({ field: { value, onChange } }) => (
-            <TextInput
-              label="Verification Code"
-              placeholder="XXX-XXX"
+            <EmailInput
               value={value}
-              errorMessage={getErrorMessage("code")}
+              errorMessage={getErrorMessage("email")}
               onChangeText={onChange}
-              keyboardType="numeric"
-              maxLength={6}
-              autoFocus
+              placeholder="Enter your email"
             />
           )}
         />
       </View>
-      <View style={styles.innerContainer}></View>
     </View>
   );
 };
 
-export default CodeScreen;
-
 const styles = StyleSheet.create({
   stepContainer: {
     width: "100%",
+    gap: 30,
     justifyContent: "flex-start",
     alignItems: "center",
   },
-  innerContainer: {
-    display: "flex",
-    flexDirection: "column",
-    marginTop: "2%",
-    gap: 10,
-    width: "100%",
-    alignItems: "center",
-  },
-  infoContainer: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "flex-start",
-    marginBottom: "6%",
-  },
   title: {
-    marginBottom: 10,
-  },
-  subtitle: {
     marginBottom: 20,
-    textAlign: "center",
-    opacity: 0.7,
   },
   inputWrapper: {
     width: "100%",
+    gap: 10,
+  },
+  infoContainer: {
+    width: "100%",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "flex-start",
   },
 });
+
+export default ResetPasswordEmailScreen;

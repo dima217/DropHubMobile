@@ -4,10 +4,13 @@ import { baseQueryWithRefresh } from "./baseApi";
 import {
   MeResponse,
   RefreshTokenResponse,
+  ResetPasswordConfirmRequest,
+  ResetPasswordInitRequest,
   SignInRequest,
   SignInResponse,
   SignUpConfirmRequest,
   SignUpConfirmResponse,
+  SignUpInitRequest,
 } from "./types/auth";
 
 export const authApi = createApi({
@@ -17,6 +20,15 @@ export const authApi = createApi({
     signIn: build.mutation<SignInResponse, SignInRequest>({
       query: (body) => ({
         url: "/auth/login",
+        method: "POST",
+        body,
+        auth: false,
+      }),
+    }),
+
+    signUpInit: build.mutation<void, SignUpInitRequest>({
+      query: (body) => ({
+        url: "/auth/sign-up-init",
         method: "POST",
         body,
         auth: false,
@@ -44,6 +56,24 @@ export const authApi = createApi({
       }),
     }),
 
+    resetPasswordInit: build.mutation<void, ResetPasswordInitRequest>({
+      query: (body) => ({
+        url: "/auth/reset-password-init",
+        method: "POST",
+        body,
+        auth: false,
+      }),
+    }),
+
+    resetPasswordConfirm: build.mutation<void, ResetPasswordConfirmRequest>({
+      query: (body) => ({
+        url: "/auth/reset-password-confirm",
+        method: "POST",
+        body,
+        auth: false,
+      }),
+    }),
+    
     profile: build.query<MeResponse, void>({
       query: () => ({ url: "/profile", method: "GET", auth: true }),
     }),
@@ -52,8 +82,11 @@ export const authApi = createApi({
 
 export const {
   useSignInMutation,
+  useSignUpInitMutation,
   useSignUpMutation,
   useSignOutMutation,
   useRefreshTokenQuery,
   useProfileQuery,
+  useResetPasswordInitMutation,
+  useResetPasswordConfirmMutation,
 } = authApi;

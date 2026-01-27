@@ -11,6 +11,7 @@ import { GestureDetector } from "react-native-gesture-handler";
 
 interface CircleProps {
   size?: number;
+  fluid?: boolean;
   color?: string;
   onPress?: () => void;
   gesture?: any;
@@ -21,39 +22,43 @@ interface CircleProps {
 const Circle = ({
   color = Colors.primary,
   size = 50,
+  fluid = false,
   gesture,
   onPress,
   children,
   style,
 }: CircleProps) => {
-  const circleStyle: ViewStyle = {
-    width: size,
-    height: size,
-    borderRadius: size / 2,
-    backgroundColor: color,
-  };
+  const circleStyle: ViewStyle = fluid
+    ? {
+        width: "100%",
+        aspectRatio: 1,
+        borderRadius: 9999,
+        backgroundColor: color,
+      }
+    : {
+        width: size,
+        height: size,
+        borderRadius: size / 2,
+        backgroundColor: color,
+      };
+
+  const content = (
+    <View style={[circleStyle, styles.circle, style]}>{children}</View>
+  );
 
   if (onPress) {
     return (
-      <TouchableOpacity
-        onPress={onPress}
-        style={[circleStyle, styles.circle, style]}
-        activeOpacity={0.8}
-      >
-        {children}
+      <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
+        {content}
       </TouchableOpacity>
     );
   }
 
   if (gesture) {
-    return (
-      <GestureDetector gesture={gesture}>
-        <View style={[circleStyle, styles.circle, style]}>{children}</View>
-      </GestureDetector>
-    );
+    return <GestureDetector gesture={gesture}>{content}</GestureDetector>;
   }
 
-  return <View style={[circleStyle, styles.circle, style]}>{children}</View>;
+  return content;
 };
 
 const styles = StyleSheet.create({

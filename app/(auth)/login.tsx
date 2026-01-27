@@ -33,13 +33,9 @@ const Login = () => {
 export default Login;
 
 const styles = StyleSheet.create({
-  mainContainer: {
-    backgroundColor: Colors.background,
-    flex: 1,
-  },
   container: {
     flex: 1,
-    justifyContent: "center",
+    marginTop: "20%",
     alignItems: "center",
   },
   iconContainer: {

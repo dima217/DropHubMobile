@@ -10,7 +10,6 @@ export interface SignInResponse {
     profile: {
       id: string;
       firstName: string;
-      lastName: string;
       avatarUrl: string | null;
     };
   };
@@ -28,12 +27,13 @@ export interface SignUpConfirmRequest {
   email: string;
   password: string;
   firstName: string;
-  lastName: string;
 }
 
 export interface SignUpConfirmResponse {
   accessToken: string;
   refreshToken: string;
+  avatarKey: string;
+  uploadUrl: string;
 }
 
 export interface MeResponse {
@@ -46,4 +46,14 @@ export interface MeResponse {
 export interface RefreshTokenResponse {
   accessToken: string;
   refreshToken: string;
+}
+
+export interface ResetPasswordInitRequest { 
+  email: string;
+}
+
+export interface ResetPasswordConfirmRequest {
+  email: string;
+  code: string;
+  newPassword: string;
 }

@@ -1,15 +1,13 @@
 import { ThemedText } from "@/shared/core/ThemedText";
-import TextInput from "@/shared/TextInput";
-import { useRouter } from "expo-router";
+import PasswordInput from "@/shared/PasswordInput";
 import { Controller, useFormContext } from "react-hook-form";
 import { StyleSheet, View } from "react-native";
 
-const CodeScreen = () => {
+const NewPasswordScreen = () => {
   const {
     control,
     formState: { errors },
   } = useFormContext();
-  const router = useRouter();
 
   const getErrorMessage = (field: string): string | undefined => {
     const error = errors[field];
@@ -23,64 +21,63 @@ const CodeScreen = () => {
     <View style={styles.stepContainer}>
       <View style={styles.infoContainer}>
         <ThemedText type="megaTitle" style={styles.title}>
-          Verify Email
+          Set New Password
         </ThemedText>
-        <ThemedText type="medium">
-          We&apos;ve sent you a 6-digit code via email. If you haven&apos;t
-          received the code, please request it again or check your spam folder
+        <ThemedText type="medium" style={styles.subtitle}>
+          The password must contain at least 8 characters, 1 special character
+          and 1 uppercase letter
         </ThemedText>
       </View>
       <View style={styles.inputWrapper}>
         <Controller
           control={control}
-          name="code"
+          name="password"
           render={({ field: { value, onChange } }) => (
-            <TextInput
-              label="Verification Code"
-              placeholder="XXX-XXX"
+            <PasswordInput
               value={value}
-              errorMessage={getErrorMessage("code")}
+              errorMessage={getErrorMessage("password")}
               onChangeText={onChange}
-              keyboardType="numeric"
-              maxLength={6}
-              autoFocus
+              placeholder={"******"}
+            />
+          )}
+        />
+        <Controller
+          control={control}
+          name="confirm"
+          render={({ field: { value, onChange } }) => (
+            <PasswordInput
+              value={value}
+              label="Confirm"
+              errorMessage={getErrorMessage("confirm")}
+              onChangeText={onChange}
+              placeholder={"******"}
             />
           )}
         />
       </View>
-      <View style={styles.innerContainer}></View>
     </View>
   );
 };
 
-export default CodeScreen;
+export default NewPasswordScreen;
 
 const styles = StyleSheet.create({
   stepContainer: {
     width: "100%",
+    gap: 30,
     justifyContent: "flex-start",
-    alignItems: "center",
-  },
-  innerContainer: {
-    display: "flex",
-    flexDirection: "column",
-    marginTop: "2%",
-    gap: 10,
-    width: "100%",
     alignItems: "center",
   },
   infoContainer: {
     display: "flex",
     flexDirection: "column",
     alignItems: "flex-start",
-    marginBottom: "6%",
   },
   title: {
     marginBottom: 10,
   },
   subtitle: {
     marginBottom: 20,
-    textAlign: "center",
     opacity: 0.7,
   },
   inputWrapper: {

@@ -7,20 +7,22 @@ interface AuthPromptProps {
   promptText: string;
   actionText: string;
   onPressAction: () => void;
+  textType?: "link" | "medium";
 }
 
 const AuthPrompt: React.FC<AuthPromptProps> = ({
   onPressAction,
   promptText,
   actionText,
+  textType = "link",
 }) => {
   return (
     <View style={styles.container}>
-      <ThemedText type="link" style={styles.baseText}>
+      <ThemedText type={textType} style={styles.baseText}>
         {promptText}
       </ThemedText>
       <Pressable onPress={onPressAction} style={{ padding: 0 }}>
-        <ThemedText type="link" style={styles.highlightText}>
+        <ThemedText type={textType} style={styles.highlightText}>
           {actionText}
         </ThemedText>
       </Pressable>
@@ -30,7 +32,6 @@ const AuthPrompt: React.FC<AuthPromptProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    paddingTop: 10,
     backgroundColor: "transparent",
     gap: 5,
     display: "flex",
