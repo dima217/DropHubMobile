@@ -22,7 +22,7 @@ const ResetPassword = () => {
     const [errorMessage, setErrorMessage] = useState("");
     const [codeSent, setCodeSent] = useState(false);
     const [resetPasswordInit, { isLoading: isResetPasswordInitLoading }] = useResetPasswordInitMutation();
-
+    
     useEffect(() => {
         setTotalSteps(3);
     }, [setTotalSteps]);

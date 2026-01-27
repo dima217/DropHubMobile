@@ -11,6 +11,8 @@ import {
   SignUpConfirmRequest,
   SignUpConfirmResponse,
   SignUpInitRequest,
+  SignUpVerifyCodeRequest,
+  SignUpVerifyCodeResponse,
 } from "./types/auth";
 
 export const authApi = createApi({
@@ -29,6 +31,15 @@ export const authApi = createApi({
     signUpInit: build.mutation<void, SignUpInitRequest>({
       query: (body) => ({
         url: "/auth/sign-up-init",
+        method: "POST",
+        body,
+        auth: false,
+      }),
+    }),
+
+    signUpVerifyCode: build.mutation<SignUpVerifyCodeResponse, SignUpVerifyCodeRequest>({
+      query: (body) => ({
+        url: "/auth/sign-up-verify-code",
         method: "POST",
         body,
         auth: false,
@@ -89,4 +100,5 @@ export const {
   useProfileQuery,
   useResetPasswordInitMutation,
   useResetPasswordConfirmMutation,
+  useSignUpVerifyCodeMutation,
 } = authApi;

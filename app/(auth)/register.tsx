@@ -1,10 +1,10 @@
-import { useSignUpInitMutation } from "@/api/authApi";
 import Header from "@/shared/Header";
 import ErrorModal from "@/shared/Modals/ErrorModal";
 import VerificationCodeModal from "@/shared/Modals/VerificationCodeModal";
 import AuthPrompt from "@/shared/ui/AuthPrompt";
 import View from "@/shared/View";
 import SignUpFormWrapper from "@/widgets/register/components/FormWrapper";
+import { useSignUpCodeFlow } from "@/widgets/register/hooks/useSignUpCodeFlow";
 import {
   SignUpFormProvider,
   useSignUpFormContext,
@@ -15,54 +15,37 @@ import PasswordScreen from "@/widgets/register/Screens/Password";
 import CodeScreen from "@/widgets/register/Screens/Verification";
 import { signUpStepsConfig } from "@/widgets/register/validation/validationSchemas";
 import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { View as RNView, StyleSheet } from "react-native";
 
 const SignUpContent = () => {
   const router = useRouter();
 
-  const { step, setTotalSteps, resetForm, formData, setStep } =
+  const { step, setTotalSteps, formData, setStep } =
     useSignUpFormContext();
 
-  const [showCodeModal, setShowCodeModal] = useState(false);
-  const [showErrorModal, setShowErrorModal] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
-  const [codeSent, setCodeSent] = useState(false);
-  const [signUpInit] = useSignUpInitMutation();
-
+  const {
+    showCodeModal,
+    showErrorModal,
+    errorMessage,
+    sendCodeIfNeeded,
+    verifyCodeIfNeeded,
+    handleResendCode,
+    closeCodeModal,
+    closeErrorModal,
+  } = useSignUpCodeFlow();
+  
   useEffect(() => {
     setTotalSteps(4);
   }, [setTotalSteps]);
 
-  /*useEffect(() => {
-    const sendCode = async () => {
-      if (step === 1 && formData.email && !codeSent) {
-        try {
-          await signUpInit({ email: formData.email }).unwrap();
-          setCodeSent(true);
-          setShowCodeModal(true);
-        } catch (error: any) {
-          let errorMsg =
-            "Failed to send code";
+  useEffect(() => {
+    sendCodeIfNeeded();
+  }, [sendCodeIfNeeded, step, formData.email]);
 
-          const status = error?.status;
-          const data = error?.data;
-
-          if (status === 409) {
-            errorMsg = "Email already exists";
-          } else if (data?.message) {
-            errorMsg = data.message;
-          }
-
-          setErrorMessage(errorMsg);
-          setShowErrorModal(true);
-          setStep(0);
-          setCodeSent(false);
-        }
-      }
-    };
-    sendCode();
-  }, [step, formData.email, codeSent, signUpInit, setStep]); */
+  useEffect(() => {
+    verifyCodeIfNeeded();
+  }, [verifyCodeIfNeeded, step, formData.code]);
 
   const handleFinalSubmit = () => {};
 
@@ -79,10 +62,6 @@ const SignUpContent = () => {
       default:
         return null;
     }
-  };
-
-  const handleResendCode = () => {
-    console.log("Resend code");
   };
 
   const handleBack = () => {
@@ -113,15 +92,13 @@ const SignUpContent = () => {
         <VerificationCodeModal
           isVisible={showCodeModal}
           email={formData.email || ""}
-          onClose={() => setShowCodeModal(false)}
+          onClose={closeCodeModal}
         />
 
         <ErrorModal
           isVisible={showErrorModal}
           message={errorMessage}
-          onClose={() => {
-          setShowErrorModal(false);
-        }}
+          onClose={closeErrorModal}
         />
 
         <RNView style={styles.innerContainer}>

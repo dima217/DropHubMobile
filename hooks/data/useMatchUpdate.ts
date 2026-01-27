@@ -3,7 +3,7 @@ import { Match } from "@/api/types/match";
 import { useEffect } from "react";
 import { useWebSocket } from "../websocket/useWebSocket";
 
-const WS_URL = "http://84.201.188.209:3000";
+const WS_URL = "http://10.11.251.195:3000";
 
 export const useMatchUpdates = (
   accessToken: string,
