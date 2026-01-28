@@ -5,6 +5,7 @@ import {
   MeResponse,
   RefreshTokenResponse,
   ResetPasswordConfirmRequest,
+  ResetPasswordConfirmResponse,
   ResetPasswordInitRequest,
   SignInRequest,
   SignInResponse,
@@ -74,16 +75,16 @@ export const authApi = createApi({
 
     resetPasswordInit: build.mutation<void, ResetPasswordInitRequest>({
       query: (body) => ({
-        url: "/auth/reset-password-init",
+        url: "/auth/forgot-password",
         method: "POST",
         body,
         auth: false,
       }),
     }),
 
-    resetPasswordConfirm: build.mutation<void, ResetPasswordConfirmRequest>({
+    resetPasswordConfirm: build.mutation<ResetPasswordConfirmResponse, ResetPasswordConfirmRequest>({
       query: (body) => ({
-        url: "/auth/reset-password-confirm",
+        url: "/auth/forgot-password/reset",
         method: "POST",
         body,
         auth: false,

@@ -5,6 +5,7 @@ import {
   useUpdateProfileMutation,
 } from "@/api/authApi";
 import { secureStore } from "@/services/secureStore";
+import { createUploader, UploadProvider } from "@/services/upload/UploaderFactory";
 import { isDefaultImage } from "@/shared/MediaUploader/utils";
 import { setCredentials } from "@/store/slices/authSlice";
 import { useRouter } from "expo-router";
@@ -17,6 +18,7 @@ export const useSignUpCodeFlow = () => {
   const { step, formData, setStep, resetForm } = useSignUpFormContext();
   const dispatch = useDispatch();
   const router = useRouter();
+  const uploader = createUploader(UploadProvider.MINIO);
 
   const [signUpInit] = useSignUpInitMutation();
   const [signUpVerifyCode, { isLoading: isVerifying }] =
@@ -131,13 +133,16 @@ export const useSignUpCodeFlow = () => {
       return;
     }
 
+    const customAvatar = isDefaultImage(finalData.avatar);
+
+    console.log(finalData.avatar);
     try {
       const result = await signUp({
         email: finalData.email,
         password: finalData.password,
         firstName: finalData.username,
-        customAvatarNumber: isDefaultImage(finalData.avatar)
-          ? Number(finalData.avatar)
+        customAvatarNumber: customAvatar
+          ? Number(finalData.avatar) + 1
           : undefined,
       }).unwrap();
 
@@ -148,12 +153,21 @@ export const useSignUpCodeFlow = () => {
         await secureStore.setRefreshToken(result.refreshToken);
       }
 
+      console.log("avatarUrl: ", result.avatarUrl);
+      if (!customAvatar) {
+        const downloadUrl = await uploader.upload(
+          result.avatarUrl,
+          finalData.avatar
+        );
+        result.avatarUrl = downloadUrl;
+        console.log("downloadUrl: ", downloadUrl);
+      }
+
       const userData = {
         email: finalData.email,
         username: finalData.username,
         avatarUrl: result.avatarUrl,
       };
-      console.log(result.avatarUrl);
 
       dispatch(
         setCredentials({
@@ -162,9 +176,9 @@ export const useSignUpCodeFlow = () => {
         })
       );
 
-      await updateProfile({
+      /*await updateProfile({
         avatarUrl: result.avatarUrl,
-      }).unwrap();
+      }).unwrap(); */
 
       router.navigate("/(tabs)/home");
       resetForm();

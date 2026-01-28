@@ -58,6 +58,10 @@ export interface ResetPasswordConfirmRequest {
   newPassword: string;
 }
 
+export interface ResetPasswordConfirmResponse {
+  success: boolean;
+}
+
 export interface SignUpVerifyCodeRequest {
   email: string;
   code: string;

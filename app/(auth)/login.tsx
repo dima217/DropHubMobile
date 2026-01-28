@@ -1,18 +1,26 @@
 import { Colors } from "@/constants/design-tokens";
 import { ThemedText } from "@/shared/core/ThemedText";
 import Header from "@/shared/Header";
+import PasswordChangedModal from "@/shared/Modals/PasswordChangedModal";
 import AuthPrompt from "@/shared/ui/AuthPrompt";
 import View from "@/shared/View";
 import LoginForm from "@/widgets/login/LoginForm";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { View as RNView, StyleSheet } from "react-native";
 
 const Login = () => {
   const router = useRouter();
+  const params = useLocalSearchParams();
+  
+  const showPasswordChangedModal = params.showModal === 'passwordChanged';
 
   return (
     <View>
       <Header />
+      <PasswordChangedModal
+        isVisible={showPasswordChangedModal}
+        onClose={() => router.setParams({ showModal: undefined })}
+      />
       <RNView style={styles.container}>
         <RNView style={styles.iconContainer}>
           <ThemedText style={styles.loginText}>Sign In</ThemedText>

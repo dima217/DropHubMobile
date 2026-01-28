@@ -12,6 +12,7 @@
       "supportsTablet": true
     },
     "android": {
+      "useCleartextTraffic": true,
       "adaptiveIcon": {
         "backgroundColor": "#0F0F0F",
         "backgroundImage": "./assets/images/flash.png"

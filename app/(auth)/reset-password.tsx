@@ -1,33 +1,47 @@
-import { useResetPasswordInitMutation } from "@/api/authApi";
 import Header from "@/shared/Header";
 import ErrorModal from "@/shared/Modals/ErrorModal";
+import PasswordChangedModal from "@/shared/Modals/PasswordChangedModal";
 import VerificationCodeModal from "@/shared/Modals/VerificationCodeModal";
 import AuthPrompt from "@/shared/ui/AuthPrompt";
 import View from "@/shared/View";
-import ResetPasswordFormWrapper from "@/widgets/password/components/FormWrapper";
+import ResetPasswordFormWrapper, { ResetPasswordFormData } from "@/widgets/password/components/FormWrapper";
+import { useResetPasswordFlow } from "@/widgets/password/hooks/useResetPasswordFlow";
 import { ResetPasswordFormProvider, useResetPasswordFormContext } from "@/widgets/password/hooks/useResetPasswordFormContext";
 import ResetPasswordEmailScreen from "@/widgets/password/Screens/Email";
 import NewPasswordScreen from "@/widgets/password/Screens/NewPassword";
 import { resetPasswordStepsConfig } from "@/widgets/password/validation/validationSchemas";
 import CodeScreen from "@/widgets/register/Screens/Verification";
 import { router } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { View as RNView, StyleSheet } from "react-native";
 
 const ResetPassword = () => {
-    const { step, setTotalSteps, resetForm, formData, setStep } =
+    const { step, setTotalSteps, formData, setStep } =
     useResetPasswordFormContext();
-    const [showCodeModal, setShowCodeModal] = useState(false);
-    const [showErrorModal, setShowErrorModal] = useState(false);
-    const [errorMessage, setErrorMessage] = useState("");
-    const [codeSent, setCodeSent] = useState(false);
-    const [resetPasswordInit, { isLoading: isResetPasswordInitLoading }] = useResetPasswordInitMutation();
-    
+
     useEffect(() => {
         setTotalSteps(3);
     }, [setTotalSteps]);
 
-    const handleFinalSubmit = () => {};
+    const { 
+      sendCodeIfNeeded, 
+      confirmPassword, 
+      closeErrorModal, 
+      closeCodeModal, 
+      closePasswordChangedModal, 
+      errorMessage, 
+      showPasswordChangedModal,
+      showCodeModal,
+      showErrorModal 
+    } = useResetPasswordFlow();
+
+    const handleFinalSubmit = (data: Partial<ResetPasswordFormData>) => {
+      confirmPassword(data);
+    };
+
+    useEffect(() => {
+      sendCodeIfNeeded();
+    }, [sendCodeIfNeeded, formData.email]);  
 
     const renderStepComponent = () => {
         switch (step) {
@@ -67,15 +81,17 @@ const ResetPassword = () => {
         <VerificationCodeModal
           isVisible={showCodeModal}
           email={formData.email || ""}
-          onClose={() => setShowCodeModal(false)}
+          onClose={closeCodeModal}
         />
 
         <ErrorModal
           isVisible={showErrorModal}
           message={errorMessage}
-          onClose={() => {
-          setShowErrorModal(false);
-        }}
+          onClose={closeErrorModal}
+        />
+        <PasswordChangedModal
+          isVisible={showPasswordChangedModal}
+          onClose={closePasswordChangedModal}
         />
         </RNView>
         <RNView style={styles.innerContainer}>
@@ -83,7 +99,7 @@ const ResetPassword = () => {
             <AuthPrompt
               promptText="Didn't receive the code?"
               actionText="Request again"
-              onPressAction={() => {}}
+              onPressAction={sendCodeIfNeeded}
             />
           )}
         </RNView>
