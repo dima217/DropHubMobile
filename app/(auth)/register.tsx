@@ -21,8 +21,7 @@ import { View as RNView, StyleSheet } from "react-native";
 const SignUpContent = () => {
   const router = useRouter();
 
-  const { step, setTotalSteps, formData, setStep } =
-    useSignUpFormContext();
+  const { step, setTotalSteps, formData, setStep } = useSignUpFormContext();
 
   const {
     showCodeModal,
@@ -33,8 +32,9 @@ const SignUpContent = () => {
     handleResendCode,
     closeCodeModal,
     closeErrorModal,
+    handleFinalSubmit,
   } = useSignUpCodeFlow();
-  
+
   useEffect(() => {
     setTotalSteps(4);
   }, [setTotalSteps]);
@@ -46,8 +46,6 @@ const SignUpContent = () => {
   useEffect(() => {
     verifyCodeIfNeeded();
   }, [verifyCodeIfNeeded, step, formData.code]);
-
-  const handleFinalSubmit = () => {};
 
   const renderStepComponent = () => {
     switch (step) {

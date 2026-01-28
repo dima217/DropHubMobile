@@ -13,6 +13,8 @@ import {
   SignUpInitRequest,
   SignUpVerifyCodeRequest,
   SignUpVerifyCodeResponse,
+  UpdateProfileRequest,
+  UpdateProfileResponse,
 } from "./types/auth";
 
 export const authApi = createApi({
@@ -37,7 +39,10 @@ export const authApi = createApi({
       }),
     }),
 
-    signUpVerifyCode: build.mutation<SignUpVerifyCodeResponse, SignUpVerifyCodeRequest>({
+    signUpVerifyCode: build.mutation<
+      SignUpVerifyCodeResponse,
+      SignUpVerifyCodeRequest
+    >({
       query: (body) => ({
         url: "/auth/sign-up-verify-code",
         method: "POST",
@@ -84,9 +89,20 @@ export const authApi = createApi({
         auth: false,
       }),
     }),
-    
+
     profile: build.query<MeResponse, void>({
       query: () => ({ url: "/profile", method: "GET", auth: true }),
+    }),
+
+    updateProfile: build.mutation<UpdateProfileResponse, UpdateProfileRequest>({
+      query: (profileData) => ({
+        url: "/profile/update",
+        method: "POST",
+        body: profileData,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }),
     }),
   }),
 });
@@ -101,4 +117,5 @@ export const {
   useResetPasswordInitMutation,
   useResetPasswordConfirmMutation,
   useSignUpVerifyCodeMutation,
+  useUpdateProfileMutation,
 } = authApi;

@@ -1,12 +1,14 @@
+import { useGetDefaultsAvatarsQuery } from "@/api/avatarApi";
 import { ThemedText } from "@/shared/core/ThemedText";
 import MediaUploader from "@/shared/MediaUploader/components/MediaUploader";
+import ActivityIndicator from "@/shared/ui/ActivityIndicator";
 import Circle from "@/shared/ui/Circle";
 import React from "react";
 import { Controller, useFormContext } from "react-hook-form";
 import { Image, StyleSheet, View } from "react-native";
 import { Grid } from "./ui/Grid";
 
-const defaultIcons = [
+/*const defaultIcons = [
   require("@/assets/icons/icon1.png"),
   require("@/assets/icons/icon2.png"),
   require("@/assets/icons/icon1.png"),
@@ -14,13 +16,15 @@ const defaultIcons = [
   require("@/assets/icons/icon1.png"),
   require("@/assets/icons/icon1.png"),
 ];
-
+*/
 //const { width } = Dimensions.get("window");
 //const ICON_SIZE = 60;
 //const ICON_MARGIN = (width - ICON_SIZE * 3) / 6;
 
 const AvatarScreen = () => {
   const { control } = useFormContext();
+
+  const { data: avatars, isLoading, isError } = useGetDefaultsAvatarsQuery();
 
   return (
     <Controller
@@ -33,7 +37,12 @@ const AvatarScreen = () => {
           </View>
 
           <View style={styles.mediaContainer}>
-            <MediaUploader value={value} onChange={onChange} type="image" />
+            <MediaUploader
+              defaultImages={avatars}
+              value={value}
+              onChange={onChange}
+              type="image"
+            />
           </View>
 
           <View style={styles.innerContainer}>
@@ -42,18 +51,31 @@ const AvatarScreen = () => {
             </ThemedText>
           </View>
 
-          <Grid columns={3} gap={18}>
-            {defaultIcons.map((icon, index) => (
-              <Circle
-                fluid
-                key={`icon-${index}-${value}`}
-                style={value === `icon-${index + 1}` && styles.iconSelected}
-                onPress={() => onChange(`icon-${index + 1}`)}
-              >
-                <Image source={icon} style={styles.iconImage} />
-              </Circle>
-            ))}
-          </Grid>
+          {isLoading && <ActivityIndicator />}
+
+          {isError && (
+            <ThemedText type="small">Failed to load avatars</ThemedText>
+          )}
+
+          {avatars && (
+            <Grid columns={3} gap={18}>
+              {avatars.map((uri, index) => {
+                const avatarValue = `${index}`;
+                const isSelected = value === avatarValue;
+
+                return (
+                  <Circle
+                    fluid
+                    key={`icon-${index}-${isSelected}`}
+                    style={value === avatarValue && styles.iconSelected}
+                    onPress={() => onChange(avatarValue)}
+                  >
+                    <Image source={{ uri }} style={styles.iconImage} />
+                  </Circle>
+                );
+              })}
+            </Grid>
+          )}
         </View>
       )}
     />

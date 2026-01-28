@@ -1,13 +1,28 @@
-import { useSignUpInitMutation, useSignUpVerifyCodeMutation } from "@/api/authApi";
+import {
+  useSignUpInitMutation,
+  useSignUpMutation,
+  useSignUpVerifyCodeMutation,
+  useUpdateProfileMutation,
+} from "@/api/authApi";
+import { secureStore } from "@/services/secureStore";
+import { isDefaultImage } from "@/shared/MediaUploader/utils";
+import { setCredentials } from "@/store/slices/authSlice";
+import { useRouter } from "expo-router";
 import { useCallback, useState } from "react";
+import { useDispatch } from "react-redux";
+import { SignUpFormData } from "../components/FormWrapper";
 import { useSignUpFormContext } from "./useSignUpFormContext";
 
 export const useSignUpCodeFlow = () => {
-  const { step, formData, setStep } = useSignUpFormContext();
+  const { step, formData, setStep, resetForm } = useSignUpFormContext();
+  const dispatch = useDispatch();
+  const router = useRouter();
 
   const [signUpInit] = useSignUpInitMutation();
   const [signUpVerifyCode, { isLoading: isVerifying }] =
     useSignUpVerifyCodeMutation();
+  const [signUp] = useSignUpMutation();
+  const [updateProfile] = useUpdateProfileMutation();
 
   const [showCodeModal, setShowCodeModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
@@ -45,12 +60,7 @@ export const useSignUpCodeFlow = () => {
   }, [codeSent, formData.email, setStep, signUpInit, step]);
 
   const verifyCodeIfNeeded = useCallback(async () => {
-    if (
-      step === 2 &&
-      formData.email &&
-      formData.code &&
-      !codeVerified
-    ) {
+    if (step === 2 && formData.email && formData.code && !codeVerified) {
       try {
         console.log(formData.email, formData.code);
         const result = await signUpVerifyCode({
@@ -81,7 +91,14 @@ export const useSignUpCodeFlow = () => {
         setCodeVerified(false);
       }
     }
-  }, [codeVerified, formData.code, formData.email, setStep, signUpVerifyCode, step]);
+  }, [
+    codeVerified,
+    formData.code,
+    formData.email,
+    setStep,
+    signUpVerifyCode,
+    step,
+  ]);
 
   const handleResendCode = useCallback(async () => {
     if (!formData.email) return;
@@ -103,6 +120,57 @@ export const useSignUpCodeFlow = () => {
     }
   }, [formData.email, signUpInit]);
 
+  const handleFinalSubmit = async (finalData: Partial<SignUpFormData>) => {
+    if (
+      !finalData.email ||
+      !finalData.code ||
+      !finalData.password ||
+      !finalData.username ||
+      !finalData.avatar
+    ) {
+      return;
+    }
+
+    try {
+      const result = await signUp({
+        email: finalData.email,
+        password: finalData.password,
+        firstName: finalData.username,
+        customAvatarNumber: isDefaultImage(finalData.avatar)
+          ? Number(finalData.avatar)
+          : undefined,
+      }).unwrap();
+
+      if (result.accessToken) {
+        await secureStore.setAccessToken(result.accessToken);
+      }
+      if (result.refreshToken) {
+        await secureStore.setRefreshToken(result.refreshToken);
+      }
+
+      const userData = {
+        email: finalData.email,
+        username: finalData.username,
+        avatarUrl: result.avatarUrl,
+      };
+      console.log(result.avatarUrl);
+
+      dispatch(
+        setCredentials({
+          user: userData,
+          accessToken: result.accessToken,
+        })
+      );
+
+      await updateProfile({
+        avatarUrl: result.avatarUrl,
+      }).unwrap();
+
+      router.navigate("/(tabs)/home");
+      resetForm();
+    } catch {}
+  };
+
   return {
     // state
     showCodeModal,
@@ -115,7 +183,6 @@ export const useSignUpCodeFlow = () => {
     handleResendCode,
     closeErrorModal,
     closeCodeModal,
+    handleFinalSubmit,
   };
 };
-
-

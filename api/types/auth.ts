@@ -27,13 +27,13 @@ export interface SignUpConfirmRequest {
   email: string;
   password: string;
   firstName: string;
+  customAvatarNumber?: number;
 }
 
 export interface SignUpConfirmResponse {
   accessToken: string;
   refreshToken: string;
-  avatarKey: string;
-  uploadUrl: string;
+  avatarUrl: string;
 }
 
 export interface MeResponse {
@@ -48,7 +48,7 @@ export interface RefreshTokenResponse {
   refreshToken: string;
 }
 
-export interface ResetPasswordInitRequest { 
+export interface ResetPasswordInitRequest {
   email: string;
 }
 
@@ -61,4 +61,24 @@ export interface ResetPasswordConfirmRequest {
 export interface SignUpVerifyCodeRequest {
   email: string;
   code: string;
+}
+
+export interface SignUpVerifyCodeResponse {
+  verified: boolean;
+}
+export interface UpdateProfileRequest {
+  firstName?: string;
+  avatarUrl?: string;
+}
+
+export interface ProfileResponse {
+  id: number;
+  firstName: string;
+  avatarUrl: string;
+}
+
+export interface UpdateProfileResponse {
+  id: number;
+  firstName: string;
+  avatarUrl: string;
 }

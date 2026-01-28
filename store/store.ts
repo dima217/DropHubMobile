@@ -1,4 +1,5 @@
 import { authApi } from "@/api/authApi";
+import { avatarApi } from "@/api/avatarApi";
 import { matchApi } from "@/api/matchApi";
 import authReducer from "@/store/slices/authSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -15,6 +16,7 @@ const rootReducer = combineReducers({
   auth: authReducer,
   [authApi.reducerPath]: authApi.reducer,
   [matchApi.reducerPath]: matchApi.reducer,
+  [avatarApi.reducerPath]: avatarApi.reducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
@@ -26,7 +28,8 @@ export const store = configureStore({
       serializableCheck: false,
     })
       .concat(authApi.middleware)
-      .concat(matchApi.middleware),
+      .concat(matchApi.middleware)
+      .concat(avatarApi.middleware),
 });
 
 export const persistor = persistStore(store);

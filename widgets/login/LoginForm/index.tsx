@@ -54,7 +54,7 @@ const LoginForm = () => {
         setCredentials({
           user: {
             ...userData,
-            ...result.user.profile,
+            avatarUrl: result.user.profile.avatarUrl ?? undefined,
           },
           accessToken: result.accessToken,
         })
