@@ -32,6 +32,12 @@ export default function TabLayout() {
             href: null, 
           }}
         />
+        <Tabs.Screen
+          name="search/connections-search"
+          options={{
+            href: null,
+          }}
+        />
       </Tabs>
     </>
   );

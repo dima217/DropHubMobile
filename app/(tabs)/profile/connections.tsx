@@ -5,6 +5,7 @@ import Header from "@/shared/Header";
 import SearchInput from "@/shared/SearchInput";
 import View from "@/shared/View";
 import ConnectionsList, { Connection } from "@/widgets/profile/Screens/Connections/components/ConnectionsList";
+import { useRouter } from "expo-router";
 import React, { useMemo, useState } from "react";
 import { View as RNView, StyleSheet } from "react-native";
 
@@ -18,6 +19,7 @@ const MOCK_CONNECTIONS: Connection[] = [
 
 const Connections = () => {
   const [search, setSearch] = useState("");
+  const router = useRouter();
 
   const filteredConnections = useMemo(() => {
     return MOCK_CONNECTIONS.filter((item) =>
@@ -33,7 +35,7 @@ const Connections = () => {
         <ThemedText type="link" style={styles.connectionsText}>
           Connections ({MOCK_CONNECTIONS.length})
         </ThemedText>
-        <GradientButton style={styles.addButton} title="New Connection" onPress={() => {}} />
+        <GradientButton style={styles.addButton} title="New Connection" onPress={() => router.push("/search/connections-search")} />
       </RNView>
 
       <SearchInput value={search} onChange={setSearch} />

@@ -2,6 +2,8 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { baseQueryWithRefresh } from "./baseApi";
 import {
+  AddFriendRequest,
+  AddFriendResponse,
   MeResponse,
   ProfileResponse,
   ProfileUploadUrlResponse,
@@ -120,6 +122,15 @@ export const authApi = createApi({
         auth: true,
       }),
     }),
+
+    addFriend: build.mutation<AddFriendResponse, AddFriendRequest>({
+      query: (body) => ({
+        url: "/friends/add",
+        method: "POST",
+        body,
+        auth: true,
+      }),
+    }),
   }),
 });
 
@@ -135,4 +146,6 @@ export const {
   useSignUpVerifyCodeMutation,
   useUpdateProfileMutation,
   useGetProfileUploadUrlQuery,
+  useSearchProfilesQuery,
+  useAddFriendMutation,
 } = authApi;

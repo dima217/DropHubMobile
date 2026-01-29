@@ -93,3 +93,12 @@ export interface ProfileUploadUrlResponse {
   uploadUrl: string;
   publicUrl: string;
 }
+
+export interface AddFriendRequest {
+  userId: number;
+}
+
+export interface AddFriendResponse {
+  success: boolean;
+  message?: string;
+}

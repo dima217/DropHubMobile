@@ -4,13 +4,14 @@ import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { StyleSheet, View } from "react-native";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 import { createUploader, UploadProvider } from "@/services/upload/UploaderFactory";
 import Button from "@/shared/Button";
 import { ThemedText } from "@/shared/core/ThemedText";
 import MediaUploader from "@/shared/MediaUploader/components/MediaUploader";
 import TextInput from "@/shared/TextInput";
+import { RootState } from "@/store/store";
 
 interface EditProfileData {
   username: string;
@@ -19,11 +20,11 @@ interface EditProfileData {
 
 const EditProfileForm = () => {
   const { data: urlData } = useGetProfileUploadUrlQuery();
-
+  const profile = useSelector((state: RootState) => state.auth.user);
   const { handleSubmit, control } = useForm<EditProfileData>({
     defaultValues: {
-      username: "",
-      avatarUrl: "",
+      username: profile?.firstName ?? "",
+      avatarUrl: profile?.avatarUrl ?? "",
     },
   });
 
