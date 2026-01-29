@@ -14,7 +14,7 @@ export const avatarApi = createApi({
       }),
     }),
 
-    getAvatar: build.query<string, number>({
+    getDefaultAvatar: build.query<string, number>({
       query: (id) => ({
         url: `/avatars/defaults/${id}`,
         method: "GET",
@@ -26,5 +26,5 @@ export const avatarApi = createApi({
 
 export const {
   useGetDefaultsAvatarsQuery,
-  useGetAvatarQuery,
+  useGetDefaultAvatarQuery,
 } = avatarApi;

@@ -153,20 +153,20 @@ export const useSignUpCodeFlow = () => {
         await secureStore.setRefreshToken(result.refreshToken);
       }
 
-      console.log("avatarUrl: ", result.avatarUrl);
+      let avatarUrl = result.avatarUrl;
+
       if (!customAvatar) {
-        const downloadUrl = await uploader.upload(
-          result.avatarUrl,
+        await uploader.upload(
+          result.uploadUrl ?? "",
           finalData.avatar
         );
-        result.avatarUrl = downloadUrl;
-        console.log("downloadUrl: ", downloadUrl);
+        avatarUrl = result.publicUrl;
       }
 
       const userData = {
         email: finalData.email,
         username: finalData.username,
-        avatarUrl: result.avatarUrl,
+        avatarUrl: avatarUrl ?? undefined,
       };
 
       dispatch(
@@ -176,9 +176,9 @@ export const useSignUpCodeFlow = () => {
         })
       );
 
-      /*await updateProfile({
-        avatarUrl: result.avatarUrl,
-      }).unwrap(); */
+      await updateProfile({
+        avatarUrl: avatarUrl ?? undefined,
+      }).unwrap();
 
       router.navigate("/(tabs)/home");
       resetForm();

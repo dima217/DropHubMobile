@@ -33,7 +33,9 @@ export interface SignUpConfirmRequest {
 export interface SignUpConfirmResponse {
   accessToken: string;
   refreshToken: string;
-  avatarUrl: string;
+  avatarUrl?: string | null;
+  uploadUrl?: string | null;
+  publicUrl?: string | null;
 }
 
 export interface MeResponse {
