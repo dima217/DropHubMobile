@@ -3,6 +3,7 @@ import { createApi } from "@reduxjs/toolkit/query/react";
 import { baseQueryWithRefresh } from "./baseApi";
 import {
   MeResponse,
+  ProfileUploadUrlResponse,
   RefreshTokenResponse,
   ResetPasswordConfirmRequest,
   ResetPasswordConfirmResponse,
@@ -95,6 +96,10 @@ export const authApi = createApi({
       query: () => ({ url: "/profile", method: "GET", auth: true }),
     }),
 
+    getProfileUploadUrl: build.query<ProfileUploadUrlResponse, void>({
+      query: () => ({ url: "/profile/upload-url", method: "GET", auth: true }),
+    }),
+
     updateProfile: build.mutation<UpdateProfileResponse, UpdateProfileRequest>({
       query: (profileData) => ({
         url: "/profile/update",
@@ -119,4 +124,5 @@ export const {
   useResetPasswordConfirmMutation,
   useSignUpVerifyCodeMutation,
   useUpdateProfileMutation,
+  useGetProfileUploadUrlQuery,
 } = authApi;

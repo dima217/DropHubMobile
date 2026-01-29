@@ -88,3 +88,8 @@ export interface UpdateProfileResponse {
   firstName: string;
   avatarUrl: string;
 }
+
+export interface ProfileUploadUrlResponse {
+  uploadUrl: string;
+  publicUrl: string;
+}

@@ -55,6 +55,7 @@ const LoginForm = () => {
           user: {
             ...userData,
             avatarUrl: result.user.profile.avatarUrl ?? undefined,
+            firstName: result.user.profile.firstName ?? undefined,
           },
           accessToken: result.accessToken,
         })
