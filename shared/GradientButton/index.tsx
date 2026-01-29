@@ -34,7 +34,7 @@ const GradientButton = ({
 }: GradientButtonProps) => {
   const isDisabled = disabled || loading;
 
-  const gradientColors = isDisabled ? disabledGradient : Colors.gradient;
+  const gradientColors = isDisabled ? disabledGradient : Colors.buttonGradient;
 
   return (
     <TouchableOpacity

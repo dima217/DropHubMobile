@@ -10,8 +10,11 @@ export const Colors = {
   background: "#060D18",
   tab: "#232323",
   border: "#232540",
+  cardBackground: "#171A29",
+  listBackground: "#21253A",
   grey: "#404349",
   gradient: ["#1A1A1A", "#242424"] as const,
+  buttonGradient: ["#2788E6", "#8BB8FF"] as const,
   reject: "#ff4a75",
 };
 

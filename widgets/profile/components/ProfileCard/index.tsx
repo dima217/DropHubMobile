@@ -6,7 +6,7 @@ import RadialGradientBackground from "@/shared/ui/RadialGradientBackground";
 import { RootState } from "@/store/store";
 import { useRouter } from "expo-router";
 import React from "react";
-import { Alert, StyleSheet, TouchableOpacity, View } from "react-native";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { useSelector } from "react-redux";
 import Avatar from "./ui/Avatar";
 
@@ -30,7 +30,7 @@ const ProfileCard = () => {
   const connectionsCount = 5;
 
   const handleConnectionsPress = () => {
-    Alert.alert("Connections clicked", "Здесь будет список друзей");
+    router.push("/(tabs)/profile/connections");
   };
 
   if (!profile) {

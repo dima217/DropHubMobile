@@ -3,6 +3,7 @@ import { createApi } from "@reduxjs/toolkit/query/react";
 import { baseQueryWithRefresh } from "./baseApi";
 import {
   MeResponse,
+  ProfileResponse,
   ProfileUploadUrlResponse,
   RefreshTokenResponse,
   ResetPasswordConfirmRequest,
@@ -108,6 +109,15 @@ export const authApi = createApi({
         headers: {
           "Content-Type": "application/json",
         },
+      }),
+    }),
+
+    searchProfiles: build.query<ProfileResponse[], string>({
+      query: (query) => ({
+        url: "/profile/search",
+        method: "GET",
+        params: { query },
+        auth: true,
       }),
     }),
   }),
