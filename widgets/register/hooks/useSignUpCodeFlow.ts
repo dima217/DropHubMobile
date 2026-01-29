@@ -165,7 +165,7 @@ export const useSignUpCodeFlow = () => {
 
       const userData = {
         email: finalData.email,
-        username: finalData.username,
+        firstName: finalData.username,
         avatarUrl: avatarUrl ?? undefined,
       };
 
@@ -182,7 +182,15 @@ export const useSignUpCodeFlow = () => {
 
       router.navigate("/(tabs)/home");
       resetForm();
-    } catch {}
+    } catch(error: any) {
+      if (error.status === 400) {
+        setErrorMessage(error.data.message);
+        setShowErrorModal(true);
+      } else {
+        setErrorMessage("Failed to update profile");
+        setShowErrorModal(true);
+      }
+    }
   };
 
   return {
