@@ -95,10 +95,25 @@ export interface ProfileUploadUrlResponse {
 }
 
 export interface AddFriendRequest {
-  userId: number;
+  profileId: number;
 }
 
 export interface AddFriendResponse {
-  success: boolean;
-  message?: string;
+  requestId: number;
+  message: string;
+}
+
+
+export enum RequestStatus {
+  PENDING = 'PENDING',
+  ACCEPTED = 'ACCEPTED',
+  REJECTED = 'REJECTED',
+  CANCELED = 'CANCELED',
+}
+
+export interface FriendRequestResponse {
+  id: number;
+  senderId: number;
+  receiverId: number;
+  status: RequestStatus;
 }

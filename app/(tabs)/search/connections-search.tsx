@@ -2,6 +2,7 @@ import { useAddFriendMutation, useSearchProfilesQuery } from "@/api/authApi";
 import Header from "@/shared/Header";
 import AddFriendConfirmationModal from "@/shared/Modals/AddFriendConfirmationModal";
 import SearchInput from "@/shared/SearchInput";
+import ActivityIndicator from "@/shared/ui/ActivityIndicator";
 import View from "@/shared/View";
 import ConnectionsList, { Connection } from "@/widgets/profile/Screens/Connections/components/ConnectionsList";
 import { useState } from "react";
@@ -15,7 +16,7 @@ const ConnectionsSearch = () => {
     skip: !search,
   });
   
-  const [addFriend] = useAddFriendMutation();
+  const [addFriend, { isLoading }] = useAddFriendMutation();
 
   const handleUserPress = (user: Connection) => {
     setSelectedUser(user);
@@ -25,7 +26,7 @@ const ConnectionsSearch = () => {
   const handleConfirm = async () => {
     if (selectedUser) {
       try {
-        await addFriend({ userId: selectedUser.id }).unwrap();
+        await addFriend({ profileId: selectedUser.id }).unwrap();
         setShowModal(false);
         setSelectedUser(null);
       } catch (error) {
@@ -43,6 +44,7 @@ const ConnectionsSearch = () => {
     <View>
       <Header title="Connections Search" />
       <SearchInput value={search} onChange={setSearch} />
+      {isLoading && <ActivityIndicator />}
       <ConnectionsList 
         data={searchProfiles.data || []} 
         onPressItem={handleUserPress} 

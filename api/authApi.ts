@@ -4,6 +4,7 @@ import { baseQueryWithRefresh } from "./baseApi";
 import {
   AddFriendRequest,
   AddFriendResponse,
+  FriendRequestResponse,
   MeResponse,
   ProfileResponse,
   ProfileUploadUrlResponse,
@@ -125,11 +126,15 @@ export const authApi = createApi({
 
     addFriend: build.mutation<AddFriendResponse, AddFriendRequest>({
       query: (body) => ({
-        url: "/friends/add",
+        url: "/relationships/request",
         method: "POST",
         body,
         auth: true,
       }),
+    }),
+
+    getFriendRequests: build.query<FriendRequestResponse[], void>({
+      query: () => ({ url: "/relationships/requests", method: "GET", auth: true }),
     }),
   }),
 });

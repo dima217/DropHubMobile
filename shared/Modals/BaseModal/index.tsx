@@ -180,6 +180,5 @@ const styles = StyleSheet.create({
   buttonSecondary: {
     backgroundColor: Colors.text,
     borderWidth: 1,
-    borderColor: Colors.primary,
   },
 });
