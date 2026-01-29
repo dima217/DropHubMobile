@@ -56,6 +56,10 @@ const slice = createSlice({
     ) {
       state.accessToken = action.payload.accessToken;
     },
+    setProfile(state, action: PayloadAction<{ avatarUrl: string | null, firstName: string | null }>) {
+      state.user!.avatarUrl = action.payload?.avatarUrl ?? undefined;
+      state.user!.firstName = action.payload?.firstName ?? undefined;
+    },
     setLoading(state, action: PayloadAction<boolean>) {
       state.loading = action.payload;
     },
@@ -69,5 +73,6 @@ export const {
   setUser,
   clearAuth,
   setLoading,
+  setProfile,
 } = slice.actions;
 export default slice.reducer;

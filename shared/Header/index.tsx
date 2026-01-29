@@ -77,7 +77,6 @@ export default Header;
 const styles = StyleSheet.create({
   container: {
     width: "100%",
-    marginTop: 30,
     backgroundColor: "transparent",
     flexDirection: "row",
     justifyContent: "space-between",

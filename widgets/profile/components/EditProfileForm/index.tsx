@@ -1,5 +1,5 @@
 import { useGetProfileUploadUrlQuery, useUpdateProfileMutation } from "@/api";
-import { setUser } from "@/store/slices/authSlice";
+import { setProfile } from "@/store/slices/authSlice";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -55,13 +55,13 @@ const EditProfileForm = () => {
       console.log(`result: ${result}`);
 
       dispatch(
-        setUser({
+        setProfile({
           avatarUrl: result.avatarUrl ?? undefined,
           firstName: result.firstName ?? undefined,
         })
       );
 
-      router.replace("/(tabs)/profile");
+      router.replace("/(tabs)/profile?showModal=profileUpdated");
     } catch (error: any) {
       let errorMessage = "Profile update failed!";
 

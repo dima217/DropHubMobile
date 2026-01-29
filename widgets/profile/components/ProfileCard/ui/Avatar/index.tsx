@@ -5,11 +5,12 @@ interface AvatarProps {
   size?: "small" | "medium" | "large" | number;
   uri?: string;
   title?: string;
+  onPress?: () => void;
 }
 
-const Avatar = ({ size, uri, title }: AvatarProps) => {
+const Avatar = ({ size, uri, title, onPress }: AvatarProps) => {
   if (uri) {
-    return <RNAvatar rounded source={{ uri: uri }} size={size} />;
+    return <RNAvatar rounded source={{ uri: uri }} size={size} onPress={onPress} />;
   }
   if (title) {
     return (
@@ -19,6 +20,7 @@ const Avatar = ({ size, uri, title }: AvatarProps) => {
         size={size}
         overlayContainerStyle={styles.avatarBackground}
         titleStyle={styles.avatarText}
+        onPress={onPress}
       />
     );
   }
