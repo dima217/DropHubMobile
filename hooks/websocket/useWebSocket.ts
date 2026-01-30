@@ -2,7 +2,7 @@ import { WebSocketService } from "@/services/websocket/WebSocketService";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Socket } from "socket.io-client";
 
-export const useWebSocket = (url: string, token?: string) => {
+export const useWebSocket = (url: string, token: string) => {
   const serviceRef = useRef<WebSocketService | null>(null);
   const socketRef = useRef<Socket | null>(null);
 

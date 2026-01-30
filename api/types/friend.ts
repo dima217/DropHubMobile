@@ -63,11 +63,11 @@ export enum FriendRequestDirection {
 
 export interface FriendRequestResponse {
   requestId: number;
-  direction: FriendRequestDirection;
   status: RequestStatus;
+  direction: FriendRequestDirection;
   profile: {
     id: number;
-    firstName: string;
     avatarUrl: string;
+    firstName: string;
   };
 }

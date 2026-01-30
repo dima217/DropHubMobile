@@ -6,8 +6,8 @@ export const styles = StyleSheet.create({
     borderRadius: 25,
     overflow: "hidden",
     alignSelf: "stretch",
-    justifyContent: "space-between",
     height: 36,
+    gap: 10,
   },
   button: {
     justifyContent: "center",

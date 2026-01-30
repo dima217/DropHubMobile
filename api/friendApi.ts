@@ -5,8 +5,9 @@ import { AcceptFriendRequestRequest, AcceptFriendRequestResponse, AddFriendReque
 export const friendApi = createApi({
   reducerPath: "friendApi",
   baseQuery: baseQueryWithRefresh,
+  tagTypes: ["FriendRequest"], 
   endpoints: (build) => ({
-    getFriends: build.query<{ friends: Friend[] }, void>({
+    getFriends: build.query<Friend[], void>({
       query: () => ({ url: "/relationships/friends", method: "POST", auth: true }),
     }),
     
@@ -28,15 +29,19 @@ export const friendApi = createApi({
     }),
 
     getFriendRequests: build.query<FriendRequestResponse[], void>({
-      query: (body) => ({ url: "/relationships/requests", method: "POST", body, auth: true }),
+      query: () => ({ url: "/relationships/requests", method: "POST", auth: true }),
+      providesTags: (result) =>
+        result ? result.map(({ requestId }) => ({ type: "FriendRequest" as const, id: requestId })) : [],
     }),
 
     acceptFriendRequest: build.mutation<AcceptFriendRequestResponse, AcceptFriendRequestRequest>({
       query: ({ requestId }) => ({ url: `/relationships/accept/${requestId}`, method: "POST", auth: true }),
+      invalidatesTags: [{ type: "FriendRequest", id: "LIST" }],
     }),
 
     rejectFriendRequest: build.mutation<RejectFriendRequestResponse, RejectFriendRequestRequest>({
       query: ({ requestId }) => ({ url: `/relationships/reject/${requestId}`, method: "POST", auth: true }),
+      invalidatesTags: [{ type: "FriendRequest", id: "LIST" }],
     }),
   }),
 });

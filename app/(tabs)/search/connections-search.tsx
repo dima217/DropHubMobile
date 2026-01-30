@@ -5,18 +5,22 @@ import AddFriendConfirmationModal from "@/shared/Modals/AddFriendConfirmationMod
 import SearchInput from "@/shared/SearchInput";
 import ActivityIndicator from "@/shared/ui/ActivityIndicator";
 import View from "@/shared/View";
+import { RootState } from "@/store/store";
 import ConnectionsList, { Connection } from "@/widgets/profile/Screens/Connections/components/ConnectionsList";
 import { useState } from "react";
+import { useSelector } from "react-redux";
 
 const ConnectionsSearch = () => {
   const [search, setSearch] = useState("");
   const [selectedUser, setSelectedUser] = useState<Connection | null>(null);
   const [showModal, setShowModal] = useState(false);
-  
+
+  const currentUser = useSelector((state: RootState) => state.auth.user);
+
   const searchProfiles = useSearchProfilesQuery(search, {
     skip: !search,
   });
-  
+
   const [addFriend, { isLoading }] = useAddFriendMutation();
 
   const handleUserPress = (user: Connection) => {
@@ -41,13 +45,17 @@ const ConnectionsSearch = () => {
     setSelectedUser(null);
   };
 
+  const filteredData = (searchProfiles.data || []).filter(
+    (user) => user.firstName !== currentUser?.firstName
+  );
+
   return (
     <View>
       <Header title="Connections Search" />
       <SearchInput value={search} onChange={setSearch} />
       {isLoading && <ActivityIndicator />}
       <ConnectionsList 
-        data={searchProfiles.data || []} 
+        data={filteredData} 
         onPressItem={handleUserPress} 
       />
       <AddFriendConfirmationModal
