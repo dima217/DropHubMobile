@@ -1,13 +1,12 @@
-// useMatchUpdates.ts
-import { Match } from "@/api/types/match";
+import { FriendRequestResponse } from "@/api/types/friend";
 import { useEffect } from "react";
 import { useWebSocket } from "../websocket/useWebSocket";
 
 const WS_URL = "http://10.11.251.195:3000";
 
-export const useMatchUpdates = (
+export const useFriendRequestUpdate = (
   accessToken: string,
-  onMatchUpdate: (updatedMatch: Match) => void,
+  onFriendRequestUpdate: (updatedFriendRequest: FriendRequestResponse) => void,
   isEnabled: boolean
 ) => {
   const { isConnected, on, emit, off } = useWebSocket(WS_URL, accessToken);
@@ -17,15 +16,15 @@ export const useMatchUpdates = (
       return;
     }
 
-    const handleUpdate = (updatedMatch: Match) => {
-      onMatchUpdate(updatedMatch);
+    const handleUpdate = (updatedFriendRequest: FriendRequestResponse) => {
+      onFriendRequestUpdate(updatedFriendRequest);
     };
 
     emit("subscribeToUpdates");
-    on("matchUpdate", handleUpdate);
+    on("friendRequestUpdate", handleUpdate);
 
     return () => {
       emit("unsubscribeFromUpdates");
     };
-  }, [off, emit, isConnected, on, onMatchUpdate, isEnabled]);
+  }, [off, emit, isConnected, on, onFriendRequestUpdate, isEnabled]);
 };

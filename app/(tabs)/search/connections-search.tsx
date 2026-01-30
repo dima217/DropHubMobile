@@ -1,4 +1,5 @@
-import { useAddFriendMutation, useSearchProfilesQuery } from "@/api/authApi";
+import { useSearchProfilesQuery } from "@/api/authApi";
+import { useAddFriendMutation } from "@/api/friendApi";
 import Header from "@/shared/Header";
 import AddFriendConfirmationModal from "@/shared/Modals/AddFriendConfirmationModal";
 import SearchInput from "@/shared/SearchInput";
