@@ -5,7 +5,7 @@ import {
   useGetFriendsQuery,
   useRejectFriendRequestMutation,
 } from "@/api/friendApi";
-import { FriendRequestDirection, FriendRequestResponse, RequestStatus } from "@/api/types/friend";
+import { FriendRequestResponse } from "@/api/types/friend";
 import { useFriendRequestUpdate } from "@/hooks/data/useFriendRequestUpdate";
 import { ThemedText } from "@/shared/core/ThemedText";
 import GradientButton from "@/shared/GradientButton";
@@ -14,6 +14,7 @@ import SearchInput from "@/shared/SearchInput";
 import Toogle from "@/shared/Toogle";
 import View from "@/shared/View";
 import { RootState } from "@/store/store";
+import { mapFriendsToFriendItems, mapRequestsToFriendRequestItems } from "@/widgets/connections/utils/mapper";
 import ConnectionsList, {
   FriendItem,
   FriendRequestItem,
@@ -22,7 +23,7 @@ import { useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import { View as RNView, StyleSheet } from "react-native";
 import { useSelector } from "react-redux";
-
+  
 const Connections = () => {
   const [search, setSearch] = useState("");
   const router = useRouter();
@@ -89,33 +90,8 @@ const Connections = () => {
     console.log("Share resource with:", item);
   };
 
-  const friendsData: FriendItem[] =
-    friends.data?.map((friend) => ({
-        id: friend.friendProfile.id,
-        firstName: friend.friendProfile.firstName,
-        avatarUrl: friend.friendProfile.avatarUrl,
-        friendshipId: friend.friendshipId,
-      }))
-      .filter(
-        (friend) =>
-          !search ||
-          friend.firstName.toLowerCase().includes(search.toLowerCase())
-      ) || [];
-
-  const requestsData: FriendRequestItem[] =
-    friendRequests
-      .filter((request) => request.direction === FriendRequestDirection.INCOMING && request.status === RequestStatus.PENDING)
-      .map((request) => ({
-        id: request.profile.id,
-        firstName: request.profile.firstName,
-        avatarUrl: request.profile.avatarUrl,
-        requestId: request.requestId,
-      }))
-      .filter(
-        (request) =>
-          !search ||
-          request.firstName.toLowerCase().includes(search.toLowerCase())
-      ) || [];
+  const friendsData = mapFriendsToFriendItems(friends.data, search);
+  const requestsData = mapRequestsToFriendRequestItems(friendRequests, search);
 
   return (
     <View>
