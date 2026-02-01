@@ -1,7 +1,7 @@
 import { authApi } from "@/api/authApi";
 import { avatarApi } from "@/api/avatarApi";
 import { friendApi } from "@/api/friendApi";
-import { matchApi } from "@/api/matchApi";
+import { roomApi } from "@/api/roomApi";
 import authReducer from "@/store/slices/authSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
@@ -16,9 +16,9 @@ const persistConfig = {
 const rootReducer = combineReducers({
   auth: authReducer,
   [authApi.reducerPath]: authApi.reducer,
-  [matchApi.reducerPath]: matchApi.reducer,
   [avatarApi.reducerPath]: avatarApi.reducer,
   [friendApi.reducerPath]: friendApi.reducer,
+  [roomApi.reducerPath]: roomApi.reducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
@@ -30,9 +30,9 @@ export const store = configureStore({
       serializableCheck: false,
     })
       .concat(authApi.middleware)
-      .concat(matchApi.middleware)
       .concat(avatarApi.middleware)
-      .concat(friendApi.middleware),
+      .concat(friendApi.middleware)
+      .concat(roomApi.middleware),
 });
 
 export const persistor = persistStore(store);

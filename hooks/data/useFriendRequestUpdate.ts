@@ -20,8 +20,8 @@ export const useFriendRequestUpdate = (
       onFriendRequestUpdate(updatedFriendRequest);
     };
 
-    emit("subscribeToUpdates");
-    on("friendRequestUpdate", handleUpdate);
+    emit('subscribeToFriends');
+    on("friendRequest", handleUpdate);
 
     return () => {
       emit("unsubscribeFromUpdates");

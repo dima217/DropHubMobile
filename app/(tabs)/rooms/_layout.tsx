@@ -8,6 +8,8 @@ export default function RoomsLayout() {
       }}
     >
       <Stack.Screen name="index" />
+      <Stack.Screen name="room-placeholder" />
+      <Stack.Screen name="[roomId]" />
     </Stack>
   );
 }

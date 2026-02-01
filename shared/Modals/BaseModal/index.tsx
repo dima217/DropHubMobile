@@ -11,6 +11,8 @@ export interface BaseModalButton {
   style?: ViewStyle;
   textColor?: string;
   variant?: "primary" | "secondary";
+  loading?: boolean;
+  disabled?: boolean;
 }
 
 export interface BaseModalProps {
@@ -102,6 +104,8 @@ const BaseModal: React.FC<BaseModalProps> = ({
                   key={index}
                   title={button.title}
                   onPress={button.onPress}
+                  loading={button.loading}
+                  disabled={button.disabled}
                   style={[
                     styles.button,
                     button.variant === "primary" && styles.buttonPrimary,
