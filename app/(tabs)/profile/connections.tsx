@@ -48,9 +48,19 @@ const Connections = () => {
   }, [initialFriendRequests, updatesEnabled]);
 
   const handleFriendRequestUpdate = useCallback((updatedRequest: FriendRequestResponse) => {
-    setFriendRequests((prev) =>
-      prev.map((request) => (request.requestId === updatedRequest.requestId ? updatedRequest : request))
-    );
+    console.log("updatedRequest", updatedRequest);
+    setFriendRequests((prev) => {
+      const exists = prev.some(
+        (req) => req.requestId === updatedRequest.requestId
+      );
+      if (exists) {
+        return prev.map((req) =>
+          req.requestId === updatedRequest.requestId ? updatedRequest : req
+        );
+      } else {
+        return [updatedRequest, ...prev];
+      }
+    });
   }, []);
 
   useFriendRequestUpdate(accessToken!, handleFriendRequestUpdate, updatesEnabled);
