@@ -47,6 +47,7 @@ const Rooms = () => {
               room={item}
               onPress={() => handleRoomPress(item.id)}
               notificationCount={0} // TODO: Получать из WebSocket или состояния
+              onRefresh={refetch}
             />
           )}
           contentContainerStyle={styles.listContainer}

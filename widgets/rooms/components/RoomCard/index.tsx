@@ -1,8 +1,10 @@
-import { RoomItem } from "@/api/types/room";
+import { AccessRole, RoomItem } from "@/api/types/room";
 import { Colors } from "@/constants/design-tokens";
 import { ThemedText } from "@/shared/core/ThemedText";
 import GradientView from "@/shared/Gradient";
+import ActionMenu from "@/shared/ui/ActionMenu";
 import Avatar from "@/widgets/profile/components/ProfileCard/ui/Avatar";
+import { useRoomActionMenu } from "@/widgets/rooms/hooks/useRoomActionMenu";
 import React from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 
@@ -10,6 +12,7 @@ interface RoomCardProps {
   room: RoomItem;
   onPress: () => void;
   notificationCount?: number;
+  onRefresh?: () => void;
 }
 
 const formatBytes = (bytes: number): string => {
@@ -20,7 +23,7 @@ const formatBytes = (bytes: number): string => {
   return `${(bytes / Math.pow(k, i)).toFixed(1)} ${sizes[i]}`;
 };
 
-const RoomCard = ({ room, onPress, notificationCount = 0 }: RoomCardProps) => {
+const RoomCard = ({ room, onPress, notificationCount = 0, onRefresh }: RoomCardProps) => {
   const participants = room.participantsDetails || [];
   const fileCount = room.files?.length || 0;
   const totalSize = room.maxBytes || 0;
@@ -28,6 +31,8 @@ const RoomCard = ({ room, onPress, notificationCount = 0 }: RoomCardProps) => {
   const ownerName = owner?.profile?.firstName || room.owner || "Room";
 
   const description = "Please wait a moment while we prepare your experience";
+
+  const { items } = useRoomActionMenu({ room, onRefresh });
 
   return (
     <TouchableOpacity onPress={onPress}>
@@ -45,6 +50,11 @@ const RoomCard = ({ room, onPress, notificationCount = 0 }: RoomCardProps) => {
           <ThemedText type="subtitle" style={styles.roomName}>
             {ownerName}
           </ThemedText>
+          {room.userRole === AccessRole.ADMIN && (
+            <View pointerEvents="box-none">
+              <ActionMenu items={items} title="Room Actions" />
+            </View>
+          )}
         </View>
 
         {participants.length > 0 && (
@@ -115,6 +125,9 @@ const styles = StyleSheet.create({
   },
   header: {
     marginBottom: 4,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   roomName: {
     fontSize: 18,

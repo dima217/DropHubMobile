@@ -33,7 +33,6 @@ const RoomDetails = () => {
 
   const hasFiles = roomDetails.files && roomDetails.files.length > 0;
 
-  // Если нет файлов, показываем placeholder
   if (!hasFiles) {
     return <RoomPlaceholder />;
   }
@@ -43,8 +42,6 @@ const RoomDetails = () => {
     <View style={styles.container}>
       <Header title={roomDetails.owner || "Room Details"} />
       <View style={styles.content}>
-        {/* Болванка для деталей комнаты */}
-        {/* Здесь будет список файлов, участники и т.д. */}
       </View>
     </View>
   );
