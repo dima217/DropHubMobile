@@ -1,8 +1,9 @@
+import { useGetFriendsQuery } from "@/api/friendApi";
 import { useGetByRoomsListQuery } from "@/api/roomApi";
 import { Colors } from "@/constants/design-tokens";
 import Button from "@/shared/Button";
 import Header from "@/shared/Header";
-import CreateRoomModal from "@/shared/Modals/CreateRoomModal";
+import CreateRoomModal from "@/shared/Modals/RoomModals/CreateRoomModal";
 import View from "@/shared/View";
 import RoomCard from "@/widgets/rooms/components/RoomCard";
 import { useRouter } from "expo-router";
@@ -13,6 +14,7 @@ const Rooms = () => {
   const router = useRouter();
   const [showCreateModal, setShowCreateModal] = useState(false);
   const { data: rooms, isLoading, refetch } = useGetByRoomsListQuery();
+  const { data: friends, isLoading: isGettingFriends } = useGetFriendsQuery();
 
   const handleAddRoom = () => {
     setShowCreateModal(true);
@@ -45,6 +47,7 @@ const Rooms = () => {
           renderItem={({ item }) => (
             <RoomCard
               room={item}
+              friends={friends || []}
               onPress={() => handleRoomPress(item.id)}
               notificationCount={0} // TODO: Получать из WebSocket или состояния
               onRefresh={refetch}

@@ -12,6 +12,7 @@ interface FriendCardProps {
   isSelected: boolean;
   disabled?: boolean;
   onToggle: (id: number) => void;
+  selectionColor: string;
 }
 
 const FriendCard: React.FC<FriendCardProps> = ({
@@ -21,11 +22,14 @@ const FriendCard: React.FC<FriendCardProps> = ({
   isSelected,
   disabled = false,
   onToggle,
+  selectionColor,
 }) => {
+  const checkboxColor = isSelected ? selectionColor : Colors.secondary;
+  const checkboxBackgroundColor = isSelected ? selectionColor : "transparent";
   return (
     <TouchableOpacity
       onPress={() => onToggle(id)}
-      style={[styles.friendItem, isSelected && styles.friendItemSelected]}
+      style={[styles.friendItem, isSelected && styles.friendItemSelected, { borderColor: selectionColor }]}
       disabled={disabled}
     >
       <Avatar
@@ -36,7 +40,7 @@ const FriendCard: React.FC<FriendCardProps> = ({
       <ThemedText style={[styles.friendText, isSelected && styles.friendTextSelected]}>
         {firstName}
       </ThemedText>
-      <View style={[styles.checkbox, isSelected && styles.checkboxSelected]}>
+      <View style={[styles.checkbox, { borderColor: checkboxColor, backgroundColor: checkboxBackgroundColor }]}>
         {isSelected && <Ionicons name="checkmark" size={16} color={Colors.brightText} />}
       </View>
     </TouchableOpacity>
@@ -57,7 +61,6 @@ const styles = StyleSheet.create({
   friendItemSelected: {
     backgroundColor: Colors.cardBackground,
     borderWidth: 1,
-    borderColor: Colors.primary,
   },
   friendText: {
     flex: 1,

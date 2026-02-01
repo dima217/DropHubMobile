@@ -1,15 +1,19 @@
+import { Friend } from "@/api/types/friend";
 import { AccessRole, RoomItem } from "@/api/types/room";
 import { Colors } from "@/constants/design-tokens";
 import { ThemedText } from "@/shared/core/ThemedText";
 import GradientView from "@/shared/Gradient";
+import ManageUsersModal from "@/shared/Modals/RoomModals/ManageUsersModal";
 import ActionMenu from "@/shared/ui/ActionMenu";
 import Avatar from "@/widgets/profile/components/ProfileCard/ui/Avatar";
 import { useRoomActionMenu } from "@/widgets/rooms/hooks/useRoomActionMenu";
+import { getManagedUsers } from "@/widgets/rooms/utils";
 import React from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 
 interface RoomCardProps {
   room: RoomItem;
+  friends: Friend[];
   onPress: () => void;
   notificationCount?: number;
   onRefresh?: () => void;
@@ -23,16 +27,18 @@ const formatBytes = (bytes: number): string => {
   return `${(bytes / Math.pow(k, i)).toFixed(1)} ${sizes[i]}`;
 };
 
-const RoomCard = ({ room, onPress, notificationCount = 0, onRefresh }: RoomCardProps) => {
+const RoomCard = ({ room, friends, onPress, notificationCount = 0, onRefresh }: RoomCardProps) => {
   const participants = room.participantsDetails || [];
   const fileCount = room.files?.length || 0;
   const totalSize = room.maxBytes || 0;
   const owner = participants.find((p) => p.role === "admin") || participants[0];
   const ownerName = owner?.profile?.firstName || room.owner || "Room";
 
-  const description = "Please wait a moment while we prepare your experience";
+  const { openManageUsersModal, manageUsersMode, setOpenManageUsersModal, handleConfirmManageUsers, items } = useRoomActionMenu({ room, onRefresh });
 
-  const { items } = useRoomActionMenu({ room, onRefresh });
+
+  const description = "Please wait a moment while we prepare your experience";
+  const managedUsers = getManagedUsers(friends, participants, manageUsersMode as 'add' | 'remove');
 
   return (
     <TouchableOpacity onPress={onPress}>
@@ -93,6 +99,14 @@ const RoomCard = ({ room, onPress, notificationCount = 0, onRefresh }: RoomCardP
         </ThemedText>
       </View>
       </GradientView>
+      <ManageUsersModal
+        isVisible={openManageUsersModal}
+        onClose={() => setOpenManageUsersModal(false)}
+        mode={manageUsersMode}
+        users={managedUsers}
+        roomId={room.id}
+        onConfirm={handleConfirmManageUsers}
+      />
     </TouchableOpacity>
   );
 };

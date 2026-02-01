@@ -7,7 +7,7 @@ import BaseModal from "@/shared/Modals/BaseModal";
 import TextInput from "@/shared/TextInput";
 import React, { useState } from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
-import FriendCard from "./ui/FriendCard";
+import FriendCard from "../ui/FriendCard";
 
 interface CreateRoomModalProps {
   isVisible: boolean;
@@ -155,6 +155,7 @@ const CreateRoomModal: React.FC<CreateRoomModalProps> = ({
                   <FriendCard
                     key={friendId}
                     id={friendId}
+                    selectionColor={Colors.primary}
                     firstName={friend.friendProfile.firstName}
                     avatarUrl={friend.friendProfile.avatarUrl}
                     isSelected={isSelected}

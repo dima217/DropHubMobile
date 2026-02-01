@@ -1,6 +1,7 @@
-import { useDeleteRoomMutation, useRemoveUsersFromRoomMutation } from "@/api/roomApi";
-import { RoomItem } from "@/api/types/room";
+import { useAddUsersToRoomMutation, useDeleteRoomMutation, useRemoveUsersFromRoomMutation } from "@/api/roomApi";
+import { AccessRole, RoomItem } from "@/api/types/room";
 import { ActionMenuItemData } from "@/shared/ui/ActionMenu/ActionMenuItem";
+import { useState } from "react";
 
 interface UseRoomActionMenuProps {
   room: RoomItem;
@@ -10,6 +11,10 @@ interface UseRoomActionMenuProps {
 export const useRoomActionMenu = ({ room, onRefresh }: UseRoomActionMenuProps) => {
   const [deleteRoom, { isLoading: isDeleting }] = useDeleteRoomMutation();
   const [removeUsers, { isLoading: isRemovingUsers }] = useRemoveUsersFromRoomMutation();
+  const [addUsers, { isLoading: isAddingUsers }] = useAddUsersToRoomMutation();
+
+  const [openManageUsersModal, setOpenManageUsersModal] = useState(false);
+  const [manageUsersMode, setManageUsersMode] = useState<"add" | "remove">("add");
 
   const handleDeleteRoom = async () => {
     try {
@@ -21,27 +26,22 @@ export const useRoomActionMenu = ({ room, onRefresh }: UseRoomActionMenuProps) =
   };
 
   const handleAddUsers = () => {
-    console.log("Add users to room:", room.id);
+    setOpenManageUsersModal(true);
+    setManageUsersMode("add");
+  };
+
+  const handleConfirmManageUsers = async (roomId: string, selectedUserIds: number[]) => {
+    if (manageUsersMode === "add") {
+      await addUsers({ roomId, targetUserIds: selectedUserIds, role: AccessRole.WRITE }).unwrap();
+    } else {
+      await removeUsers({ roomId, targetUserIds: selectedUserIds }).unwrap();
+    }
+    onRefresh?.();
   };
 
   const handleRemoveUsers = async () => {
-    // TODO: Открыть модалку для выбора пользователей для удаления
-    // Пока просто пример
-    const participantIds = room.participantsDetails
-      .filter((p) => p.role !== "admin")
-      .map((p) => p.userId);
-
-    if (participantIds.length > 0) {
-      try {
-        await removeUsers({
-          roomId: room.id,
-          targetUserIds: participantIds.slice(0, 1), // Пример: удаляем первого не-админа
-        }).unwrap();
-        onRefresh?.();
-      } catch (error) {
-        console.error("Failed to remove users:", error);
-      }
-    }
+    setOpenManageUsersModal(true);
+    setManageUsersMode("remove");
   };
 
   const handleEditRoom = () => {
@@ -94,6 +94,11 @@ export const useRoomActionMenu = ({ room, onRefresh }: UseRoomActionMenuProps) =
   return {
     items,
     isLoading: isDeleting || isRemovingUsers,
+    openManageUsersModal,
+    manageUsersMode,
+    setOpenManageUsersModal,
+    setManageUsersMode,
+    handleConfirmManageUsers,
   };
 };
 
