@@ -5,6 +5,7 @@ import { AddUserToRoomRequest, AddUserToRoomResponse, CreateRoomRequest, CreateR
 export const roomApi = createApi({
   reducerPath: "roomApi",
   baseQuery: baseQueryWithRefresh,
+  tagTypes: ["Room"],
   endpoints: (build) => ({
     createRoom: build.mutation<CreateRoomResponse, CreateRoomRequest>({
       query: (body) => ({ url: "/room", method: "POST", body, auth: true }),
@@ -12,9 +13,11 @@ export const roomApi = createApi({
     getByRoomsList: build.query<RoomItem[], void>({
       query: () => ({ url: "/room/my-list", method: "POST", auth: true }),
       transformResponse: (response: Room) => response.rooms || [],
+      providesTags: ["Room"],
     }),
     getRoomDetails: build.query<RoomDetails, string>({
       query: (roomId) => ({ url: `/room/${roomId}/details`, method: "GET", auth: true }),
+      providesTags: (result, error, roomId) => [{ type: "Room", id: roomId }],
     }),
     addUsersToRoom: build.mutation<AddUserToRoomResponse, AddUserToRoomRequest>({
       query: (body) => ({ url: `/room/add-users`, method: "POST", body, auth: true }),

@@ -1,10 +1,4 @@
-export enum FileUploadStatus {
-    IN_PROGRESS = 'in_progress',
-    COMPLETE = 'completed',
-    FAILED = 'failed',
-    CANCELED = 'canceled',
-    STOPPED = 'stopped',
-}
+import { FileItem, FileUploadStatus } from "./file";
 
 export enum AccessRole {
     ADMIN = 'admin',
@@ -53,7 +47,7 @@ export interface RoomItem {
 
 export interface RoomDetails {
     id: string;
-    files: string[];
+    files: FileItem[];
     groups: string[];
     createdAt: string;
     participants: number;

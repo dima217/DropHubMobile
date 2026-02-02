@@ -7,11 +7,19 @@ import { useRouter } from "expo-router";
 import React from "react";
 import { View as RNView, StyleSheet } from "react-native";
 
-const RoomPlaceholder = () => {
+interface RoomPlaceholderProps {
+  onAddFiles?: () => void;
+}
+
+const RoomPlaceholder: React.FC<RoomPlaceholderProps> = ({ onAddFiles }) => {
   const router = useRouter();
 
   const handleAddFiles = () => {
-    console.log("Add files to room");
+    if (onAddFiles) {
+      onAddFiles();
+    } else {
+      console.log("Add files to room");
+    }
   };
 
   return (

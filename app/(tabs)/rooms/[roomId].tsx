@@ -1,18 +1,153 @@
+import { useDeleteRoomFilesMutation, useLazyDownloadRoomFilesQuery } from "@/api/fileApi";
 import { useGetRoomDetailsQuery } from "@/api/roomApi";
 import { Colors } from "@/constants/design-tokens";
+import { useRoomFilesUpdate } from "@/hooks/data/useRoomFilesUpdate";
+import { secureStore } from "@/services/secureStore";
+import { createUploader, UploadProvider } from "@/services/upload/UploaderFactory";
 import Header from "@/shared/Header";
+import MultiSelectBar from "@/shared/ui/MultiSelectBar";
 import View from "@/shared/View";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import React from "react";
-import { ActivityIndicator, StyleSheet } from "react-native";
+import { RootState } from "@/store/store";
+import ResourcesSection, { ResourceItem } from "@/widgets/rooms/components/ResourcesSection";
+import { useRoomFileUpload } from "@/widgets/rooms/hooks/useRoomFileUpload";
+import { combineRoomResources } from "@/widgets/rooms/mappers/roomResources.mapper";
+import { FileMenuManager } from "@/widgets/rooms/menu/fileMenu";
+import { folderMenuItems } from "@/widgets/rooms/menu/folderMenu";
+import { createMultiSelectMenuItems } from "@/widgets/rooms/menu/multiSelectorMenu";
+import { Feather } from "@expo/vector-icons";
+import { useLocalSearchParams } from "expo-router";
+import React, { useCallback, useMemo, useState } from "react";
+import { ActivityIndicator, Alert, StyleSheet, TouchableOpacity } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useSelector } from "react-redux";
 import RoomPlaceholder from "./room-placeholder";
 
-const RoomDetails = () => {
-  const router = useRouter();
+const RoomDetailsScreen = () => {
   const { roomId } = useLocalSearchParams<{ roomId: string }>();
-  const { data: roomDetails, isLoading } = useGetRoomDetailsQuery(roomId || "", {
+  const user = useSelector((state: RootState) => state.auth.user);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const insets = useSafeAreaInsets();
+  
+  const { data: roomDetails, isLoading, refetch } = useGetRoomDetailsQuery(roomId || "", {
     skip: !roomId,
   });
+
+  React.useEffect(() => {
+    secureStore.getAccessToken().then(setAccessToken);
+  }, []);
+
+  const { uploadingFiles, pickAndUpload } = useRoomFileUpload(
+    roomId || '',
+    user?.id ? parseInt(user.id) : undefined
+  );
+
+  useRoomFilesUpdate(
+    roomId || '',
+    accessToken || '',
+    useCallback(() => {
+      refetch();
+    }, [refetch]),
+    !!roomId && !!accessToken
+  );
+
+  const [deleteRoomFiles] = useDeleteRoomFilesMutation();
+  const [downloadRoomFiles] = useLazyDownloadRoomFilesQuery();
+
+  const handleDownloadFiles = useCallback(async (fileIds: string[]) => {
+    if (!roomId) return;
+    
+    try {
+      const downloadResponse = await downloadRoomFiles({ fileIds, roomId }).unwrap();
+
+      const downloadData: { fileId: string; url: string }[] = downloadResponse.map((response) => ({
+        fileId: response.fileId,
+        url: response.url,
+      }));
+      
+      const uploader = createUploader(UploadProvider.MINIO);
+      
+      for (const item of downloadData) {
+        try {
+          await uploader.download(item.url, (progress) => {
+            console.log(`Download progress for ${item.fileId}: ${progress.percentage}%`);
+          });
+          Alert.alert('Success', `File ${item.fileId} downloaded successfully`);
+        } catch (downloadError) {
+          console.error(`Failed to download ${item.fileId}:`, downloadError);
+          Alert.alert('Error', `Failed to download file ${item.fileId}`);
+        }
+      }
+    } catch (downloadError) {
+      console.error('Download error:', downloadError);
+      Alert.alert('Error', 'Failed to download files');
+    }
+  }, [downloadRoomFiles, roomId]);
+
+  const handleDeleteFiles = useCallback(async (fileIds: string[]) => {
+    if (!roomId) return;
+    
+    try {
+      await deleteRoomFiles({ fileIds, roomId }).unwrap();
+      refetch();
+      setSelectedIds(new Set());
+      setIsMultiSelectMode(false);
+    } catch {
+      Alert.alert('Error', 'Failed to delete files');
+    }
+  }, [roomId, deleteRoomFiles, refetch]);
+
+
+  const fileMenuManager = useMemo(() => new FileMenuManager(handleDownloadFiles, handleDeleteFiles), [handleDownloadFiles, handleDeleteFiles]);
+
+  const multiSelectMenuItems = useMemo(
+    () =>
+      createMultiSelectMenuItems(
+        selectedIds,
+        handleDownloadFiles,
+        handleDeleteFiles,
+        () => {
+          setSelectedIds(new Set());
+          setIsMultiSelectMode(false);
+        }
+      ),
+    [selectedIds, handleDownloadFiles, handleDeleteFiles]
+  );
+
+  const resources: ResourceItem[] = useMemo(() => {
+    return combineRoomResources(uploadingFiles, roomDetails, user);
+  }, [roomDetails, uploadingFiles, user]);
+
+  const handleFileLongPress = useCallback((fileId: string) => {
+    const newSelected = new Set(selectedIds);
+    if (newSelected.has(fileId)) {
+      newSelected.delete(fileId);
+    } else {
+      newSelected.add(fileId);
+    }
+    setSelectedIds(newSelected);
+    if (newSelected.size > 0 && !isMultiSelectMode) {
+      setIsMultiSelectMode(true);
+    } else if (newSelected.size === 0 && isMultiSelectMode) {
+      setIsMultiSelectMode(false);
+    }
+  }, [selectedIds, isMultiSelectMode]);
+
+  const handleFolderLongPress = useCallback((folderId: string) => {
+    const newSelected = new Set(selectedIds);
+    if (newSelected.has(folderId)) {
+      newSelected.delete(folderId);
+    } else {
+      newSelected.add(folderId);
+    }
+    setSelectedIds(newSelected);
+    if (newSelected.size > 0 && !isMultiSelectMode) {
+      setIsMultiSelectMode(true);
+    } else if (newSelected.size === 0 && isMultiSelectMode) {
+      setIsMultiSelectMode(false);
+    }
+  }, [selectedIds, isMultiSelectMode]);
 
   if (isLoading) {
     return (
@@ -31,18 +166,85 @@ const RoomDetails = () => {
     );
   }
 
-  const hasFiles = roomDetails.files && roomDetails.files.length > 0;
+  const hasFiles = (roomDetails.files && roomDetails.files.length > 0) || uploadingFiles.length > 0;
 
   if (!hasFiles) {
-    return <RoomPlaceholder />;
+    return (
+      <RoomPlaceholder 
+        onAddFiles={pickAndUpload}
+      />
+    );
   }
 
-  // TODO: Реализовать экран с реальными деталями комнаты
   return (
     <View style={styles.container}>
       <Header title={roomDetails.owner || "Room Details"} />
-      <View style={styles.content}>
-      </View>
+      {isMultiSelectMode && (
+        <MultiSelectBar
+          selectedCount={selectedIds.size}
+          menuItems={multiSelectMenuItems}
+        />
+      )}
+      <ResourcesSection
+        resources={resources}
+        showAuthorship={true}
+        fileMenuItems={fileMenuManager}
+        folderMenuItems={folderMenuItems}
+        onFilePress={(file) => {
+          if (isMultiSelectMode) {
+            if (selectedIds.has(file._id)) {
+              // If already selected, deselect on press
+              const newSelected = new Set(selectedIds);
+              newSelected.delete(file._id);
+              setSelectedIds(newSelected);
+              if (newSelected.size === 0) {
+                setIsMultiSelectMode(false);
+              }
+            } else {
+              // If not selected, select it
+              const newSelected = new Set(selectedIds);
+              newSelected.add(file._id);
+              setSelectedIds(newSelected);
+            }
+          } else {
+            // Normal press - open file preview or do default action
+            // TODO: Open file preview
+          }
+        }}
+        onFileLongPress={(file) => handleFileLongPress(file._id)}
+        onFolderPress={(folderId) => {
+          if (isMultiSelectMode) {
+            if (selectedIds.has(folderId)) {
+              // If already selected, deselect on press
+              const newSelected = new Set(selectedIds);
+              newSelected.delete(folderId);
+              setSelectedIds(newSelected);
+              if (newSelected.size === 0) {
+                setIsMultiSelectMode(false);
+              }
+            } else {
+              // If not selected, select it
+              const newSelected = new Set(selectedIds);
+              newSelected.add(folderId);
+              setSelectedIds(newSelected);
+            }
+          } else {
+            // Normal press - open folder or do default action
+            // TODO: Open folder
+          }
+        }}
+        onFolderLongPress={handleFolderLongPress}
+        selectedIds={selectedIds}
+        onSelectionChange={setSelectedIds}
+        isMultiSelectMode={isMultiSelectMode}
+      />
+      <TouchableOpacity
+        style={[styles.uploadButton, { bottom: insets.bottom + 16 }]}
+        onPress={pickAndUpload}
+        activeOpacity={0.8}
+      >
+        <Feather name="upload" size={24} color={Colors.brightText} />
+      </TouchableOpacity>
     </View>
   );
 };
@@ -50,15 +252,30 @@ const RoomDetails = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  content: {
-    flex: 1,
-    padding: 16,
+    gap: 16,
   },
   loader: {
     marginTop: 50,
   },
+  uploadButton: {
+    position: 'absolute',
+    right: 16,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: Colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
 });
 
-export default RoomDetails;
+export default RoomDetailsScreen;
 

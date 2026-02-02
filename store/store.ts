@@ -1,5 +1,6 @@
 import { authApi } from "@/api/authApi";
 import { avatarApi } from "@/api/avatarApi";
+import { fileApi } from "@/api/fileApi";
 import { friendApi } from "@/api/friendApi";
 import { roomApi } from "@/api/roomApi";
 import authReducer from "@/store/slices/authSlice";
@@ -18,6 +19,7 @@ const rootReducer = combineReducers({
   [authApi.reducerPath]: authApi.reducer,
   [avatarApi.reducerPath]: avatarApi.reducer,
   [friendApi.reducerPath]: friendApi.reducer,
+  [fileApi.reducerPath]: fileApi.reducer,
   [roomApi.reducerPath]: roomApi.reducer,
 });
 
@@ -32,7 +34,8 @@ export const store = configureStore({
       .concat(authApi.middleware)
       .concat(avatarApi.middleware)
       .concat(friendApi.middleware)
-      .concat(roomApi.middleware),
+      .concat(fileApi.middleware)
+      .concat(roomApi.middleware)
 });
 
 export const persistor = persistStore(store);
