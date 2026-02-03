@@ -41,7 +41,7 @@ const RoomDetailsScreen = () => {
     secureStore.getAccessToken().then(setAccessToken);
   }, []);
 
-  const { uploadingFiles, pickAndUpload } = useRoomFileUpload(
+  const { uploadingFiles, pickAndUpload, isUploadPreviewModalVisible, setIsUploadPreviewModalVisible } = useRoomFileUpload(
     roomId || '',
     user?.id ? parseInt(user.id) : undefined
   );
@@ -299,6 +299,8 @@ const RoomDetailsScreen = () => {
       >
         <Feather name="upload" size={24} color={Colors.brightText} />
       </TouchableOpacity>
+      
+      
     </View>
   );
 };

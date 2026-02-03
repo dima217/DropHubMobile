@@ -67,10 +67,11 @@ export class MinioUploader extends AbstractUploader {
       if (onProgress) {
         xhr.upload.onprogress = (event) => {
           if (event.lengthComputable) {
+            const percentage = Math.min((event.loaded / event.total) * 100, 100);
             onProgress({
               loaded: event.loaded,
               total: event.total,
-              percentage: (event.loaded / event.total) * 100,
+              percentage,
             });
           }
         };

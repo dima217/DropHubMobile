@@ -17,7 +17,7 @@ export interface MediaFile {
 const MAX_FILE_MB = 100;
 
 export const useResourcePicker = () => {
-  const [media, setMedia] = useState<MediaFile | null>(null);
+  const [media, setMedia] = useState<MediaFile[]>([]);
 
   const showError = (title: string, message: string) => {
     Alert.alert(title, message);
@@ -25,8 +25,6 @@ export const useResourcePicker = () => {
 
   const validateSize = (bytes?: number) => {
     const sizeMB = (bytes ?? 0) / (1024 * 1024);
-    console.log("[validateSize] sizeMB:", sizeMB);
-
     if (sizeMB > MAX_FILE_MB) {
       showError(
         "Слишком большой файл",
@@ -45,7 +43,7 @@ export const useResourcePicker = () => {
 
     if (status !== "granted") {
       showError("Нет доступа", "Разреши доступ к галерее");
-      return;
+      return [];
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -53,39 +51,42 @@ export const useResourcePicker = () => {
         type === "image"
           ? ImagePicker.MediaTypeOptions.Images
           : type === "video"
-            ? ImagePicker.MediaTypeOptions.Videos
-            : ImagePicker.MediaTypeOptions.All,
+          ? ImagePicker.MediaTypeOptions.Videos
+          : ImagePicker.MediaTypeOptions.All,
       quality: 1,
+      allowsMultipleSelection: true, 
     });
 
-    if (result.canceled) return;
+    if (result.canceled) return [];
 
-    const asset = result.assets[0];
+    const pickedFiles: MediaFile[] = [];
 
-    if (!validateSize(asset.fileSize)) return;
+    for (const asset of result.assets) {
+      if (!validateSize(asset.fileSize)) continue;
 
-    let thumbnail: string | null = null;
+      let thumbnail: string | null = null;
 
-    if (asset.type === "video") {
-      try {
-        const res = await VideoThumbnails.getThumbnailAsync(asset.uri, {
-          time: 1000,
-        });
-        thumbnail = res.uri;
-      } catch (e) {
-        console.warn("[thumbnail] failed:", e);
+      if (asset.type === "video") {
+        try {
+          const res = await VideoThumbnails.getThumbnailAsync(asset.uri, {
+            time: 1000,
+          });
+          thumbnail = res.uri;
+        } catch (e) {
+          console.warn("[thumbnail] failed:", e);
+        }
       }
+
+      pickedFiles.push({
+        uri: asset.uri,
+        type: asset.type as MediaType,
+        size: asset.fileSize,
+        thumbnail,
+      });
     }
 
-    const picked: MediaFile = {
-      uri: asset.uri,
-      type: asset.type as MediaType,
-      size: asset.fileSize,
-      thumbnail,
-    };
-
-    setMedia(picked);
-    return picked;
+    setMedia((prev) => [...prev, ...pickedFiles]);
+    return pickedFiles;
   };
 
   /* ================= FILE / AUDIO ================= */
@@ -94,30 +95,31 @@ export const useResourcePicker = () => {
     const result = await DocumentPicker.getDocumentAsync({
       type: type === "audio" ? "audio/*" : "*/*",
       copyToCacheDirectory: true,
+      multiple: true, // <--- Включаем множественный выбор
     });
 
-    if (result.canceled) return;
+    if (result.canceled) return [];
 
-    const file = result.assets[0];
+    const pickedFiles: MediaFile[] = [];
 
-    if (!validateSize(file.size)) return;
+    for (const file of result.assets) {
+      if (!validateSize(file.size)) continue;
 
-    const picked: MediaFile = {
-      uri: file.uri,
-      type,
-      name: file.name,
-      size: file.size,
-    };
+      pickedFiles.push({
+        uri: file.uri,
+        type,
+        name: file.name,
+        size: file.size,
+      });
+    }
 
-    setMedia(picked);
-    return picked;
+    setMedia((prev) => [...prev, ...pickedFiles]);
+    return pickedFiles;
   };
 
   /* ================= PUBLIC API ================= */
 
   const pickResource = async (type?: MediaType) => {
-    console.log("[pickResource] type:", type);
-
     if (type === "image" || type === "video" || !type) {
       return pickMedia(type);
     }
@@ -125,21 +127,18 @@ export const useResourcePicker = () => {
     if (type === "file" || type === "audio") {
       return pickDocument(type);
     }
+
+    return [];
   };
 
   const clearMedia = () => {
-    setMedia(null);
+    setMedia([]);
   };
 
-  const labelByType = media
-    ? media.type === "image"
-      ? "Фото выбрано"
-      : media.type === "video"
-        ? "Видео выбрано"
-        : media.type === "audio"
-          ? "Аудио выбрано"
-          : "Файл выбран"
-    : "Добавить файл";
+  const labelByType =
+    media.length > 0
+      ? `${media.length} файл${media.length > 1 ? "ов" : ""} выбрано`
+      : "Добавить файл";
 
   return {
     media,
