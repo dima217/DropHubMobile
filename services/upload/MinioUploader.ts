@@ -1,5 +1,8 @@
-import * as FileSystem from "expo-file-system";
-import { AbstractUploader, DownloadProgress, UploadProgress } from "./AbstractUploader";
+import { downloadToDownloads } from "@/native/downloader";
+import * as FileSystem from "expo-file-system/legacy";
+import * as Sharing from "expo-sharing";
+import { NativeModules } from "react-native";
+import { AbstractUploader, UploadProgress } from "./AbstractUploader";
 
 export class MinioUploader extends AbstractUploader {
   async upload(uploadUrl: string, fileUri: string): Promise<string> {
@@ -19,39 +22,37 @@ export class MinioUploader extends AbstractUploader {
     return this.getDownloadUrl(uploadUrl);
   }
 
-  async download(
-    downloadUrl: string,
-    onProgress?: (progress: DownloadProgress) => void
-  ): Promise<string> {
-    const fileName = downloadUrl.split("/").pop() || `download_${Date.now()}`;
-    const fileUri = `${FileSystem.Directory}${fileName}`;
+  // ===========================
+  // НАДЁЖНЫЙ DOWNLOAD → SHARE
+  // ===========================
+  async download(downloadUrl: string): Promise<string> {
+    const fileName =
+      downloadUrl.split("/").pop() ?? `download_${Date.now()}`;
 
-    const downloadResumable = FileSystem.createDownloadResumable(
+    // sandbox приложения
+    const fileUri = FileSystem.documentDirectory + fileName;
+
+    const { uri } = await FileSystem.downloadAsync(
       downloadUrl,
-      fileUri,
-      {},
-      (downloadProgress) => {
-        const total = downloadProgress.totalBytesExpectedToWrite || 0;
-        const loaded = downloadProgress.totalBytesWritten || 0;
-        const percentage = total > 0 ? (loaded / total) * 100 : 0;
-
-        if (onProgress) {
-          onProgress({
-            loaded,
-            total,
-            percentage,
-          });
-        }
-      }
+      fileUri
     );
 
-    const result = await downloadResumable.downloadAsync();
-    
-    if (!result) {
-      throw new Error("Download failed: no result");
+    // Диагностика: проверяем доступность нативного модуля
+    console.log("NativeModules:", Object.keys(NativeModules));
+    console.log("NativeModules.Downloader:", NativeModules.Downloader);
+    if (NativeModules.Downloader) {
+      console.log("Downloader module methods:", Object.keys(NativeModules.Downloader));
+    } else {
+      console.warn("Downloader module is not available. Make sure to rebuild the app.");
     }
 
-    return result.uri;
+    await downloadToDownloads(downloadUrl, fileName);
+
+    if (await Sharing.isAvailableAsync()) {
+      await Sharing.shareAsync(uri);
+    }
+
+    return uri;
   }
 
   private uploadWithXhr(
@@ -65,17 +66,16 @@ export class MinioUploader extends AbstractUploader {
       xhr.open("PUT", uploadUrl, true);
       xhr.setRequestHeader(
         "Content-Type",
-        blob.type || "image/jpeg"
+        blob.type || "application/octet-stream"
       );
 
       if (onProgress) {
         xhr.upload.onprogress = (event) => {
           if (event.lengthComputable) {
-            const percentage = (event.loaded / event.total) * 100;
             onProgress({
               loaded: event.loaded,
               total: event.total,
-              percentage,
+              percentage: (event.loaded / event.total) * 100,
             });
           }
         };
