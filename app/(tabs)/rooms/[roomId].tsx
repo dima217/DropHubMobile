@@ -5,6 +5,7 @@ import { useRoomFilesUpdate } from "@/hooks/data/useRoomFilesUpdate";
 import { secureStore } from "@/services/secureStore";
 import { createUploader, UploadProvider } from "@/services/upload/UploaderFactory";
 import Header from "@/shared/Header";
+import UploadPreviewModal from "@/shared/Modals/UploadPreviewModal";
 import SearchInput from "@/shared/SearchInput";
 import MultiSelectBar from "@/shared/ui/MultiSelectBar";
 import View from "@/shared/View";
@@ -41,7 +42,7 @@ const RoomDetailsScreen = () => {
     secureStore.getAccessToken().then(setAccessToken);
   }, []);
 
-  const { uploadingFiles, pickAndUpload, isUploadPreviewModalVisible, setIsUploadPreviewModalVisible } = useRoomFileUpload(
+  const { uploadingFiles, pickFiles, uploadFiles, isUploadPreviewModalVisible, setIsUploadPreviewModalVisible, clearUploads } = useRoomFileUpload(
     roomId || '',
     user?.id ? parseInt(user.id) : undefined
   );
@@ -146,7 +147,7 @@ const RoomDetailsScreen = () => {
     const query = searchQuery.toLowerCase();
   
     return allResources.filter((item) =>
-      item.file?.originalName?.toLowerCase().includes(query)
+      item.file?.storedName?.toLowerCase().includes(query)
     );
   }, [roomDetails, uploadingFiles, user, searchQuery]);
   
@@ -209,7 +210,7 @@ const RoomDetailsScreen = () => {
   if (!hasFiles) {
     return (
       <RoomPlaceholder 
-        onAddFiles={pickAndUpload}
+        onAddFiles={pickFiles}
       />
     );
   }
@@ -294,13 +295,21 @@ const RoomDetailsScreen = () => {
       />
       <TouchableOpacity
         style={[styles.uploadButton, { bottom: insets.bottom + 16 }]}
-        onPress={pickAndUpload}
+        onPress={pickFiles}
         activeOpacity={0.8}
       >
         <Feather name="upload" size={24} color={Colors.brightText} />
       </TouchableOpacity>
       
-      
+      <UploadPreviewModal
+        visible={isUploadPreviewModalVisible}
+        files={uploadingFiles}
+        onClose={() => {
+          clearUploads();
+          setIsUploadPreviewModalVisible(false);
+        }}
+        onUpload={uploadFiles}
+      />
     </View>
   );
 };

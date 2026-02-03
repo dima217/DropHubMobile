@@ -117,7 +117,7 @@ const FileCard: React.FC<FileCardProps> = ({
           </View>
           <View style={styles.infoContainer}>
             <ThemedText style={styles.fileName} numberOfLines={1}>
-              {file.originalName}
+              {file.storedName}
             </ThemedText>
             <ThemedText style={styles.fileMeta}>
               {formatFileSize(file.size)} • {file.downloadCount || 0} downloads
