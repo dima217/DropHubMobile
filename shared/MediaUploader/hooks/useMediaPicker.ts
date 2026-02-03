@@ -1,163 +1,149 @@
+import * as DocumentPicker from "expo-document-picker";
 import * as ImagePicker from "expo-image-picker";
 import * as VideoThumbnails from "expo-video-thumbnails";
 import { useState } from "react";
 import { Alert } from "react-native";
 
-export type MediaType = "image" | "video";
+export type MediaType = "image" | "video" | "file" | "audio";
 
 export interface MediaFile {
   uri: string;
   type: MediaType;
+  name?: string;
+  size?: number;
   thumbnail?: string | null;
 }
 
 const MAX_FILE_MB = 100;
 
-export const useMediaPicker = () => {
+export const useResourcePicker = () => {
   const [media, setMedia] = useState<MediaFile | null>(null);
 
   const showError = (title: string, message: string) => {
     Alert.alert(title, message);
   };
 
-  const validateFile = (asset: ImagePicker.ImagePickerAsset) => {
-    const sizeMB = (asset.fileSize ?? 0) / (1024 * 1024);
-    console.log("[validateFile] sizeMB:", sizeMB);
+  const validateSize = (bytes?: number) => {
+    const sizeMB = (bytes ?? 0) / (1024 * 1024);
+    console.log("[validateSize] sizeMB:", sizeMB);
+
     if (sizeMB > MAX_FILE_MB) {
       showError(
         "Слишком большой файл",
-        `Максимальный размер — ${MAX_FILE_MB}MB.`
+        `Максимальный размер — ${MAX_FILE_MB}MB`
       );
       return false;
     }
     return true;
   };
 
-  const requestPermissions = async () => {
-    try {
-      console.log("[requestPermissions] Requesting permissions...");
-      const { status } =
-        await ImagePicker.requestMediaLibraryPermissionsAsync();
-      console.log("[requestPermissions] Permissions status:", status);
-      if (status !== "granted") {
-        showError(
-          "No permission",
-          "Please allow access to your media library."
-        );
-        return false;
-      }
-      return true;
-    } catch (e) {
-      console.error("[requestPermissions] Failed to request permissions:", e);
-      showError("Error", "Failed to request permissions.");
-      return false;
-    }
-  };
+  /* ================= IMAGE / VIDEO ================= */
 
-  const getVideoThumbnail = async (uri: string): Promise<string | null> => {
-    try {
-      console.log("[getVideoThumbnail] Creating thumbnail for video:", uri);
-      const { uri: thumbnail } = await VideoThumbnails.getThumbnailAsync(uri, {
-        time: 1000,
-      });
-      console.log("[getVideoThumbnail] Thumbnail created:", thumbnail);
-      return thumbnail;
-    } catch (e) {
-      console.warn("[getVideoThumbnail] Failed to create video thumbnail:", e);
-      return null;
-    }
-  };
+  const pickMedia = async (type?: "image" | "video") => {
+    const { status } =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
 
-  const pickMedia = async (allowedType?: MediaType) => {
-    console.log("[pickMedia] Start picking media...");
-    const granted = await requestPermissions();
-    if (!granted) {
-      console.log("[pickMedia] Permissions not granted, aborting");
+    if (status !== "granted") {
+      showError("Нет доступа", "Разреши доступ к галерее");
       return;
     }
 
-    try {
-      console.log("[pickMedia] Opening media library...");
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes:
+        type === "image"
+          ? ImagePicker.MediaTypeOptions.Images
+          : type === "video"
+            ? ImagePicker.MediaTypeOptions.Videos
+            : ImagePicker.MediaTypeOptions.All,
+      quality: 1,
+    });
 
-      const mediaTypes =
-        allowedType === "image"
-          ? ["images"]
-          : allowedType === "video"
-            ? ["videos"]
-            : ["images", "videos"];
+    if (result.canceled) return;
 
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: mediaTypes as any,
-        quality: 1,
-      });
+    const asset = result.assets[0];
 
-      console.log("[pickMedia] Media picker result:", result);
+    if (!validateSize(asset.fileSize)) return;
 
-      if (result.canceled) {
-        console.log("[pickMedia] User canceled media picking");
-        return;
+    let thumbnail: string | null = null;
+
+    if (asset.type === "video") {
+      try {
+        const res = await VideoThumbnails.getThumbnailAsync(asset.uri, {
+          time: 1000,
+        });
+        thumbnail = res.uri;
+      } catch (e) {
+        console.warn("[thumbnail] failed:", e);
       }
+    }
 
-      const asset = result.assets[0];
-      console.log("[pickMedia] Picked asset:", asset);
+    const picked: MediaFile = {
+      uri: asset.uri,
+      type: asset.type as MediaType,
+      size: asset.fileSize,
+      thumbnail,
+    };
 
-      if (allowedType && asset.type !== allowedType) {
-        console.log(
-          "[pickMedia] Picked media type does not match expected type"
-        );
-        showError(
-          "Invalid media type",
-          `Expected ${allowedType === "image" ? "image" : "video"}, but got ${
-            asset.type === "image" ? "image" : "video"
-          }.`
-        );
-        return;
-      }
+    setMedia(picked);
+    return picked;
+  };
 
-      if (!validateFile(asset)) {
-        console.log("[pickMedia] File did not pass validation");
-        return;
-      }
+  /* ================= FILE / AUDIO ================= */
 
-      let thumbnail: string | null = null;
-      if (asset.type === "video") {
-        thumbnail = await getVideoThumbnail(asset.uri);
-      }
+  const pickDocument = async (type: "file" | "audio") => {
+    const result = await DocumentPicker.getDocumentAsync({
+      type: type === "audio" ? "audio/*" : "*/*",
+      copyToCacheDirectory: true,
+    });
 
-      console.log("[pickMedia] Saving media to state:", {
-        uri: asset.uri,
-        type: asset.type,
-        thumbnail,
-      });
+    if (result.canceled) return;
 
-      const picked = {
-        uri: asset.uri,
-        type: asset.type as MediaType,
-        thumbnail,
-      };
+    const file = result.assets[0];
 
-      setMedia(picked);
-      return picked;
-    } catch (e) {
-      console.error("[pickMedia] Error while picking media:", e);
-      showError("Error", "Failed to open media library");
+    if (!validateSize(file.size)) return;
+
+    const picked: MediaFile = {
+      uri: file.uri,
+      type,
+      name: file.name,
+      size: file.size,
+    };
+
+    setMedia(picked);
+    return picked;
+  };
+
+  /* ================= PUBLIC API ================= */
+
+  const pickResource = async (type?: MediaType) => {
+    console.log("[pickResource] type:", type);
+
+    if (type === "image" || type === "video" || !type) {
+      return pickMedia(type);
+    }
+
+    if (type === "file" || type === "audio") {
+      return pickDocument(type);
     }
   };
 
   const clearMedia = () => {
-    console.log("[clearMedia] Clearing media");
     setMedia(null);
   };
 
   const labelByType = media
     ? media.type === "image"
-      ? "Photo uploaded"
-      : "Video uploaded"
-    : "Add media";
+      ? "Фото выбрано"
+      : media.type === "video"
+        ? "Видео выбрано"
+        : media.type === "audio"
+          ? "Аудио выбрано"
+          : "Файл выбран"
+    : "Добавить файл";
 
   return {
     media,
-    pickMedia,
+    pickResource,
     clearMedia,
     labelByType,
   };

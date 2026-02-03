@@ -170,7 +170,7 @@ const styles = StyleSheet.create({
     color: Colors.brightText,
   },
   listContent: {
-    padding: 16,
+    paddingVertical: 16,
   },
 });
 

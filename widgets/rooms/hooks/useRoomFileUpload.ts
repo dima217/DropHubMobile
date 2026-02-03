@@ -2,7 +2,7 @@ import { useUploadRoomConfirmMutation, useUploadRoomFileMutation } from '@/api';
 import { FileItem, FileUploadStatus } from '@/api/types/file';
 import { UploadProgress } from '@/services/upload/AbstractUploader';
 import { createUploader, UploadProvider } from '@/services/upload/UploaderFactory';
-import { useMediaPicker } from '@/shared/MediaUploader/hooks/useMediaPicker';
+import { useResourcePicker } from '@/shared/MediaUploader/hooks/useMediaPicker';
 import { useCallback, useState } from 'react';
 
 export interface UploadingFile {
@@ -19,7 +19,7 @@ export interface UploadingFile {
 export const useRoomFileUpload = (roomId: string, currentUserId?: number) => {
   const [uploadRoomFile] = useUploadRoomFileMutation();
   const [uploadRoomConfirm] = useUploadRoomConfirmMutation();
-  const { pickMedia } = useMediaPicker();
+  const { pickResource } = useResourcePicker();
   const [uploadingFiles, setUploadingFiles] = useState<Map<string, UploadingFile>>(new Map());
 
   const uploadFile = useCallback(async (fileUri: string, fileName: string, fileSize: number, mimeType: string) => {
@@ -145,7 +145,7 @@ export const useRoomFileUpload = (roomId: string, currentUserId?: number) => {
   }, [roomId, currentUserId, uploadRoomFile, uploadRoomConfirm]);
 
   const pickAndUpload = useCallback(async () => {
-    const media = await pickMedia();
+    const media = await pickResource("file");
     if (!media) return;
 
     const fileInfo = await fetch(media.uri).then(res => {
@@ -164,7 +164,7 @@ export const useRoomFileUpload = (roomId: string, currentUserId?: number) => {
     fileInfo.fileSize = blob.size;
 
     await uploadFile(fileInfo.uri, fileInfo.fileName, fileInfo.fileSize, fileInfo.mimeType);
-  }, [pickMedia, uploadFile]);
+  }, [pickResource, uploadFile]);
 
   return {
     uploadingFiles: Array.from(uploadingFiles.values()),

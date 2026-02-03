@@ -41,14 +41,10 @@ export const useWebSocket = (url: string, token: string) => {
     };
   }, [url, token]);
 
-  const emit = useCallback(
-    (event: string, data?: any) => {
-      if (socketRef.current && isConnected) {
-        socketRef.current.emit(event, data);
-      }
-    },
-    [isConnected]
-  );
+  const emit = useCallback((event: string, data?: any) => {
+    socketRef.current?.emit(event, data);
+  }, []);
+  
 
   const on = useCallback(
     (event: string, callback: (...args: any[]) => void) => {

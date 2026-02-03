@@ -1,7 +1,7 @@
 import { Colors } from "@/constants/design-tokens";
 import React from "react";
 import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
-import { useMediaPicker } from "../../hooks/useMediaPicker";
+import { useResourcePicker } from "../../hooks/useMediaPicker";
 import { getImageSource } from "../../utils";
 
 interface MediaUploaderProps {
@@ -17,10 +17,10 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
   onChange,
   defaultImages,
 }) => {
-  const { pickMedia } = useMediaPicker();
+  const { pickResource } = useResourcePicker();
 
   const handlePick = async () => {
-    const picked = await pickMedia(type);
+    const picked = await pickResource(type);
     if (onChange && picked) {
       onChange(picked.uri);
     }

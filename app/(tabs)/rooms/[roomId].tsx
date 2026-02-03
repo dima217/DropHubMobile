@@ -5,6 +5,7 @@ import { useRoomFilesUpdate } from "@/hooks/data/useRoomFilesUpdate";
 import { secureStore } from "@/services/secureStore";
 import { createUploader, UploadProvider } from "@/services/upload/UploaderFactory";
 import Header from "@/shared/Header";
+import SearchInput from "@/shared/SearchInput";
 import MultiSelectBar from "@/shared/ui/MultiSelectBar";
 import View from "@/shared/View";
 import { RootState } from "@/store/store";
@@ -15,7 +16,7 @@ import { FileMenuManager } from "@/widgets/rooms/menu/fileMenu";
 import { folderMenuItems } from "@/widgets/rooms/menu/folderMenu";
 import { createMultiSelectMenuItems } from "@/widgets/rooms/menu/multiSelectorMenu";
 import { Feather } from "@expo/vector-icons";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useMemo, useState } from "react";
 import { ActivityIndicator, Alert, StyleSheet, TouchableOpacity } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -24,10 +25,12 @@ import RoomPlaceholder from "./room-placeholder";
 
 const RoomDetailsScreen = () => {
   const { roomId } = useLocalSearchParams<{ roomId: string }>();
+  const router = useRouter();
   const user = useSelector((state: RootState) => state.auth.user);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
   const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const insets = useSafeAreaInsets();
   
   const { data: roomDetails, isLoading, refetch } = useGetRoomDetailsQuery(roomId || "", {
@@ -116,8 +119,17 @@ const RoomDetailsScreen = () => {
   );
 
   const resources: ResourceItem[] = useMemo(() => {
-    return combineRoomResources(uploadingFiles, roomDetails, user);
-  }, [roomDetails, uploadingFiles, user]);
+    const allResources = combineRoomResources(uploadingFiles, roomDetails, user);
+  
+    if (!searchQuery.trim()) return allResources;
+  
+    const query = searchQuery.toLowerCase();
+  
+    return allResources.filter((item) =>
+      item.file?.originalName?.toLowerCase().includes(query)
+    );
+  }, [roomDetails, uploadingFiles, user, searchQuery]);
+  
 
   const handleFileLongPress = useCallback((fileId: string) => {
     const newSelected = new Set(selectedIds);
@@ -149,6 +161,12 @@ const RoomDetailsScreen = () => {
     }
   }, [selectedIds, isMultiSelectMode]);
 
+  const handleNavigateToChat = useCallback(() => {
+    if (roomId) {
+      router.push(`/(tabs)/rooms/${roomId}/chat`);
+    }
+  }, [roomId, router]);
+
   if (isLoading) {
     return (
       <View style={styles.container}>
@@ -178,13 +196,29 @@ const RoomDetailsScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Header title={roomDetails.owner || "Room Details"} />
-      {isMultiSelectMode && (
+      {isMultiSelectMode ? (
         <MultiSelectBar
           selectedCount={selectedIds.size}
           menuItems={multiSelectMenuItems}
         />
+      ) : (
+        <Header
+          title="Room Details"
+          rightAction={
+            <TouchableOpacity
+              onPress={handleNavigateToChat}
+              style={styles.chatButton}
+              activeOpacity={0.7}
+            >
+              <Feather name="message-circle" size={22} color={Colors.primary} />
+            </TouchableOpacity>
+          }
+        />
       )}
+      <SearchInput
+        value={searchQuery}
+        onChange={setSearchQuery}
+      />
       <ResourcesSection
         resources={resources}
         showAuthorship={true}
@@ -252,7 +286,6 @@ const RoomDetailsScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    gap: 16,
   },
   loader: {
     marginTop: 50,
@@ -274,6 +307,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
+  },
+  chatButton: {
+    padding: 4,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 

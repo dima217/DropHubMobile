@@ -1,6 +1,6 @@
 import D from "@/assets/images/D.svg";
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import ExitConfirmationModal from "../Modals/ExitConfirmationModal";
 import { ThemedText } from "../core/ThemedText";
@@ -9,9 +9,10 @@ type HeaderProps = {
   title?: string;
   confirmOnExit?: boolean;
   onBackPress?: () => void;
+  rightAction?: ReactNode;
 };
 
-const Header = ({ title, confirmOnExit = false, onBackPress }: HeaderProps) => {
+const Header = ({ title, confirmOnExit = false, onBackPress, rightAction }: HeaderProps) => {
   const router = useRouter();
   const [isModalVisible, setIsModalVisible] = useState(false);
 
@@ -57,9 +58,11 @@ const Header = ({ title, confirmOnExit = false, onBackPress }: HeaderProps) => {
         </ThemedText>
       )}
 
-      <Pressable onPress={() => {}}>
-        <D width={22} height={22} />
-      </Pressable>
+      {rightAction || (
+        <Pressable onPress={() => {}}>
+          <D width={22} height={22} />
+        </Pressable>
+      )}
 
       {confirmOnExit && (
         <ExitConfirmationModal
