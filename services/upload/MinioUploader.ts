@@ -1,7 +1,6 @@
 import { downloadToDownloads } from "@/native/downloader";
 import * as FileSystem from "expo-file-system/legacy";
 import * as Sharing from "expo-sharing";
-import { NativeModules } from "react-native";
 import { AbstractUploader, UploadProgress } from "./AbstractUploader";
 
 export class MinioUploader extends AbstractUploader {
@@ -22,14 +21,23 @@ export class MinioUploader extends AbstractUploader {
     return this.getDownloadUrl(uploadUrl);
   }
 
-  // ===========================
-  // НАДЁЖНЫЙ DOWNLOAD → SHARE
-  // ===========================
   async download(downloadUrl: string): Promise<string> {
-    const fileName =
-      downloadUrl.split("/").pop() ?? `download_${Date.now()}`;
+    const fileName = (() => {
+      const lastPart = downloadUrl.split("/").pop() ?? `download_${Date.now()}`;
+      return lastPart.split("?")[0];
+    })();
 
-    // sandbox приложения
+    console.log('downloading file', downloadUrl, fileName);
+    await downloadToDownloads(downloadUrl, fileName);
+    return fileName;
+  }
+
+  async share(downloadUrl: string): Promise<void> {
+    const fileName = (() => {
+      const lastPart = downloadUrl.split("/").pop() ?? `download_${Date.now()}`;
+      return lastPart.split("?")[0];
+    })();
+
     const fileUri = FileSystem.documentDirectory + fileName;
 
     const { uri } = await FileSystem.downloadAsync(
@@ -37,22 +45,9 @@ export class MinioUploader extends AbstractUploader {
       fileUri
     );
 
-    // Диагностика: проверяем доступность нативного модуля
-    console.log("NativeModules:", Object.keys(NativeModules));
-    console.log("NativeModules.Downloader:", NativeModules.Downloader);
-    if (NativeModules.Downloader) {
-      console.log("Downloader module methods:", Object.keys(NativeModules.Downloader));
-    } else {
-      console.warn("Downloader module is not available. Make sure to rebuild the app.");
-    }
-
-    await downloadToDownloads(downloadUrl, fileName);
-
     if (await Sharing.isAvailableAsync()) {
       await Sharing.shareAsync(uri);
     }
-
-    return uri;
   }
 
   private uploadWithXhr(

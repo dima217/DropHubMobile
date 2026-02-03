@@ -88,6 +88,26 @@ const RoomDetailsScreen = () => {
     }
   }, [downloadRoomFiles, roomId]);
 
+  const handleShareFiles = useCallback(async (fileIds: string[]) => {
+    if (!roomId) return;
+    
+    const downloadResponse = await downloadRoomFiles({ fileIds, roomId }).unwrap();
+
+      const downloadData: { fileId: string; url: string }[] = downloadResponse.map((response) => ({
+        fileId: response.fileId,
+        url: response.url,
+      }));
+    try {
+      const uploader = createUploader(UploadProvider.MINIO);
+      for (const item of downloadData) {
+        await uploader.share(item.url);
+      }
+    } catch (shareError) {
+      console.error('Share error:', shareError);
+      Alert.alert('Error', 'Failed to share files');
+    }
+  }, [downloadRoomFiles, roomId]);
+
   const handleDeleteFiles = useCallback(async (fileIds: string[]) => {
     if (!roomId) return;
     
@@ -102,7 +122,7 @@ const RoomDetailsScreen = () => {
   }, [roomId, deleteRoomFiles, refetch]);
 
 
-  const fileMenuManager = useMemo(() => new FileMenuManager(handleDownloadFiles, handleDeleteFiles), [handleDownloadFiles, handleDeleteFiles]);
+  const fileMenuManager = useMemo(() => new FileMenuManager(handleDownloadFiles, handleDeleteFiles, handleShareFiles), [handleDownloadFiles, handleDeleteFiles, handleShareFiles]);
 
   const multiSelectMenuItems = useMemo(
     () =>

@@ -2,14 +2,13 @@ import { NativeModules, Platform } from "react-native";
 
 const { Downloader } = NativeModules;
 
-// Проверка доступности модуля
 if (Platform.OS === "android" && !Downloader) {
   console.warn(
     "Downloader native module is not available. Make sure you have rebuilt the app after adding the native module."
   );
 }
 
-export function downloadToDownloads(
+export async function downloadToDownloads(
   url: string,
   fileName?: string
 ): Promise<boolean> {
@@ -33,5 +32,8 @@ export function downloadToDownloads(
   const name =
     fileName ?? url.split("/").pop() ?? `file_${Date.now()}`;
 
-  return Downloader.download(url, name);
+  const result: boolean = await Downloader.download(url, name);
+  console.log("Native result:", result);
+
+  return result;
 }
