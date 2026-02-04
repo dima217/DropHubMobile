@@ -3,7 +3,7 @@ import { ThemedText } from "@/shared/core/ThemedText";
 import View from "@/shared/View";
 import React, { forwardRef } from "react";
 import { FlatList, ListRenderItem, StyleSheet } from "react-native";
-import MessageBubble, { MessageBubbleProps } from "../MessageBubble";
+import MessageBubble from "../MessageBubble";
 
 export interface Message {
   id: string;

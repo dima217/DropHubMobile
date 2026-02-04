@@ -1,4 +1,4 @@
-import { useGetChatMessagesQuery } from "@/api/chatApi";
+import { chatApi, useGetChatMessagesQuery } from "@/api/chatApi";
 import { ChatMessage as ApiChatMessage } from "@/api/types/chat";
 import { Colors } from "@/constants/design-tokens";
 import { useRoomChat, ChatMessage as WSChatMessage } from "@/hooks/data/useMessage";
@@ -11,13 +11,13 @@ import MessageList, { Message } from "@/widgets/rooms/components/Chat/MessageLis
 import { useLocalSearchParams } from "expo-router";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-    ActivityIndicator,
-    FlatList,
-    KeyboardAvoidingView,
-    Platform,
-    StyleSheet,
+  ActivityIndicator,
+  FlatList,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
 } from "react-native";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 type UnifiedChatMessage = ApiChatMessage & { roomId?: string };
 
@@ -35,6 +35,8 @@ const RoomChatScreen = () => {
   const [messageText, setMessageText] = useState("");
   const [messages, setMessages] = useState<UnifiedChatMessage[]>([]);
   const flatListRef = useRef<FlatList>(null);
+  const dispatch = useDispatch();
+
 
   const { data: initialMessages, isLoading } = useGetChatMessagesQuery(
     { roomId: roomId || "" },
@@ -83,10 +85,15 @@ const RoomChatScreen = () => {
       };
       return [...prev, unifiedMessage];
     });
+    dispatch(
+      chatApi.util.invalidateTags([
+        { type: "ChatMessages", id: message.roomId },
+      ])
+    );
     setTimeout(() => {
       flatListRef.current?.scrollToEnd({ animated: true });
     }, 100);
-  }, []);
+  }, [dispatch]);
 
   const handleMessageUpdated = useCallback((message: WSChatMessage) => {
     setMessages((prev) =>
@@ -142,7 +149,7 @@ const RoomChatScreen = () => {
 
   const isMyMessage = useCallback(
     (message: Message) => {
-      return message.author.id === user?.id;
+      return message.author.email === user?.email;
     },
     [user]
   );
@@ -164,8 +171,7 @@ const RoomChatScreen = () => {
     <View style={styles.container}>
       <Header title="Chat" />
       <KeyboardAvoidingView
-        style={styles.keyboardView}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        behavior={Platform.OS === "ios" ? "padding" : 'height'}
         keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
       >
         <MessageList
@@ -188,10 +194,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background,
-  },
-  keyboardView: {
-    flex: 1,
-    paddingBottom: 16,
+    paddingBottom: 120,
   },
   loader: {
     marginTop: 50,
