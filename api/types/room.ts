@@ -101,3 +101,13 @@ export interface DeleteRoomResponse {
     success: boolean;
     message: string;
 }
+
+export interface UpdateRoomRequest {
+    roomId: string;
+    owner: string;
+}
+
+export interface UpdateRoomResponse {
+    success: boolean;
+    roomId: string;
+}

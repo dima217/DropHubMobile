@@ -1,6 +1,6 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { baseQueryWithRefresh } from "./baseApi";
-import { DeleteRoomFilesRequest, DeleteRoomFilesResponse, DownloadRoomFilesRequest, DownloadRoomFilesResponse, RoomUploadConfirmRequest, RoomUploadConfirmResponse, RoomUploadInitRequest, RoomUploadInitResponse } from "./types/file";
+import { DeleteRoomFilesRequest, DeleteRoomFilesResponse, DownloadRoomFilesRequest, DownloadRoomFilesResponse, RoomUploadConfirmRequest, RoomUploadConfirmResponse, RoomUploadInitRequest, RoomUploadInitResponse, UpdateRoomFileRequest, UpdateRoomFileResponse } from "./types/file";
 
 export const fileApi = createApi({
     reducerPath: "fileApi",
@@ -34,6 +34,13 @@ export const fileApi = createApi({
                 body,
             }),
         }),
+        updateRoomFile: build.mutation<UpdateRoomFileResponse, UpdateRoomFileRequest>({
+            query: (body) => ({
+                url: `/file/update`,
+                method: "POST",
+                body,
+            }),
+        }),
     }),
 });
 
@@ -42,4 +49,5 @@ export const {
     useUploadRoomConfirmMutation,
     useLazyDownloadRoomFilesQuery,
     useDeleteRoomFilesMutation,
+    useUpdateRoomFileMutation,
 } = fileApi;

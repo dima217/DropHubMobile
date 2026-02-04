@@ -4,8 +4,8 @@ export class FileMenuManager {
     onDownload?: (ids: string[]) => void;
     onDelete?: (ids: string[]) => void;
     onShare?: (ids: string[]) => void;
-    onEdit?: (ids: string[]) => void;
-    constructor(onDownload?: (ids: string[]) => void, onDelete?: (ids: string[]) => void, onShare?: (ids: string[]) => void, onEdit?: (ids: string[]) => void) {
+    onEdit?: () => void;
+    constructor(onDownload?: (ids: string[]) => void, onDelete?: (ids: string[]) => void, onShare?: (ids: string[]) => void, onEdit?: () => void) {
       this.onDownload = onDownload;
       this.onDelete = onDelete;
       this.onShare = onShare;
@@ -30,7 +30,7 @@ export class FileMenuManager {
           id: 'edit',
           icon: 'edit',
           label: 'Edit',
-          onPress: () => this.onEdit?.([fileId])
+          onPress: () => this.onEdit?.()
         },
         {
           id: 'delete',

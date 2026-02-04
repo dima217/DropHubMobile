@@ -72,3 +72,14 @@ export interface DeleteRoomFilesRequest {
 export interface DeleteRoomFilesResponse {
     success: boolean;
 }
+
+export interface UpdateRoomFileRequest {
+    fileId: string;
+    roomId: string;
+    storedName: string;
+}
+
+export interface UpdateRoomFileResponse {
+    success: boolean;
+    roomId: string;
+}

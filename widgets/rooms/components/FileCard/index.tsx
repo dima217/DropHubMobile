@@ -86,7 +86,7 @@ const FileCard: React.FC<FileCardProps> = ({
     if (file.mimeType?.includes('zip') || file.mimeType?.includes('rar')) return 'archive';
     return 'file';
   };
-
+  
   const progress = uploadProgress !== undefined ? uploadProgress : downloadProgress;
 
   return (
