@@ -77,6 +77,7 @@ const Rooms = () => {
         <FlatList
           data={rooms || []}
           keyExtractor={(item) => item.id}
+          showsVerticalScrollIndicator={false}
           renderItem={({ item }) => (
             <RoomCard
               room={item}

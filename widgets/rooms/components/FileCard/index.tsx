@@ -125,7 +125,7 @@ const FileCard: React.FC<FileCardProps> = ({
           </View>
           {menuItems && (
           <>
-            {menuItems && <ActionMenu items={menuItems.getMenuItems(file._id)} />}
+            {menuItems && <ActionMenu items={menuItems.getMenuItems(file._id, file.storedName)} />}
           </>
           )}
         </View>

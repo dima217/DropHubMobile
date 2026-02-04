@@ -3,35 +3,35 @@ import { ThemedText } from "@/shared/core/ThemedText";
 import TextInput from "@/shared/TextInput";
 import React, { useEffect, useState } from "react";
 import {
-  Modal,
-  StyleSheet,
-  TouchableOpacity,
-  View
+    Modal,
+    StyleSheet,
+    TouchableOpacity,
+    View
 } from "react-native";
 
-type UpdateFileModalProps = {
+type UpdateRoomModalProps = {
   visible: boolean;
-  fileId: string;
-  storedName: string;
+  roomId: string;
+  owner: string;
   onClose: () => void;
-  onUpdate: (fileId: string, storedName: string) => void;
+  onUpdate: (roomId: string, owner: string) => void;
 };
 
-const UpdateFileModal: React.FC<UpdateFileModalProps> = ({
+const UpdateRoomModal: React.FC<UpdateRoomModalProps> = ({
   visible,
-  fileId,
-  storedName,
+  roomId,
+  owner,
   onClose,
   onUpdate,
 }) => {
-  const [singleFileName, setSingleFileName] = useState(storedName);
+  const [singleOwner, setSingleOwner] = useState(owner);
 
   useEffect(() => {
-    setSingleFileName(storedName);
-  }, [storedName, visible]);
+    setSingleOwner(owner);
+  }, [owner, visible]);
 
-  const handleUpload = () => {
-    onUpdate(fileId, singleFileName.trim());
+  const handleUpdate = () => {
+    onUpdate(roomId, singleOwner.trim());
     onClose();
   };
 
@@ -39,15 +39,15 @@ const UpdateFileModal: React.FC<UpdateFileModalProps> = ({
     <Modal visible={visible} animationType="slide" transparent>
       <View style={styles.overlay}>
         <View style={styles.container}>
-          <ThemedText style={styles.title}>Update File</ThemedText>
+          <ThemedText style={styles.title}>Update Room</ThemedText>
 
           <View style={styles.singleFileContainer}>
-              <ThemedText style={styles.label}>File Name:</ThemedText>
+              <ThemedText style={styles.label}>Owner:</ThemedText>
               <TextInput
-                value={singleFileName}
-                onChangeText={setSingleFileName}
+                value={singleOwner}
+                onChangeText={setSingleOwner}
                 style={styles.input}
-                placeholder="Enter file name"
+                placeholder="Enter owner"
               />
             </View>
 
@@ -55,8 +55,8 @@ const UpdateFileModal: React.FC<UpdateFileModalProps> = ({
             <TouchableOpacity style={styles.buttonCancel} onPress={onClose}>
               <ThemedText style={styles.buttonText}>Cancel</ThemedText>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.buttonUpload} onPress={handleUpload}>
-              <ThemedText style={styles.buttonText}>Update</ThemedText>
+            <TouchableOpacity style={styles.buttonUpdate} onPress={handleUpdate}>
+              <ThemedText style={styles.buttonText}>Update Room</ThemedText>
             </TouchableOpacity>
           </View>
         </View>
@@ -83,25 +83,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     marginBottom: 16,
   },
-  fileList: {
-    marginBottom: 16,
-  },
-  fileRow: {
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  fileName: {
-    fontSize: 14,
-    flex: 1,
-  },
-  fileSize: {
-    fontSize: 12,
-    color: Colors.secondary,
-    marginLeft: 8,
-  },
   singleFileContainer: {
     marginBottom: 16,
   },
@@ -116,11 +97,6 @@ const styles = StyleSheet.create({
     padding: 8,
     fontSize: 14,
   },
-  fileSizeSingle: {
-    fontSize: 12,
-    color: Colors.secondary,
-    marginTop: 4,
-  },
   buttonsRow: {
     flexDirection: "row",
     justifyContent: "flex-end",
@@ -132,7 +108,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.border,
     borderRadius: 30,
   },
-  buttonUpload: {
+  buttonUpdate: {
     paddingHorizontal: 16,
     paddingVertical: 10,
     backgroundColor: Colors.primary,
@@ -144,4 +120,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default UpdateFileModal;
+export default UpdateRoomModal;

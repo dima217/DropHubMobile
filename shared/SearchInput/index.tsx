@@ -5,12 +5,13 @@ import React from "react";
 interface SearchInputProps {
   value: string;
   onChange: (text: string) => void;
+  placeholder?: string;
 }
 
-const SearchInput = ({ value, onChange }: SearchInputProps) => {
+const SearchInput = ({ value, onChange, placeholder = "Search connections" }: SearchInputProps) => {
   return (
     <TextInput
-      placeholder="Search connections"
+      placeholder={placeholder}
       value={value}
       onChangeText={onChange}
       autoCapitalize="none"

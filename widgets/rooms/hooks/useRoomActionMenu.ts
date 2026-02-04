@@ -1,4 +1,4 @@
-import { useAddUsersToRoomMutation, useDeleteRoomMutation, useRemoveUsersFromRoomMutation } from "@/api/roomApi";
+import { useAddUsersToRoomMutation, useDeleteRoomMutation, useRemoveUsersFromRoomMutation, useUpdateRoomMutation } from "@/api/roomApi";
 import { AccessRole, RoomItem } from "@/api/types/room";
 import { ActionMenuItemData } from "@/shared/ui/ActionMenu/ActionMenuItem";
 import { useState } from "react";
@@ -12,9 +12,12 @@ export const useRoomActionMenu = ({ room, onRefresh }: UseRoomActionMenuProps) =
   const [deleteRoom, { isLoading: isDeleting }] = useDeleteRoomMutation();
   const [removeUsers, { isLoading: isRemovingUsers }] = useRemoveUsersFromRoomMutation();
   const [addUsers, { isLoading: isAddingUsers }] = useAddUsersToRoomMutation();
+  const [updateRoom, { isLoading: isUpdatingRoom }] = useUpdateRoomMutation();
 
   const [openManageUsersModal, setOpenManageUsersModal] = useState(false);
   const [manageUsersMode, setManageUsersMode] = useState<"add" | "remove">("add");
+  const [openEditRoomModal, setOpenEditRoomModal] = useState(false);
+
 
   const handleDeleteRoom = async () => {
     try {
@@ -45,7 +48,12 @@ export const useRoomActionMenu = ({ room, onRefresh }: UseRoomActionMenuProps) =
   };
 
   const handleEditRoom = () => {
-    console.log("Edit room:", room.id);
+    setOpenEditRoomModal(true);
+  };
+
+  const handleConfirmEditRoom = async (roomId: string, owner: string) => {
+    await updateRoom({ roomId, owner }).unwrap();
+    onRefresh?.();
   };
 
   const handleShareRoom = () => {
@@ -99,6 +107,9 @@ export const useRoomActionMenu = ({ room, onRefresh }: UseRoomActionMenuProps) =
     setOpenManageUsersModal,
     setManageUsersMode,
     handleConfirmManageUsers,
+    openEditRoomModal,
+    setOpenEditRoomModal,
+    handleConfirmEditRoom,
   };
 };
 

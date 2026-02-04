@@ -3,12 +3,14 @@ import { Colors } from "@/constants/design-tokens";
 import { useRoomFilesUpdate } from "@/hooks/data/useRoomFilesUpdate";
 import { secureStore } from "@/services/secureStore";
 import Header from "@/shared/Header";
+import UpdateFileModal from "@/shared/Modals/UpdateFileModal";
 import UploadPreviewModal from "@/shared/Modals/UploadPreviewModal";
 import SearchInput from "@/shared/SearchInput";
 import MultiSelectBar from "@/shared/ui/MultiSelectBar";
 import View from "@/shared/View";
 import { RootState } from "@/store/store";
 import ResourcesSection, { ResourceItem } from "@/widgets/rooms/components/ResourcesSection";
+import { useEditFileModal } from "@/widgets/rooms/hooks/useEditFileModal";
 import { useRoomFileManipulations } from "@/widgets/rooms/hooks/useRoomFileManipulation";
 import { useRoomFileUpload } from "@/widgets/rooms/hooks/useRoomFileUpload";
 import { combineRoomResources } from "@/widgets/rooms/mappers/roomResources.mapper";
@@ -58,6 +60,16 @@ const RoomDetailsScreen = () => {
     handleDeleteFiles,
   } = useRoomFileManipulations(roomId || '', refetch);
 
+  const {
+    isEditModalVisible,
+    editingFileId,
+    newFileName,
+    openEditFileModal,
+    saveFileName,
+    cancelEdit,
+  } = useEditFileModal(roomId || '');
+  
+
   useRoomFilesUpdate(
     roomId || '',
     accessToken || '',
@@ -68,8 +80,11 @@ const RoomDetailsScreen = () => {
   );
 
   const fileMenuManager = useMemo(
-    () => new FileMenuManager(handleDownloadFiles, handleDeleteFiles, handleShareFiles),
-    [handleDownloadFiles, handleDeleteFiles, handleShareFiles]
+    () => new FileMenuManager(handleDownloadFiles, handleDeleteFiles, handleShareFiles,  
+      (fileId: string, storedName: string) => {
+      openEditFileModal(fileId, storedName);
+    }),
+    [handleDownloadFiles, handleDeleteFiles, handleShareFiles, openEditFileModal]
   );
 
   const multiSelectMenuItems = useMemo(
@@ -82,6 +97,10 @@ const RoomDetailsScreen = () => {
       ),
     [selectedIds, handleDownloadFiles, handleDeleteFiles, resetSelection]
   );
+
+  const handleUpdateFile = useCallback((fileId: string, storedName: string) => {
+    saveFileName(storedName);
+  }, [saveFileName]);
 
   const resources: ResourceItem[] = useMemo(() => {
     const allResources = combineRoomResources(uploadingFiles, roomDetails, user);
@@ -132,7 +151,7 @@ const RoomDetailsScreen = () => {
         />
       )}
 
-      <SearchInput value={searchQuery} onChange={setSearchQuery} />
+      <SearchInput value={searchQuery} onChange={setSearchQuery} placeholder="Search files" />
 
       <ResourcesSection
         resources={resources}
@@ -170,6 +189,13 @@ const RoomDetailsScreen = () => {
           setIsUploadPreviewModalVisible(false);
         }}
         onUpload={uploadFiles}
+      />
+      <UpdateFileModal
+        visible={isEditModalVisible}
+        fileId={editingFileId || ""}
+        storedName={newFileName || ""}
+        onClose={cancelEdit}
+        onUpdate={handleUpdateFile}
       />
     </View>
   );

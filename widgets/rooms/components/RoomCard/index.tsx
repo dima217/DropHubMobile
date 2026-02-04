@@ -4,6 +4,7 @@ import { Colors } from "@/constants/design-tokens";
 import { ThemedText } from "@/shared/core/ThemedText";
 import GradientView from "@/shared/Gradient";
 import ManageUsersModal from "@/shared/Modals/RoomModals/ManageUsersModal";
+import UpdateRoomModal from "@/shared/Modals/RoomModals/UpdateRoomModal";
 import ActionMenu from "@/shared/ui/ActionMenu";
 import Avatar from "@/widgets/profile/components/ProfileCard/ui/Avatar";
 import { useRoomActionMenu } from "@/widgets/rooms/hooks/useRoomActionMenu";
@@ -31,10 +32,10 @@ const RoomCard = ({ room, friends, onPress, notificationCount = 0, onRefresh }: 
   const participants = room.participantsDetails || [];
   const fileCount = room.files?.length || 0;
   const totalSize = room.maxBytes || 0;
-  const owner = participants.find((p) => p.role === "admin") || participants[0];
-  const ownerName = owner?.profile?.firstName || room.owner || "Room";
+  //const owner = participants.find((p) => p.role === "admin") || participants[0];
+  const ownerName = room.owner || "Room";
 
-  const { openManageUsersModal, manageUsersMode, setOpenManageUsersModal, handleConfirmManageUsers, items } = useRoomActionMenu({ room, onRefresh });
+  const { openManageUsersModal, manageUsersMode, setOpenManageUsersModal, handleConfirmManageUsers, items, openEditRoomModal, setOpenEditRoomModal, handleConfirmEditRoom } = useRoomActionMenu({ room, onRefresh });
 
 
   const description = "Please wait a moment while we prepare your experience";
@@ -42,7 +43,7 @@ const RoomCard = ({ room, friends, onPress, notificationCount = 0, onRefresh }: 
 
   return (
     <TouchableOpacity onPress={onPress}>
-    <GradientView colors={[Colors.border, Colors.cardBackground]} style={styles.container}>
+    <GradientView colors={[Colors.border, Colors.cardBackground]} locations={[0, 0.5]} style={styles.container}>
       {notificationCount > 0 && (
         <View style={styles.notificationBadge}>
           <ThemedText style={styles.notificationText}>
@@ -106,6 +107,13 @@ const RoomCard = ({ room, friends, onPress, notificationCount = 0, onRefresh }: 
         users={managedUsers}
         roomId={room.id}
         onConfirm={handleConfirmManageUsers}
+      />
+      <UpdateRoomModal
+        visible={openEditRoomModal}
+        roomId={room.id}
+        owner={room.owner}
+        onClose={() => setOpenEditRoomModal(false)}
+        onUpdate={handleConfirmEditRoom}
       />
     </TouchableOpacity>
   );
