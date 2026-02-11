@@ -1,48 +1,32 @@
 import {
-  useGetTrashItemsQuery,
-  useRestoreTrashItemMutation,
   useDeleteStorageItemMutation,
   useGetStorageInfoQuery,
+  useGetTrashItemsQuery,
+  useRestoreTrashItemMutation,
 } from "@/api/storageApi";
+import { StorageItem } from "@/api/types/storage";
 import { Colors } from "@/constants/design-tokens";
 import Header from "@/shared/Header";
 import View from "@/shared/View";
 import { ThemedText } from "@/shared/core/ThemedText";
-import React from "react";
+import { StorageBreadcrumbs } from "@/widgets/storage/components/Path";
+import { StorageItemList } from "@/widgets/storage/components/StorageItemList";
+import { useHierarchicalBrowser } from "@/widgets/storageList/hooks/useHierarchicalBrowser";
+import {
+  createStorageItemMenuItems,
+  StorageItemMenuOptions,
+} from "@/widgets/storageList/menu/storageItemMenu";
+import React, { useCallback, useMemo } from "react";
 import {
   ActivityIndicator,
   Alert,
-  FlatList,
-  StyleSheet,
-  TouchableOpacity,
   View as RNView,
+  ScrollView,
+  StyleSheet,
 } from "react-native";
-import FileCard from "@/widgets/rooms/components/FileCard";
-import FolderCard from "@/widgets/rooms/components/FolderCard";
-import { StorageItem } from "@/api/types/storage";
-import { FileItem, FileUploadStatus } from "@/api/types/file";
-import { Feather } from "@expo/vector-icons";
 
-const mapStorageItemToFile = (item: StorageItem): FileItem => {
-  const meta = item.fileMeta;
-  return {
-    _id: meta?._id || item.id,
-    originalName: meta?.originalName || item.name,
-    storedName: meta?.storedName || item.name,
-    size: meta?.size || 0,
-    mimeType: meta?.mimeType || "application/octet-stream",
-    uploadTime: meta?.uploadTime || new Date().toISOString(),
-    downloadCount: meta?.downloadCount || 0,
-    key: "",
-    uploadedParts: 0,
-    expiresAt: null,
-    creatorId: meta?.creatorId || Number(item.creatorId) || 0,
-    uploadSession: { status: FileUploadStatus.COMPLETE },
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    __v: 0,
-  };
-};
+const hasParentInTrash = (item: StorageItem, ids: Set<string>) =>
+  !!(item.parentId && ids.has(item.parentId));
 
 const TrashScreen = () => {
   const { data: storageInfo } = useGetStorageInfoQuery();
@@ -56,7 +40,7 @@ const TrashScreen = () => {
   const [restoreItem] = useRestoreTrashItemMutation();
   const [deletePermanently] = useDeleteStorageItemMutation();
 
-  const handleRestore = async (item: StorageItem) => {
+  const handleRestore = useCallback(async (item: StorageItem) => {
     if (!storageId) return;
     try {
       await restoreItem({
@@ -68,9 +52,9 @@ const TrashScreen = () => {
     } catch {
       Alert.alert("Ошибка", "Не удалось восстановить элемент");
     }
-  };
+  }, [storageId, restoreItem, refetch]);
 
-  const handleDeletePermanently = async (item: StorageItem) => {
+  const handleDeletePermanently = useCallback(async (item: StorageItem) => {
     if (!storageId) return;
     Alert.alert(
       "Удалить навсегда?",
@@ -95,7 +79,80 @@ const TrashScreen = () => {
         },
       ]
     );
-  };
+  }, [storageId, deletePermanently, refetch]);
+
+  const ids = useMemo(() => new Set((trashItems ?? []).map((i) => i.id)), [trashItems]);
+  const normalizedParentId = useCallback(
+    (item: StorageItem) => (item.parentId && ids.has(item.parentId) ? item.parentId : null),
+    [ids]
+  );
+
+  const childCountByParentId = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const item of (trashItems ?? []) as any as StorageItem[]) {
+      const pid = normalizedParentId(item);
+      if (!pid) continue;
+      map.set(pid, (map.get(pid) ?? 0) + 1);
+    }
+    return map;
+  }, [trashItems, normalizedParentId]);
+
+  const {
+    path,
+    visibleItems,
+    openFolder,
+    navigateTo,
+  } = useHierarchicalBrowser<StorageItem>({
+    items: (trashItems ?? []) as any as StorageItem[],
+    rootLabel: "Корзина",
+    // Orphans (parent not in trash list) should be shown at root.
+    getParentId: (item, { ids }) =>
+      item.parentId && ids.has(item.parentId) ? item.parentId : null,
+  });
+
+  const visibleItemsWithCounts = useMemo(() => {
+    return visibleItems.map((item) => {
+      if (!item.isDirectory) return item;
+      return {
+        ...item,
+        childrenCount: childCountByParentId.get(item.id) ?? 0,
+      };
+    });
+  }, [visibleItems, childCountByParentId]);
+
+  const menuOptions: StorageItemMenuOptions = useMemo(
+    () => ({
+      folder: ["restore", "deletePermanent"],
+      file: ["restore", "deletePermanent"],
+    }),
+    []
+  );
+
+  const getMenuItems = useCallback(
+    (item: StorageItem, ctx: { isFavorite: boolean }) =>
+      createStorageItemMenuItems(
+        item,
+        {
+          ...ctx,
+          canRestore: item.isDirectory ? !hasParentInTrash(item, ids) : true,
+        },
+        {
+          onRestore: (i) => {
+            if (i.isDirectory && hasParentInTrash(i, ids)) {
+              Alert.alert(
+                "Нельзя восстановить",
+                "Сначала восстановите родительскую папку из корзины."
+              );
+              return;
+            }
+            handleRestore(i);
+          },
+          onDeletePermanent: handleDeletePermanently,
+        },
+        menuOptions
+      ),
+    [ids, menuOptions, handleDeletePermanently, handleRestore]
+  );
 
   return (
     <View>
@@ -106,49 +163,31 @@ const TrashScreen = () => {
           <ActivityIndicator size="large" color={Colors.primary} />
         </RNView>
       ) : (
-        <FlatList
-          data={trashItems || []}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <RNView style={styles.itemContainer}>
-              {item.isDirectory ? (
-                <FolderCard
-                  folderId={item.id}
-                  folderName={item.name}
-                  itemCount={0}
-                />
-              ) : (
-                <FileCard file={mapStorageItemToFile(item)} />
-              )}
-              <RNView style={styles.actionsContainer}>
-                <TouchableOpacity
-                  style={styles.actionButton}
-                  onPress={() => handleRestore(item)}
-                >
-                  <Feather name="rotate-ccw" size={20} color={Colors.primary} />
-                  <ThemedText style={styles.actionText}>Восстановить</ThemedText>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.actionButton, styles.deleteButton]}
-                  onPress={() => handleDeletePermanently(item)}
-                >
-                  <Feather name="trash-2" size={20} color={Colors.reject} />
-                  <ThemedText style={[styles.actionText, styles.deleteText]}>
-                    Удалить навсегда
-                  </ThemedText>
-                </TouchableOpacity>
-              </RNView>
+        <>
+          <RNView style={styles.headerRow}>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.breadcrumbContainer}
+            >
+              <StorageBreadcrumbs path={path} onNavigate={navigateTo} />
+            </ScrollView>
+          </RNView>
+
+          <StorageItemList
+            items={visibleItemsWithCounts}
+            previewEnabled={false}
+            previewUrls={{}}
+            onFolderPress={openFolder}
+            getMenuItems={getMenuItems}
+          />
+
+          {(!trashItems || trashItems.length === 0) && (
+            <RNView style={styles.emptyContainer}>
+              <ThemedText style={styles.emptyText}>Корзина пуста</ThemedText>
             </RNView>
           )}
-          ListEmptyComponent={
-            <RNView style={styles.emptyContainer}>
-              <ThemedText style={styles.emptyText}>
-                Корзина пуста
-              </ThemedText>
-            </RNView>
-          }
-          contentContainerStyle={styles.listContent}
-        />
+        </>
       )}
     </View>
   );
@@ -161,40 +200,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingTop: 100,
   },
-  listContent: {
-    paddingVertical: 12,
-  },
-  itemContainer: {
-    marginBottom: 16,
-  },
-  actionsContainer: {
+  headerRow: {
     flexDirection: "row",
-    gap: 12,
-    paddingHorizontal: 16,
-    marginTop: 8,
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 16,
+    marginBottom: 8,
   },
-  actionButton: {
-    flex: 1,
+  breadcrumbContainer: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    backgroundColor: Colors.cardBackground,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  deleteButton: {
-    borderColor: Colors.reject,
-  },
-  actionText: {
-    fontSize: 14,
-    color: Colors.primary,
-  },
-  deleteText: {
-    color: Colors.reject,
+    paddingRight: 8,
   },
   emptyContainer: {
     padding: 40,

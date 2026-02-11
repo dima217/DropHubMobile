@@ -41,6 +41,7 @@ export interface RevokePermissionsRequest {
 export interface GetSharedStructureRequest {
     storageId: string;
     resourceId: string;
+    parentId?: string;
 }
 
 export interface GetSharedItemParticipantsRequest {

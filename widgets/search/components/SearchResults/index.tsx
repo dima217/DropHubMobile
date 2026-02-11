@@ -1,9 +1,11 @@
 import { FileItem, FileUploadStatus } from "@/api/types/file";
-import { SearchFile, SearchResponse } from "@/api/types/search";
+import { SearchFile, SearchResourceType, SearchResponse } from "@/api/types/search";
+import { StorageItem } from "@/api/types/storage";
 import { Colors } from "@/constants/design-tokens";
 import { ThemedText } from "@/shared/core/ThemedText";
 import FileCard from "@/widgets/rooms/components/FileCard";
 import FolderCard from "@/widgets/rooms/components/FolderCard";
+import { useRouter } from "expo-router";
 import React from "react";
 import {
   ActivityIndicator,
@@ -43,6 +45,8 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
   isLoading,
   searchQuery,
 }) => {
+  const router = useRouter();
+
   if (isLoading) {
     return (
       <RNView style={styles.center}>
@@ -51,47 +55,92 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
     );
   }
 
-  const items = [];
+  const items: (
+    | { type: "storage"; item: StorageItem }
+    | { type: "searchFile"; file: SearchFile }
+  )[] = [];
 
   if (results?.storageItems) {
-    for (const storageItem of results.storageItems) {
-      if (storageItem.isDirectory) {
-        items.push({ type: "folder" as const, item: storageItem });
-      } else {
-        items.push({ type: "file" as const, file: mapSearchFileToFileItem(storageItem as any) });
-      }
-    }
+    items.push(...results.storageItems.map((it) => ({ type: "storage" as const, item: it })));
   }
-  
+
   if (results?.files) {
-    items.push(...results.files.map((file) => ({ type: "file" as const, file: mapSearchFileToFileItem(file) })));
+    items.push(...results.files.map((file) => ({ type: "searchFile" as const, file })));
   }
   
 
   return (
     <FlatList
       data={items}
-      keyExtractor={(item, index) =>
-        item.type === "folder" ? item.item.id : item.file?._id || ""
-      }
-      renderItem={({ item }) => {
-        switch (item.type) {
-          case "folder":
+      keyExtractor={(row) => (row.type === "storage" ? row.item.id : row.file.id)}
+      renderItem={({ item: row }) => {
+        if (row.type === "storage") {
+          const it = row.item;
+
+          const targetParentId = it.isDirectory ? it.id : it.parentId;
+          const goToStorageFolder = () => {
+            if (targetParentId === null || targetParentId === undefined) {
+              router.push("/(tabs)/storage");
+              return;
+            }
+
+            router.push({
+              pathname: "/(tabs)/storage",
+              params: { targetParentId },
+            });
+          };
+
+          if (it.isDirectory) {
             return (
               <FolderCard
-                folderId={item.item.id}
-                folderName={item.item.name}
+                folderId={it.id}
+                folderName={it.name}
                 itemCount={
-                  item.item.childrenCount ||
-                  (item.item.filesCount || 0) + (item.item.foldersCount || 0)
+                  it.childrenCount ?? (it.filesCount || 0) + (it.foldersCount || 0)
                 }
+                onPress={goToStorageFolder}
               />
             );
-          case "file":
-            return <FileCard file={item.file} />;
+          }
+
+          // Simple display; main action is redirect to containing folder.
+          const file: FileItem = {
+            _id: it.fileMeta?._id || it.id,
+            originalName: it.fileMeta?.originalName || it.name,
+            storedName: it.fileMeta?.storedName || it.name,
+            size: it.fileMeta?.size || 0,
+            mimeType: it.fileMeta?.mimeType || "application/octet-stream",
+            uploadTime: it.fileMeta?.uploadTime || new Date().toISOString(),
+            downloadCount: it.fileMeta?.downloadCount || 0,
+            key: "",
+            uploadedParts: 0,
+            expiresAt: null,
+            creatorId: it.fileMeta?.creatorId || Number(it.creatorId) || 0,
+            uploadSession: { status: FileUploadStatus.COMPLETE },
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            __v: 0,
+          };
+
+          return <FileCard file={file} onPress={goToStorageFolder} />;
         }
+
+        // Non-storage results stay as simple cards for now.
+        const goToResource = () => {
+          if (row.file.resourceType === SearchResourceType.ROOM) {
+            router.push(`/(tabs)/rooms/${row.file.resourceId}`);
+            return;
+          }
+
+          if (row.file.resourceType === SearchResourceType.STORAGE) {
+            // SearchFile doesn't include parentId/itemId, so we can only open storage root.
+            router.push("/(tabs)/storage");
+            return;
+          }
+        };
+
+        return <FileCard file={mapSearchFileToFileItem(row.file)} onPress={goToResource} />;
       }}
-      
       ListEmptyComponent={
         <RNView style={styles.emptyContainer}>
           <ThemedText style={styles.emptyText}>

@@ -55,7 +55,7 @@ export const sharedApi = createApi({
     }),
     getSharedStructure: build.query<StorageItem[], GetSharedStructureRequest>({
       query: (body) => ({
-        url: "/shared/get-structure",
+        url: "/shared/get-item-structure",
         method: "POST",
         body,
         auth: true,

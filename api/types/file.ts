@@ -155,7 +155,7 @@ export interface UploadSharedConfirmResponse {
 
 export interface DownloadSharedFileRequest {
     fileIds: string[];
-    sharedId: string;
+    resourceId: string;
 }
 
 export interface DownloadSharedFileResponse {

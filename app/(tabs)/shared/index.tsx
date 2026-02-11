@@ -1,7 +1,7 @@
+import { useLazyDownloadSharedFileQuery } from "@/api/fileApi";
 import { useGetSharedResourcesQuery } from "@/api/sharedApi";
-import { FileItem, FileUploadStatus } from "@/api/types/file";
-import { StorageItem } from "@/api/types/storage";
 import { Colors } from "@/constants/design-tokens";
+import { createUploader, UploadProvider } from "@/services/upload/UploaderFactory";
 import Header from "@/shared/Header";
 import SearchButton from "@/shared/SearchButton";
 import View from "@/shared/View";
@@ -10,39 +10,48 @@ import { useRouter } from "expo-router";
 import React from "react";
 import {
   ActivityIndicator,
+  Alert,
   FlatList,
   View as RNView,
   StyleSheet,
   TouchableOpacity,
 } from "react-native";
 
-const mapStorageItemToFile = (item: StorageItem): FileItem => {
-  const meta = item.fileMeta;
-  return {
-    _id: meta?._id || item.id,
-    originalName: meta?.originalName || item.name,
-    storedName: meta?.storedName || item.name,
-    size: meta?.size || 0,
-    mimeType: meta?.mimeType || "application/octet-stream",
-    uploadTime: meta?.uploadTime || new Date().toISOString(),
-    downloadCount: meta?.downloadCount || 0,
-    key: "",
-    uploadedParts: 0,
-    expiresAt: null,
-    creatorId: meta?.creatorId || Number(item.creatorId) || 0,
-    uploadSession: { status: FileUploadStatus.COMPLETE },
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    __v: 0,
-  };
-};
-
 const SharedScreen = () => {
   const router = useRouter();
   const { data: sharedResources, isLoading } = useGetSharedResourcesQuery();
+  const [downloadSharedFile] = useLazyDownloadSharedFileQuery();
 
-  const handleItemPress = (resourceId: string) => {
-    router.push(`/(tabs)/shared/${resourceId}`);
+  const handleItemPress = async (item: {
+    id: string;
+    storageId: string;
+    isDirectory: boolean;
+    fileId: string | null;
+  }) => {
+    if (item.isDirectory) {
+      router.push(`/(tabs)/shared/${item.id}?storageId=${item.storageId}`);
+      return;
+    }
+
+    if (!item.fileId) {
+      Alert.alert("Ошибка", "У файла нет fileId");
+      return;
+    }
+
+    try {
+      const response = await downloadSharedFile({
+        resourceId: item.id,
+        fileIds: [item.fileId],
+      }).unwrap();
+      const uploader = createUploader(UploadProvider.MINIO);
+      for (const { url } of response) {
+        await uploader.download(url);
+      }
+      Alert.alert("Успешно", "Файл загружен");
+    } catch (e) {
+      console.log("Shared download failed", e);
+      Alert.alert("Ошибка", "Не удалось скачать файл");
+    }
   };
 
   return (
@@ -60,7 +69,14 @@ const SharedScreen = () => {
           renderItem={({ item }) => (
             <TouchableOpacity
               style={styles.itemCard}
-              onPress={() => handleItemPress(item.id)}
+              onPress={() =>
+                handleItemPress({
+                  id: item.id,
+                  storageId: item.storageId,
+                  isDirectory: item.isDirectory,
+                  fileId: item.fileId,
+                })
+              }
             >
               <ThemedText style={styles.itemTitle}>
                 {item.isDirectory ? "Папка" : "Файл"}

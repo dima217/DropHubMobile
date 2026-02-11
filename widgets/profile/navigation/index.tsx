@@ -1,9 +1,11 @@
 import Settings from "@/assets/images/Setting.svg";
 import SignOut from "@/assets/images/SignOut.svg";
 import Support from "@/assets/images/Support.svg";
+import { Colors } from "@/constants/design-tokens";
 import { secureStore } from "@/services/secureStore";
 import LogoutConfirmationModal from "@/shared/Modals/LogoutConfirmationModal";
 import { clearAuth } from "@/store/slices/authSlice";
+import { Feather } from "@expo/vector-icons";
 import { Href } from "expo-router";
 import { ReactNode, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -51,6 +53,13 @@ export const useProfileMenuItems = (): {
       title: "Избранное",
       icon: <Settings />, // TODO: Replace with Heart icon
       href: "/(tabs)/favorites",
+      isNested: true,
+    },
+    {
+      id: "trash",
+      title: "Trash",
+      icon: <Feather name="trash" size={24} color={Colors.secondary} />,
+      href: "/(tabs)/trash",
       isNested: true,
     },
     {

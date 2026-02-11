@@ -29,10 +29,15 @@ import { useStorageNavigation } from "@/widgets/storage/hooks/useStorageNavigati
 import { useStoragePreviewUrls } from "@/widgets/storage/hooks/useStoragePreviewUrls";
 import { useStorageScreenHandlers } from "@/widgets/storage/hooks/useStorageScreenHandlers";
 import { useSelectedItemState } from "@/widgets/storage/hooks/useTagsState";
+import { useFolderPathNavigation } from "@/widgets/storageList/hooks/useFolderPathNavigation";
+import {
+  createStorageItemMenuItems,
+  StorageItemMenuOptions,
+} from "@/widgets/storageList/menu/storageItemMenu";
 import { Feather } from "@expo/vector-icons";
 import { skipToken } from "@reduxjs/toolkit/query";
 import { useLocalSearchParams } from "expo-router";
-import React, { useMemo, useRef, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   View as RNView,
@@ -44,12 +49,7 @@ import {
 
 const StorageScreen = () => {
   const { targetParentId } = useLocalSearchParams<{ targetParentId?: string }>();
-  const [currentParentId, setCurrentParentId] = useState<string | null>(null);
   const [previewEnabled, setPreviewEnabled] = useState(false);
-  const [path, setPath] = useState<{ id: string | null; name: string }[]>([
-    { id: null, name: "Root" },
-  ]);
-  const hasNavigatedRef = useRef(false);
 
   // Modal states
   const [tagsModalVisible, setTagsModalVisible] = useState(false);
@@ -71,11 +71,24 @@ const StorageScreen = () => {
   const storageId = storageInfo?.id || "";
 
   const {
+    currentParentId,
+    setCurrentParentId,
+    path,
+    setPath,
+    openFolder,
+    navigateTo,
+  } = useFolderPathNavigation("Root");
+
+  const {
     data: structure,
     isLoading: isStructureLoading,
     refetch: refetchStructure,
     isError: isStructureError,
-  } = useGetStorageStructureQuery(storageId ? { storageId, parentId: currentParentId ?? undefined } : skipToken);
+  } = useGetStorageStructureQuery(
+    storageId
+      ? { storageId, parentId: currentParentId ?? undefined }
+      : skipToken
+  );
 
   // Handle navigation from favorites
   useStorageNavigation({
@@ -102,6 +115,17 @@ const StorageScreen = () => {
     useCreateStorageFolderMutation();
   const [removeStorageTags] = useRemoveStorageTagsMutation();
 
+  const itemsInCurrentFolder: StorageItem[] = useMemo(() => {
+    if (!structure) return [];
+    return structure
+      .filter((item) => item.parentId === currentParentId && !item.deletedAt)
+      .sort((a, b) => {
+        if (a.isDirectory && !b.isDirectory) return -1;
+        if (!a.isDirectory && b.isDirectory) return 1;
+        return a.name.localeCompare(b.name);
+      });
+  }, [structure, currentParentId]);
+
   const {
     uploadingFiles,
     isUploadPreviewModalVisible,
@@ -124,18 +148,6 @@ const StorageScreen = () => {
   });
 
   // currentParent can be derived from path if needed in the future
-
-  const itemsInCurrentFolder: StorageItem[] = useMemo(() => {
-    console.log("structure", structure);
-    if (!structure) return [];
-    return structure
-      .filter((item) => item.parentId === currentParentId && !item.deletedAt)
-      .sort((a, b) => {
-        if (a.isDirectory && !b.isDirectory) return -1;
-        if (!a.isDirectory && b.isDirectory) return 1;
-        return a.name.localeCompare(b.name);
-      });
-  }, [structure, currentParentId]);
 
   const previewUrls = useStoragePreviewUrls(
     storageId,
@@ -168,6 +180,58 @@ const StorageScreen = () => {
 
   const isLoading =
     isStorageInfoLoading || (storageId && isStructureLoading) || false;
+
+  const menuOptions: StorageItemMenuOptions = useMemo(
+    () => ({
+      folder: [
+        "rename",
+        "copy",
+        "move",
+        "favorite",
+        "tag",
+        "share",
+        "permissions",
+        "info",
+        "delete",
+      ],
+      file: [
+        "download",
+        "rename",
+        "copy",
+        "move",
+        "favorite",
+        "tag",
+        "share",
+        "permissions",
+        "info",
+        "delete",
+      ],
+    }),
+    []
+  );
+
+  const getMenuItems = useCallback(
+    (item: StorageItem, ctx: { isFavorite: boolean }) =>
+      createStorageItemMenuItems(
+        item,
+        ctx,
+        {
+          onDownload: actions.handleDownloadFile,
+          onRename: actions.handleRename,
+          onCopy: actions.handleCopy,
+          onMove: actions.handleMove,
+          onAddToFavorites: actions.handleAddToFavorites,
+          onRemoveFromFavorites: actions.handleRemoveFromFavorites,
+          onAddTag: actions.handleAddTag,
+          onShare: actions.handleShare,
+          onViewPermissions: actions.handleViewPermissions,
+          onInfo: actions.handleInfo,
+          onDelete: actions.handleMoveToTrash,
+        },
+        menuOptions
+      ),
+    [actions, menuOptions]
+  );
 
   if (isStorageInfoError || isStructureError) {
     return (
@@ -216,8 +280,7 @@ const StorageScreen = () => {
             <StorageBreadcrumbs
               path={path}
               onNavigate={(segmentId, index) => {
-                setCurrentParentId(segmentId);
-                setPath((prev) => prev.slice(0, index + 1));
+                navigateTo(segmentId, index);
               }}
             />
             </ScrollView>
@@ -232,21 +295,8 @@ const StorageScreen = () => {
             previewEnabled={previewEnabled}
             favoriteItemIds={favoriteItemIds}
             previewUrls={previewUrls}
-            onFolderPress={(folder) => {
-              setCurrentParentId(folder.id);
-              setPath((prev) => [...prev, { id: folder.id, name: folder.name }]);
-            }}
-            onDownload={actions.handleDownloadFile}
-            onRename={actions.handleRename}
-            onCopy={actions.handleCopy}
-            onMove={actions.handleMove}
-            onAddToFavorites={actions.handleAddToFavorites}
-            onRemoveFromFavorites={actions.handleRemoveFromFavorites}
-            onAddTag={actions.handleAddTag}
-            onShare={actions.handleShare}
-            onViewPermissions={actions.handleViewPermissions}
-            onInfo={actions.handleInfo}
-            onDelete={actions.handleMoveToTrash}
+            onFolderPress={openFolder}
+            getMenuItems={getMenuItems}
           />
         </>
       )}

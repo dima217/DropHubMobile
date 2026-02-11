@@ -1,11 +1,10 @@
 import { FileItem, FileUploadStatus } from "@/api/types/file";
 import { StorageItem } from "@/api/types/storage";
+import { ActionMenuItemData } from "@/shared/ui/ActionMenu/ActionMenuItem";
 import { TagColorMap } from "@/store/slices/tagColorsSlice";
 import { RootState } from "@/store/store";
 import FileCard from "@/widgets/rooms/components/FileCard";
 import FolderCard from "@/widgets/rooms/components/FolderCard";
-import { StorageFileMenuManager } from "@/widgets/storage/menu/storageFileMenu";
-import { StorageFolderMenuManager } from "@/widgets/storage/menu/storageFolderMenu";
 import React from "react";
 import { FlatList, StyleSheet } from "react-native";
 import { useSelector } from "react-redux";
@@ -36,75 +35,45 @@ const mapStorageItemToFile = (
 
 interface StorageItemListProps {
   items: StorageItem[];
-  previewEnabled: boolean;
-  favoriteItemIds: Set<string>;
+  previewEnabled?: boolean;
+  favoriteItemIds?: Set<string>;
   previewUrls?: Record<string, string>;
-  onFolderPress: (folder: StorageItem) => void;
-  onDownload: (item: StorageItem) => void;
-  onRename: (item: StorageItem) => void;
-  onCopy: (item: StorageItem) => void;
-  onMove: (item: StorageItem) => void;
-  onAddToFavorites: (item: StorageItem) => void;
-  onRemoveFromFavorites: (item: StorageItem) => void;
-  onAddTag: (item: StorageItem) => void;
-  onShare: (item: StorageItem) => void;
-  onViewPermissions: (item: StorageItem) => void;
-  onInfo: (item: StorageItem) => void;
-  onDelete: (item: StorageItem) => void;
+  onFolderPress?: (folder: StorageItem) => void;
+  getMenuItems?: (
+    item: StorageItem,
+    ctx: { isFavorite: boolean }
+  ) => ActionMenuItemData[];
 }
 
 export const StorageItemList: React.FC<StorageItemListProps> = ({
   items,
-  previewEnabled,
+  previewEnabled = false,
   favoriteItemIds,
   previewUrls = {},
   onFolderPress,
-  onDownload,
-  onRename,
-  onCopy,
-  onMove,
-  onAddToFavorites,
-  onRemoveFromFavorites,
-  onAddTag,
-  onShare,
-  onViewPermissions,
-  onInfo,
-  onDelete,
+  getMenuItems,
 }) => {
   const tagColors = useSelector(
     (state: RootState) => (state.tagColors as { colors: TagColorMap }).colors
   );
 
   const renderItem = ({ item }: { item: StorageItem }) => {
-    const isFavorite = favoriteItemIds.has(item.id);
+    const isFavorite = favoriteItemIds?.has(item.id) ?? false;
     const itemTags = item.tags || [];
 
     if (item.isDirectory) {
       const itemCount =
         item.childrenCount ??
         (item.filesCount || 0) + (item.foldersCount || 0);
-
-      const menuManager = new StorageFolderMenuManager(
-        onRename,
-        onCopy,
-        onMove,
-        onAddToFavorites,
-        onRemoveFromFavorites,
-        onAddTag,
-        onShare,
-        onViewPermissions,
-        onInfo,
-        onDelete,
-        isFavorite
-      );
+      const menuItems = getMenuItems?.(item, { isFavorite }) ?? [];
 
       return (
         <FolderCard
           folderId={item.id}
           folderName={item.name}
           itemCount={itemCount}
-          menuItems={menuManager.getMenuItems(item)}
-          onPress={() => onFolderPress(item)}
+          menuItems={menuItems}
+          onPress={() => onFolderPress?.(item)}
           tags={itemTags}
           tagColors={tagColors}
           isFavorite={isFavorite}
@@ -115,28 +84,19 @@ export const StorageItemList: React.FC<StorageItemListProps> = ({
     const fileId = item.fileId || item.id;
     const url = previewUrls[fileId];
     const file = mapStorageItemToFile(item, url);
-    const menuManager = new StorageFileMenuManager(
-      onDownload,
-      onRename,
-      onCopy,
-      onMove,
-      onAddToFavorites,
-      onRemoveFromFavorites,
-      onAddTag,
-      onShare,
-      onViewPermissions,
-      onInfo,
-      onDelete,
-      isFavorite
-    );
+    const menuItems = getMenuItems?.(item, { isFavorite }) ?? [];
 
     return (
       <FileCard
         file={file}
         showPreview={previewEnabled}
-        menuItems={{
-          getMenuItems: () => menuManager.getMenuItems(item),
-        }}
+        menuItems={
+          menuItems.length > 0
+            ? {
+                getMenuItems: () => menuItems,
+              }
+            : undefined
+        }
         tags={itemTags}
         tagColors={tagColors}
         isFavorite={isFavorite}

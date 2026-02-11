@@ -106,6 +106,12 @@ export default function TabLayout() {
             href: null,
           }}
         />
+        <Tabs.Screen
+          name="shared/[resourceId]"
+          options={{
+            href: null,
+          }}
+        />
       </Tabs>
     </>
   );
