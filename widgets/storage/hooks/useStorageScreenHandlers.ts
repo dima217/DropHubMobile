@@ -35,28 +35,25 @@ export const useStorageScreenHandlers = ({
   selectedItem,
   actions,
 }: UseStorageScreenHandlersProps) => {
-  const handleCreateFolder = useCallback(async () => {
-    if (!storageId) return;
-    Alert.prompt(
-      "Новая папка",
-      "Введите название папки",
-      async (name) => {
-        if (!name || !name.trim()) return;
-        try {
-          await createFolder({
-            storageId,
-            name: name.trim(),
-            parentId: currentParentId || undefined,
-            isDirectory: true,
-          });
-          refetchStructure();
-        } catch {
-          Alert.alert("Ошибка", "Не удалось создать папку");
-        }
-      },
-      "plain-text"
-    );
-  }, [storageId, currentParentId, createFolder, refetchStructure]);
+  const handleCreateFolder = useCallback(
+    async (name: string) => {
+      if (!storageId) return;
+  
+      try {
+        await createFolder({
+          storageId,
+          name: name.trim(),
+          parentId: currentParentId ?? undefined,
+          isDirectory: true,
+        });
+  
+        refetchStructure();
+      } catch {
+        Alert.alert("Ошибка", "Не удалось создать папку");
+      }
+    },
+    [storageId, currentParentId, createFolder, refetchStructure]
+  );  
 
   const handleRemoveGlobalTag = useCallback(
     async (tag: string) => {

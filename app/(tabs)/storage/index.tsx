@@ -9,6 +9,7 @@ import { ResourceType } from "@/api/types/shared";
 import { StorageItem } from "@/api/types/storage";
 import { Colors } from "@/constants/design-tokens";
 import Header from "@/shared/Header";
+import CreateFolderModal from "@/shared/Modals/StorageModals/CreateFolderModal";
 import GrantAccessModal from "@/shared/Modals/StorageModals/GrantAccessModal";
 import ItemInfoModal from "@/shared/Modals/StorageModals/ItemInfoModal";
 import MoveItemModal from "@/shared/Modals/StorageModals/MoveItemModal";
@@ -55,6 +56,7 @@ const StorageScreen = () => {
   const [permissionsModalVisible, setPermissionsModalVisible] = useState(false);
   const [renameModalVisible, setRenameModalVisible] = useState(false);
   const [infoModalVisible, setInfoModalVisible] = useState(false);
+  const [createFolderModalVisible, setCreateFolderModalVisible] = useState(false);
   const [moveModalVisible, setMoveModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState<StorageItem | null>(null);
 
@@ -300,7 +302,7 @@ useEffect(() => {
       )}
 
       <StorageFAB
-        onCreateFolder={handleCreateFolder}
+        onCreateFolder={() => setCreateFolderModalVisible(true)}
         onUploadFiles={pickFiles}
         isCreatingFolder={isCreatingFolder}
         isStorageReady={!!storageId}
@@ -355,6 +357,15 @@ useEffect(() => {
           setSelectedItem(null);
         }}
         onSelectFriend={handleGrantAccess}
+      />
+
+      <CreateFolderModal
+        visible={createFolderModalVisible}
+        onClose={() => {
+          setCreateFolderModalVisible(false);
+          setSelectedItem(null);
+        }}
+        onConfirm={handleCreateFolder}
       />
 
       <PermissionsModal
