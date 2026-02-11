@@ -1,6 +1,6 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { baseQueryWithRefresh } from "./baseApi";
-import { DeleteRoomFilesRequest, DeleteRoomFilesResponse, DownloadRoomFilesRequest, DownloadRoomFilesResponse, RoomUploadConfirmRequest, RoomUploadConfirmResponse, RoomUploadInitRequest, RoomUploadInitResponse, UpdateRoomFileRequest, UpdateRoomFileResponse } from "./types/file";
+import { DeleteRoomFilesRequest, DeleteRoomFilesResponse, DownloadRoomFilesRequest, DownloadRoomFilesResponse, DownloadSharedFileRequest, DownloadSharedFileResponse, DownloadStorageFileRequest, DownloadStorageFileResponse, RoomUploadConfirmRequest, RoomUploadConfirmResponse, RoomUploadInitRequest, RoomUploadInitResponse, UpdateRoomFileRequest, UpdateRoomFileResponse, UploadSharedConfirmRequest, UploadSharedConfirmResponse, UploadSharedInitRequest, UploadSharedInitResponse, UploadStorageConfirmRequest, UploadStorageConfirmResponse, UploadStorageInitRequest, UploadStorageInitResponse } from "./types/file";
 
 export const fileApi = createApi({
     reducerPath: "fileApi",
@@ -41,6 +41,48 @@ export const fileApi = createApi({
                 body,
             }),
         }),
+        uploadStorageInit: build.mutation<UploadStorageInitResponse, UploadStorageInitRequest>({
+            query: (body) => ({
+                url: `/upload/auth/storage/init`,
+                method: "POST",
+                body,
+            }),
+        }),
+        uploadStorageConfirm: build.mutation<UploadStorageConfirmResponse, UploadStorageConfirmRequest>({
+            query: (body) => ({
+                url: `/upload/auth/storage/confirm`,
+                method: "POST",
+                body,
+            }),
+        }),
+        downloadStorageFile: build.query<DownloadStorageFileResponse[], DownloadStorageFileRequest>({
+            query: (body) => ({
+                url: `/download/url-private/storage`,
+                method: "POST",
+                body,
+            }),
+        }),
+        uploadSharedInit: build.mutation<UploadSharedInitResponse, UploadSharedInitRequest>({
+            query: (body) => ({
+                url: `/upload/auth/init-shared`,
+                method: "POST",
+                body,
+            }),
+        }),
+        uploadSharedConfirm: build.mutation<UploadSharedConfirmResponse, UploadSharedConfirmRequest>({
+            query: (body) => ({
+                url: `/upload/auth/confirm-shared`,
+                method: "POST",
+                body,
+            }),
+        }),
+        downloadSharedFile: build.query<DownloadSharedFileResponse[], DownloadSharedFileRequest>({
+            query: (body) => ({
+                url: `/download/url-private/shared`,
+                method: "POST",
+                body,
+            }),
+        }),
     }),
 });
 
@@ -50,4 +92,10 @@ export const {
     useLazyDownloadRoomFilesQuery,
     useDeleteRoomFilesMutation,
     useUpdateRoomFileMutation,
+    useUploadStorageInitMutation,
+    useUploadStorageConfirmMutation,
+    useLazyDownloadStorageFileQuery,
+    useUploadSharedInitMutation,
+    useUploadSharedConfirmMutation,
+    useLazyDownloadSharedFileQuery,
 } = fileApi;

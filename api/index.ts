@@ -3,4 +3,7 @@ export * from "./baseApi";
 export * from "./fileApi";
 export * from "./friendApi";
 export * from "./roomApi";
-
+export * from "./storageApi";
+export * from "./sharedApi";
+export * from "./favorites";
+export * from "./searchApi";

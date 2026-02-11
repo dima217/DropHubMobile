@@ -3,12 +3,15 @@ import { RoomItem } from "@/api/types/room";
 import { Colors } from "@/constants/design-tokens";
 import AccountDetails from "@/shared/AccountDetails";
 import View from "@/shared/View";
+import SearchButton from "@/shared/SearchButton";
+import Header from "@/shared/Header";
 import ConnectionCard from "@/widgets/home/components/ConnectionCard";
 import StorageCard from "@/widgets/home/components/StorageCard";
 import React, { useMemo } from "react";
 import {
   ActivityIndicator,
   ScrollView,
+  View as RNView,
   StyleSheet,
 } from "react-native";
 
@@ -36,6 +39,8 @@ const Home = () => {
 
   return (
     <View style={styles.container}>
+      <Header title="Home" rightAction={<SearchButton />} />
+      <RNView style={styles.accountDetailsContainer}>
       <AccountDetails />
       <ScrollView 
         showsVerticalScrollIndicator={false}
@@ -45,6 +50,7 @@ const Home = () => {
 
         <ConnectionCard />
       </ScrollView>
+      </RNView>
     </View>
   );
 };
@@ -52,6 +58,9 @@ const Home = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  accountDetailsContainer: {
+    paddingTop: 20,
   },
   loadingContainer: {
     flex: 1,

@@ -2,7 +2,9 @@ import { Colors } from "@/constants/design-tokens";
 import { ThemedText } from "@/shared/core/ThemedText";
 import ProgressBar from "@/shared/ui/animated/ProgressBar";
 import React from "react";
-import { StyleSheet } from "react-native";
+import { StyleSheet, TouchableOpacity } from "react-native";
+import { useRouter } from "expo-router";
+import { Feather } from "@expo/vector-icons";
 import Animated, {
     useAnimatedStyle,
     useSharedValue,
@@ -30,6 +32,7 @@ const StorageCard = React.memo(({
   total = 10 * 1024 * 1024 * 1024, // Mock: 10GB
   activeRoomsCount = 0,
 }: StorageCardProps) => {
+  const router = useRouter();
   // Static progress value for now (API not ready)
   const progress = 25; // 25% usage
   const opacity = useSharedValue(0);
@@ -67,6 +70,14 @@ const StorageCard = React.memo(({
           {activeRoomsCount}
         </ThemedText>
       </Animated.View>
+
+      <TouchableOpacity
+        style={styles.sharedButton}
+        onPress={() => router.push("/(tabs)/shared")}
+      >
+        <Feather name="share-2" size={20} color={Colors.primary} />
+        <ThemedText style={styles.sharedButtonText}>Общие ресурсы</ThemedText>
+      </TouchableOpacity>
     </Animated.View>
   );
 });
@@ -108,6 +119,23 @@ const styles = StyleSheet.create({
     color: Colors.primary,
     fontSize: 32,
     fontWeight: "700",
+  },
+  sharedButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginTop: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    backgroundColor: Colors.background,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  sharedButtonText: {
+    color: Colors.primary,
+    fontSize: 14,
+    fontWeight: "600",
   },
 });
 

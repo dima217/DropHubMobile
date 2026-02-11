@@ -47,6 +47,13 @@ export const useProfileMenuItems = (): {
 
   const items: MenuItem[] = [
     {
+      id: "favorites",
+      title: "Избранное",
+      icon: <Settings />, // TODO: Replace with Heart icon
+      href: "/(tabs)/favorites",
+      isNested: true,
+    },
+    {
       id: "support",
       title: "Support",
       icon: <Support />,

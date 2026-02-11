@@ -37,14 +37,7 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <NetworkProvider>
         <Provider store={store}>
-          <PersistGate 
-            loading={null} 
-            persistor={persistor}
-            onBeforeLift={() => {
-              // Ensure state is loaded before rendering
-              console.log('PersistGate: State loaded');
-            }}
-          >
+          <PersistGate loading={null} persistor={persistor}>
             <LayoutContent />
             <StatusBar style="auto" />
           </PersistGate>

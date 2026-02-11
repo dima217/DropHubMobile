@@ -7,7 +7,7 @@ import { Feather } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import * as VideoThumbnails from 'expo-video-thumbnails';
 import React, { useState } from 'react';
-import { Pressable, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Modal, Pressable, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { FileMenuManager } from '../../menu/fileMenu';
 
 interface FileCardProps {
@@ -19,10 +19,13 @@ interface FileCardProps {
   authorUserId?: number;
   menuItems?: FileMenuManager;
   isSelected?: boolean;
+  isFavorite?: boolean;
   onPress?: () => void;
   onLongPress?: () => void;
   uploadProgress?: number;
   downloadProgress?: number;
+  tags?: string[];
+  tagColors?: Record<string, string>;
 }
 
 const FileCard: React.FC<FileCardProps> = ({
@@ -34,10 +37,13 @@ const FileCard: React.FC<FileCardProps> = ({
   authorUserId,
   menuItems,
   isSelected = false,
+  isFavorite = false,
   onPress,
   onLongPress,
   uploadProgress,
   downloadProgress,
+  tags = [],
+  tagColors = {},
 }) => {
   const [thumbnailUri, setThumbnailUri] = useState<string | null>(null);
   const [showFullPreview, setShowFullPreview] = useState(false);
@@ -47,10 +53,7 @@ const FileCard: React.FC<FileCardProps> = ({
 
   React.useEffect(() => {
     if (isVideo && showPreview && file.key) {
-      // For videos, we'll use the key as URL if it's a full URL, otherwise skip thumbnail
-      // In production, you might want to generate thumbnails server-side
       if (file.key.startsWith('http://') || file.key.startsWith('https://')) {
-        // Try to generate thumbnail from video URL
         VideoThumbnails.getThumbnailAsync(file.key, {
           time: 1000,
         })
@@ -60,7 +63,6 @@ const FileCard: React.FC<FileCardProps> = ({
         setThumbnailUri(null);
       }
     } else if (isImage && showPreview && file.key) {
-      // For images, use the key directly if it's a URL
       if (file.key.startsWith('http://') || file.key.startsWith('https://')) {
         setThumbnailUri(file.key);
       } else {
@@ -89,11 +91,17 @@ const FileCard: React.FC<FileCardProps> = ({
   
   const progress = uploadProgress !== undefined ? uploadProgress : downloadProgress;
 
+  // Determine border color from first tag with a color
+  const primaryTagColor = tags.length > 0
+    ? tags.map((t) => tagColors[t]).find(Boolean) || undefined
+    : undefined;
+
   return (
     <Pressable
       style={[
         styles.container,
         isSelected && styles.containerSelected,
+        primaryTagColor ? { borderColor: primaryTagColor } : null,
       ]}
       onPress={onPress}
       onLongPress={onLongPress}
@@ -116,17 +124,50 @@ const FileCard: React.FC<FileCardProps> = ({
             />
           </View>
           <View style={styles.infoContainer}>
-            <ThemedText style={styles.fileName} numberOfLines={1}>
-              {file.storedName}
-            </ThemedText>
+            <View style={styles.nameRow}>
+              <ThemedText style={styles.fileName} numberOfLines={1}>
+                {file.storedName}
+              </ThemedText>
+              {isFavorite && !isSelected && (
+              <View style={styles.favoriteIndicator}>
+                <Feather name="star" size={14} color="#FFD700" />
+                </View>
+              )}
+            </View>
+            {tags.length > 0 && (
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={styles.tagsRow}
+              >
+                {tags.map((tag) => (
+                  <View
+                    key={tag}
+                    style={[
+                      styles.tagBadge,
+                      tagColors[tag]
+                        ? { backgroundColor: `${tagColors[tag]}20`, borderColor: tagColors[tag] }
+                        : null,
+                    ]}
+                  >
+                    <ThemedText
+                      style={[
+                        styles.tagBadgeText,
+                        tagColors[tag] ? { color: tagColors[tag] } : null,
+                      ]}
+                    >
+                      #{tag}
+                    </ThemedText>
+                  </View>
+                ))}
+              </ScrollView>
+            )}
             <ThemedText style={styles.fileMeta}>
               {formatFileSize(file.size)} • {file.downloadCount || 0} downloads
             </ThemedText>
           </View>
           {menuItems && (
-          <>
-            {menuItems && <ActionMenu items={menuItems.getMenuItems(file._id, file.storedName)} />}
-          </>
+            <ActionMenu items={menuItems.getMenuItems(file._id, file.storedName)} />
           )}
         </View>
 
@@ -164,22 +205,6 @@ const FileCard: React.FC<FileCardProps> = ({
             )}
           </TouchableOpacity>
         )}
-
-        {showFullPreview && thumbnailUri && (
-          <View style={styles.fullPreviewContainer}>
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => setShowFullPreview(false)}
-            >
-              <Feather name="x" size={24} color={Colors.brightText} />
-            </TouchableOpacity>
-            <Image
-              source={{ uri: thumbnailUri }}
-              style={styles.fullPreviewImage}
-              contentFit="contain"
-            />
-          </View>
-        )}
       </View>
 
       {isSelected && (
@@ -187,6 +212,29 @@ const FileCard: React.FC<FileCardProps> = ({
           <Feather name="check-circle" size={20} color={Colors.primary} />
         </View>
       )}
+
+      <Modal
+        visible={showFullPreview}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowFullPreview(false)}
+      >
+        <View style={styles.fullPreviewOverlay}>
+          <TouchableOpacity
+            style={styles.closeButton}
+            onPress={() => setShowFullPreview(false)}
+          >
+            <Feather name="x" size={24} color={Colors.brightText} />
+          </TouchableOpacity>
+          {thumbnailUri && (
+            <Image
+              source={{ uri: thumbnailUri }}
+              style={styles.fullPreviewImage}
+              contentFit="contain"
+            />
+          )}
+        </View>
+      </Modal>
     </Pressable>
   );
 };
@@ -222,12 +270,39 @@ const styles = StyleSheet.create({
   },
   infoContainer: {
     flex: 1,
-    gap: 4,
+    gap: 2,
+  },
+  nameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
   },
   fileName: {
     fontSize: 14,
     fontWeight: '600',
     color: Colors.brightText,
+    flexShrink: 1,
+  },
+  tagsRow: {
+    flexDirection: 'row',
+    marginTop: 2,
+    marginBottom: 2,
+  },
+  tagBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: `${Colors.secondary}20`,
+    borderWidth: 1,
+    borderColor: Colors.secondary,
+    borderRadius: 6,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    marginRight: 4,
+  },
+  tagBadgeText: {
+    fontSize: 10,
+    color: Colors.secondary,
+    fontWeight: '600',
   },
   fileMeta: {
     fontSize: 12,
@@ -279,14 +354,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  fullPreviewContainer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
+  fullPreviewOverlay: {
+    flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.95)',
-    zIndex: 1000,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -296,7 +366,7 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     position: 'absolute',
-    top: 20,
+    top: 50,
     right: 20,
     zIndex: 1001,
     width: 40,
@@ -305,6 +375,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.6)',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  favoriteIndicator: {
+    backgroundColor: Colors.cardBackground,
   },
   selectedIndicator: {
     position: 'absolute',
@@ -317,4 +390,3 @@ const styles = StyleSheet.create({
 });
 
 export default FileCard;
-

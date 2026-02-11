@@ -83,3 +83,82 @@ export interface UpdateRoomFileResponse {
     success: boolean;
     roomId: string;
 }
+
+export interface UploadStorageInitRequest {
+    storageId: string;
+    files: {
+        originalName: string;
+        fileSize: number;
+        mimeType: string;
+        uploaderIp: string;
+    }[];
+}
+
+export interface UploadStorageInitResponse {
+    success: boolean;
+    result: {
+        uploadId: string;
+        uploadUrl: string;
+    }[];
+}
+
+export interface UploadStorageConfirmRequest {
+    uploadId: string;
+    storageId: string;
+    parentId?: string;
+}
+
+export interface UploadStorageConfirmResponse {
+    success: boolean;
+    fileId: string;
+}
+
+export interface DownloadStorageFileRequest {
+    fileIds: string[];
+    storageId: string;
+}
+
+export interface DownloadStorageFileResponse {
+    fileId: string;
+    url: string;
+}
+
+export interface UploadSharedInitRequest {
+    sharedId: string;
+    files: {
+        originalName: string;
+        fileSize: number;
+        mimeType: string;
+        uploaderIp: string;
+    }[];
+}
+
+export interface UploadSharedInitResponse { 
+    success: boolean;
+    result: {
+        uploadId: string;
+        uploadUrl: string;
+    }[];
+}
+
+export interface UploadSharedConfirmRequest {
+    uploadId: string;
+    sharedId: string;
+    resourceId: string;
+    parentId: string;
+}
+
+export interface UploadSharedConfirmResponse {
+    success: boolean;
+    fileId: string;  
+}
+
+export interface DownloadSharedFileRequest {
+    fileIds: string[];
+    sharedId: string;
+}
+
+export interface DownloadSharedFileResponse {
+    fileId: string;
+    url: string;
+}

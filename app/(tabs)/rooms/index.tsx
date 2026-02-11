@@ -7,6 +7,7 @@ import { useRemovedFromRoom } from "@/hooks/data/useRemovedFromRoom";
 import { secureStore } from "@/services/secureStore";
 import Button from "@/shared/Button";
 import Header from "@/shared/Header";
+import SearchButton from "@/shared/SearchButton";
 import CreateRoomModal from "@/shared/Modals/RoomModals/CreateRoomModal";
 import View from "@/shared/View";
 import RoomCard from "@/widgets/rooms/components/RoomCard";
@@ -63,7 +64,7 @@ const Rooms = () => {
 
   return (
     <View>
-      <Header title="Rooms" />
+      <Header title="Rooms" rightAction={<SearchButton />} />
       
       <Button
         title="Add New Room"

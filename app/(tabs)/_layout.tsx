@@ -77,7 +77,31 @@ export default function TabLayout() {
           }}
         />
         <Tabs.Screen
+          name="search/index"
+          options={{
+            href: null,
+          }}
+        />
+        <Tabs.Screen
           name="search/connections-search"
+          options={{
+            href: null,
+          }}
+        />
+        <Tabs.Screen
+          name="trash/index"
+          options={{
+            href: null,
+          }}
+        />
+        <Tabs.Screen
+          name="shared/index"
+          options={{
+            href: null,
+          }}
+        />
+        <Tabs.Screen
+          name="favorites/index"
           options={{
             href: null,
           }}
