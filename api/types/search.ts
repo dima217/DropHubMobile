@@ -1,10 +1,19 @@
-import { FileItem } from "./file";
 import { StorageItem } from "./storage";
 
 export enum SearchResourceType {
     ROOM = 'room',
     STORAGE = 'storage',
     ALL = 'all',
+}
+
+export interface SearchFile {
+    id: string;
+    originalName: string;
+    mimeType: string;
+    size: number;
+    creatorId: number;
+    resourceId: string;
+    resourceType: SearchResourceType;
 }
 
 export interface SearchRequest {
@@ -17,6 +26,6 @@ export interface SearchRequest {
 export interface SearchResponse {
     success: boolean;
     total: number;
-    files: FileItem[];
+    files: SearchFile[];
     storageItems: StorageItem[];
 }

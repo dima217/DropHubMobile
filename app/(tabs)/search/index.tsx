@@ -8,14 +8,14 @@ import { ThemedText } from "@/shared/core/ThemedText";
 import { SearchFilters } from "@/widgets/search/components/SearchFilters";
 import { SearchHistory } from "@/widgets/search/components/SearchHistory";
 import { SearchResults } from "@/widgets/search/components/SearchResults";
-import React, { useState, useMemo, useEffect } from "react";
-import {
-  StyleSheet,
-  TouchableOpacity,
-  View as RNView,
-} from "react-native";
 import { Feather } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import React, { useEffect, useMemo, useState } from "react";
+import {
+  View as RNView,
+  StyleSheet,
+  TouchableOpacity,
+} from "react-native";
 
 const SEARCH_HISTORY_KEY = "@search_history";
 
@@ -77,7 +77,7 @@ const GlobalSearchScreen = () => {
   };
 
   return (
-    <View>
+    <View style={styles.container}>
       <Header title="Поиск" />
       <SearchInput
         value={searchQuery}
@@ -100,6 +100,7 @@ const GlobalSearchScreen = () => {
       </RNView>
 
       {showFilters && (
+        <RNView style={styles.filtersContainer}>
         <SearchFilters
           selectedResourceType={selectedResourceType}
           onResourceTypeChange={setSelectedResourceType}
@@ -110,7 +111,8 @@ const GlobalSearchScreen = () => {
           selectedTags={selectedTags}
           onTagToggle={toggleTag}
           mimeTypes={mimeTypes}
-        />
+          />
+        </RNView>
       )}
 
       {!searchQuery && (
@@ -130,10 +132,12 @@ const GlobalSearchScreen = () => {
 };
 
 const styles = StyleSheet.create({
+  container: {
+    gap: 16,
+  },
   filtersContainer: {
     flexDirection: "row",
     gap: 12,
-    marginTop: 16,
     marginBottom: 8,
   },
   filterButton: {

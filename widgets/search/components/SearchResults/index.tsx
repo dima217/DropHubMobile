@@ -1,6 +1,5 @@
-import { SearchResponse } from "@/api/types/search";
-import { StorageItem } from "@/api/types/storage";
 import { FileItem, FileUploadStatus } from "@/api/types/file";
+import { SearchFile, SearchResponse } from "@/api/types/search";
 import { Colors } from "@/constants/design-tokens";
 import { ThemedText } from "@/shared/core/ThemedText";
 import FileCard from "@/widgets/rooms/components/FileCard";
@@ -9,24 +8,23 @@ import React from "react";
 import {
   ActivityIndicator,
   FlatList,
-  StyleSheet,
   View as RNView,
+  StyleSheet,
 } from "react-native";
 
-const mapStorageItemToFile = (item: StorageItem): FileItem => {
-  const meta = item.fileMeta;
+const mapSearchFileToFileItem = (item: SearchFile): FileItem => {
   return {
-    _id: meta?._id || item.id,
-    originalName: meta?.originalName || item.name,
-    storedName: meta?.storedName || item.name,
-    size: meta?.size || 0,
-    mimeType: meta?.mimeType || "application/octet-stream",
-    uploadTime: meta?.uploadTime || new Date().toISOString(),
-    downloadCount: meta?.downloadCount || 0,
+    _id: item.id,
+    originalName: item.originalName,
+    mimeType: item.mimeType,
+    size: item.size,
+    creatorId: item.creatorId,
+    storedName: item.originalName,
     key: "",
+    uploadTime: new Date().toISOString(),
+    downloadCount: 0,
     uploadedParts: 0,
     expiresAt: null,
-    creatorId: meta?.creatorId || Number(item.creatorId) || 0,
     uploadSession: { status: FileUploadStatus.COMPLETE },
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
@@ -53,46 +51,47 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
     );
   }
 
-  const items = [
-    ...(results?.storageItems || []).map((item) => ({
-      type: "storage" as const,
-      item,
-    })),
-    ...(results?.files || []).map((file) => ({
-      type: "file" as const,
-      file,
-    })),
-  ];
+  const items = [];
+
+  if (results?.storageItems) {
+    for (const storageItem of results.storageItems) {
+      if (storageItem.isDirectory) {
+        items.push({ type: "folder" as const, item: storageItem });
+      } else {
+        items.push({ type: "file" as const, file: mapSearchFileToFileItem(storageItem as any) });
+      }
+    }
+  }
+  
+  if (results?.files) {
+    items.push(...results.files.map((file) => ({ type: "file" as const, file: mapSearchFileToFileItem(file) })));
+  }
+  
 
   return (
     <FlatList
       data={items}
       keyExtractor={(item, index) =>
-        item.type === "storage" ? item.item.id : item.file._id
+        item.type === "folder" ? item.item.id : item.file?._id || ""
       }
       renderItem={({ item }) => {
-        if (item.type === "storage") {
-          const storageItem = item.item;
-          if (storageItem.isDirectory) {
+        switch (item.type) {
+          case "folder":
             return (
               <FolderCard
-                folderId={storageItem.id}
-                folderName={storageItem.name}
+                folderId={item.item.id}
+                folderName={item.item.name}
                 itemCount={
-                  storageItem.childrenCount ||
-                  (storageItem.filesCount || 0) +
-                    (storageItem.foldersCount || 0)
+                  item.item.childrenCount ||
+                  (item.item.filesCount || 0) + (item.item.foldersCount || 0)
                 }
               />
             );
-          } else {
-            const file = mapStorageItemToFile(storageItem);
-            return <FileCard file={file} />;
-          }
-        } else {
-          return <FileCard file={item.file} />;
+          case "file":
+            return <FileCard file={item.file} />;
         }
       }}
+      
       ListEmptyComponent={
         <RNView style={styles.emptyContainer}>
           <ThemedText style={styles.emptyText}>
@@ -107,7 +106,6 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
 
 const styles = StyleSheet.create({
   center: {
-    flex: 1,
     justifyContent: "center",
     alignItems: "center",
     paddingTop: 100,

@@ -1,8 +1,8 @@
 import { Colors } from "@/constants/design-tokens";
 import { ThemedText } from "@/shared/core/ThemedText";
-import React from "react";
-import { StyleSheet, TouchableOpacity, View as RNView } from "react-native";
 import { Feather } from "@expo/vector-icons";
+import React from "react";
+import { View as RNView, StyleSheet, TouchableOpacity } from "react-native";
 
 interface SearchHistoryProps {
   history: string[];
@@ -17,7 +17,6 @@ export const SearchHistory: React.FC<SearchHistoryProps> = ({
 
   return (
     <RNView style={styles.historyContainer}>
-      <ThemedText style={styles.historyTitle}>История поиска:</ThemedText>
       {history.map((item, index) => (
         <TouchableOpacity
           key={index}
@@ -34,8 +33,7 @@ export const SearchHistory: React.FC<SearchHistoryProps> = ({
 
 const styles = StyleSheet.create({
   historyContainer: {
-    marginTop: 16,
-    paddingHorizontal: 16,
+    
   },
   historyTitle: {
     fontSize: 14,

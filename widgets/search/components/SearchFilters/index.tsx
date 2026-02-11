@@ -3,14 +3,14 @@ import { useGetStorageInfoQuery } from "@/api/storageApi";
 import { SearchResourceType } from "@/api/types/search";
 import { Colors } from "@/constants/design-tokens";
 import { ThemedText } from "@/shared/core/ThemedText";
+import { Feather } from "@expo/vector-icons";
 import React from "react";
 import {
+  View as RNView,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
-  View as RNView,
 } from "react-native";
-import { Feather } from "@expo/vector-icons";
 
 interface SearchFiltersProps {
   selectedResourceType: SearchResourceType;
@@ -168,14 +168,12 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
 
 const styles = StyleSheet.create({
   filters: {
-    maxHeight: 200,
-    marginBottom: 16,
+    
   },
   filterRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    marginBottom: 12,
     paddingHorizontal: 16,
   },
   filterLabel: {

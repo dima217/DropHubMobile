@@ -20,17 +20,19 @@ import UploadPreviewModal from "@/shared/Modals/UploadPreviewModal";
 import SearchButton from "@/shared/SearchButton";
 import View from "@/shared/View";
 import PreviewToggleSwitch from "@/shared/ui/PreviewToggleSwitch";
+import { StorageBreadcrumbs } from "@/widgets/storage/components/Path";
 import { StorageFAB } from "@/widgets/storage/components/StorageFAB";
 import { StorageItemList } from "@/widgets/storage/components/StorageItemList";
 import { useStorageActions } from "@/widgets/storage/hooks/useStorageActions";
 import { useStorageFileUpload } from "@/widgets/storage/hooks/useStorageFileUpload";
+import { useStorageNavigation } from "@/widgets/storage/hooks/useStorageNavigation";
 import { useStoragePreviewUrls } from "@/widgets/storage/hooks/useStoragePreviewUrls";
 import { useStorageScreenHandlers } from "@/widgets/storage/hooks/useStorageScreenHandlers";
 import { useSelectedItemState } from "@/widgets/storage/hooks/useTagsState";
 import { Feather } from "@expo/vector-icons";
 import { skipToken } from "@reduxjs/toolkit/query";
 import { useLocalSearchParams } from "expo-router";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   View as RNView,
@@ -68,13 +70,6 @@ const StorageScreen = () => {
 
   const storageId = storageInfo?.id || "";
 
-  
-useEffect(() => {
-  console.log("STORAGE INFO ID CHANGED:", storageInfo?.id);
-  console.log("STORAGE INFO CHANGED:", storageInfo);
-
-}, [storageInfo]);
-
   const {
     data: structure,
     isLoading: isStructureLoading,
@@ -83,35 +78,13 @@ useEffect(() => {
   } = useGetStorageStructureQuery(storageId ? { storageId, parentId: currentParentId ?? undefined } : skipToken);
 
   // Handle navigation from favorites
-  useEffect(() => {
-    if (targetParentId && structure && !hasNavigatedRef.current) {
-      hasNavigatedRef.current = true;
-      const targetId = targetParentId === "" ? null : targetParentId;
-
-      // Build path from root to target folder
-      const buildPath = (folderId: string | null): { id: string | null; name: string }[] => {
-        const segments: { id: string | null; name: string }[] = [{ id: null, name: "Root" }];
-        if (!folderId) return segments;
-        const chain: StorageItem[] = [];
-        let currentId: string | null = folderId;
-        while (currentId) {
-          const item = structure.find((s) => s.id === currentId);
-          if (!item) break;
-          chain.unshift(item);
-          currentId = item.parentId;
-        }
-        for (const item of chain) {
-          segments.push({ id: item.id, name: item.name });
-        }
-        return segments;
-      };
-
-      const newPath = buildPath(targetId);
-      setCurrentParentId(targetId);
-      setPath(newPath);
-    }
-  }, [targetParentId, structure]);
-
+  useStorageNavigation({
+    targetParentId,
+    structure,
+    setCurrentParentId,
+    setPath,
+  });
+  
   const { data: favorites } = useGetFavoritesQuery(undefined, {
     skip: !storageId,
   });
@@ -240,36 +213,13 @@ useEffect(() => {
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.breadcrumbContainer}
             >
-              {path.map((segment, index) => {
-                const isLast = index === path.length - 1;
-                return (
-                  <RNView
-                    key={`${segment.id ?? "root"}_${index}`}
-                    style={styles.breadcrumbItemWrapper}
-                  >
-                    <TouchableOpacity
-                      disabled={isLast}
-                      onPress={() => {
-                        setCurrentParentId(segment.id);
-                        setPath((prev) => prev.slice(0, index + 1));
-                      }}
-                    >
-                      <Text
-                        style={[
-                          styles.breadcrumbText,
-                          isLast && styles.breadcrumbTextActive,
-                        ]}
-                      >
-                        {segment.name}
-                      </Text>
-                      {isLast && <RNView style={styles.breadcrumbUnderline} />}
-                    </TouchableOpacity>
-                    {index < path.length - 1 && (
-                      <Text style={styles.breadcrumbSeparator}>/</Text>
-                    )}
-                  </RNView>
-                );
-              })}
+            <StorageBreadcrumbs
+              path={path}
+              onNavigate={(segmentId, index) => {
+                setCurrentParentId(segmentId);
+                setPath((prev) => prev.slice(0, index + 1));
+              }}
+            />
             </ScrollView>
             <PreviewToggleSwitch
               isEnabled={previewEnabled}
