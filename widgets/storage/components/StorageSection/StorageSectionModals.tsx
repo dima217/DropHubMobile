@@ -158,8 +158,6 @@ export const StorageSectionModals: React.FC<StorageSectionModalsProps> = ({
 
       <MoveItemModal
         visible={moveModalVisible}
-        itemId={selectedItem?.id || ""}
-        storageId={storageId}
         currentParentId={currentParentId}
         onClose={() => {
           setters.setMoveModalVisible(false);

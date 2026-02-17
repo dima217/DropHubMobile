@@ -18,6 +18,8 @@ interface FolderCardProps {
   menuItems?: ActionMenuItemData[];
   isSelected?: boolean;
   isFavorite?: boolean;
+  /** When true, folder card is visually dimmed and not clickable */
+  disabled?: boolean;
   onPress?: () => void;
   onLongPress?: () => void;
   tags?: string[];
@@ -35,6 +37,7 @@ const FolderCard: React.FC<FolderCardProps> = ({
   menuItems = [],
   isSelected = false,
   isFavorite = false,
+  disabled = false,
   onPress,
   onLongPress,
   tags = [],
@@ -49,10 +52,11 @@ const FolderCard: React.FC<FolderCardProps> = ({
       style={[
         styles.container,
         isSelected && styles.containerSelected,
+        disabled && styles.containerDisabled,
         primaryTagColor ? { borderColor: primaryTagColor } : null,
       ]}
-      onPress={onPress}
-      onLongPress={onLongPress}
+      onPress={disabled ? undefined : onPress}
+      onLongPress={disabled ? undefined : onLongPress}
     >
       {showAuthorship && (
         <AuthorshipSection
@@ -68,12 +72,18 @@ const FolderCard: React.FC<FolderCardProps> = ({
             <Feather
               name="folder"
               size={24}
-              color={Colors.primary}
+                color={disabled ? Colors.secondary : Colors.primary}
             />
           </View>
           <View style={styles.infoContainer}>
             <View style={styles.nameRow}>
-            <ThemedText style={styles.folderName} numberOfLines={1}>
+              <ThemedText
+                style={[
+                  styles.folderName,
+                  disabled && styles.folderNameDisabled,
+                ]}
+                numberOfLines={1}
+              >
               {folderName}
             </ThemedText>
             {isFavorite && !isSelected && (
@@ -142,6 +152,9 @@ const styles = StyleSheet.create({
     borderColor: Colors.primary,
     backgroundColor: Colors.inactive,
   },
+  containerDisabled: {
+    opacity: 0.5,
+  },
   content: {
     gap: 8,
   },
@@ -166,6 +179,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: Colors.brightText,
+  },
+  folderNameDisabled: {
+    color: Colors.secondary,
   },
   tagsRow: {
     flexDirection: 'row',

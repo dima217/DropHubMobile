@@ -39,6 +39,8 @@ interface StorageItemListProps {
   favoriteItemIds?: Set<string>;
   previewUrls?: Record<string, string>;
   onFolderPress?: (folder: StorageItem) => void;
+  /** Folders that should be visually disabled and not clickable (e.g. folder being moved) */
+  disabledFolderIds?: Set<string>;
   getMenuItems?: (
     item: StorageItem,
     ctx: { isFavorite: boolean }
@@ -51,6 +53,7 @@ export const StorageItemList: React.FC<StorageItemListProps> = ({
   favoriteItemIds,
   previewUrls = {},
   onFolderPress,
+  disabledFolderIds,
   getMenuItems,
 }) => {
   const tagColors = useSelector(
@@ -62,6 +65,7 @@ export const StorageItemList: React.FC<StorageItemListProps> = ({
     const itemTags = item.tags || [];
 
     if (item.isDirectory) {
+      const isDisabled = disabledFolderIds?.has(item.id) ?? false;
       const itemCount =
         item.childrenCount ??
         (item.filesCount || 0) + (item.foldersCount || 0);
@@ -73,7 +77,11 @@ export const StorageItemList: React.FC<StorageItemListProps> = ({
           folderName={item.name}
           itemCount={itemCount}
           menuItems={menuItems}
-          onPress={() => onFolderPress?.(item)}
+          disabled={isDisabled}
+          onPress={() => {
+            if (isDisabled) return;
+            onFolderPress?.(item);
+          }}
           tags={itemTags}
           tagColors={tagColors}
           isFavorite={isFavorite}

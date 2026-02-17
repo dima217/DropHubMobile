@@ -265,6 +265,13 @@ export const StorageSection: React.FC<StorageSectionProps> = (props) => {
     [getMenuItemsProp, actions, menuOptions]
   );
 
+  const disabledFolderIds = useMemo(() => {
+    if (!moveModalVisible || !selectedItem || !selectedItem.isDirectory) {
+      return undefined;
+    }
+    return new Set<string>([selectedItem.id]);
+  }, [moveModalVisible, selectedItem]);
+
   const modalsState: StorageSectionModalsState = useMemo(
     () => ({
       tagsModalVisible,
@@ -351,6 +358,7 @@ export const StorageSection: React.FC<StorageSectionProps> = (props) => {
             previewEnabled={previewEnabled}
             favoriteItemIds={favoriteItemIds}
             previewUrls={previewUrls}
+            disabledFolderIds={disabledFolderIds}
             onFolderPress={openFolder}
             getMenuItems={getMenuItems}
           />
