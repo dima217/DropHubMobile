@@ -1,3 +1,4 @@
+import { roomApi, useGetRoomDetailsQuery } from "@/api/roomApi";
 import { Colors } from "@/constants/design-tokens";
 import Header from "@/shared/Header";
 import SearchButton from "@/shared/SearchButton";
@@ -5,14 +6,41 @@ import View from "@/shared/View";
 import { StorageSection } from "@/widgets/storage/components/StorageSection";
 import { menuOptions } from "@/widgets/storage/components/StorageSection/data/defaultOptions";
 import { Feather } from "@expo/vector-icons";
-import React from "react";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import React, { useMemo } from "react";
 import {
   View as RNView,
   StyleSheet,
-  TouchableOpacity
+  TouchableOpacity,
 } from "react-native";
+import { useDispatch } from "react-redux";
 
-const StorageScreen = () => { 
+const StorageScreen = () => {
+  const router = useRouter();
+  const dispatch = useDispatch();
+  const { archiveRoomId } = useLocalSearchParams<{ archiveRoomId?: string }>();
+  const { data: roomDetails } = useGetRoomDetailsQuery(archiveRoomId!, {
+    skip: !archiveRoomId,
+  });
+
+  const archiveFileIds = useMemo(
+    () => roomDetails?.files?.map((f) => f._id) ?? [],
+    [roomDetails?.files]
+  );
+
+  const archiveMode = useMemo(() => {
+    if (!archiveRoomId) return undefined;
+    return {
+      roomId: archiveRoomId,
+      fileIds: archiveFileIds,
+      onCancel: () => router.replace("/(tabs)/storage"),
+      onComplete: () => {
+        dispatch(roomApi.util.invalidateTags(["Room"]));
+        router.back();
+      },
+    };
+  }, [archiveRoomId, archiveFileIds, router, dispatch]);
+
   return (
     <View>
       <Header
@@ -28,7 +56,7 @@ const StorageScreen = () => {
         options={{
           showBreadcrumbs: true,
           showPreviewToggle: true,
-          showFAB: true,
+          showFAB: !archiveMode,
           showGlobalTagsButton: true,
         }}
         menuOptions={menuOptions}
@@ -42,6 +70,7 @@ const StorageScreen = () => {
             </TouchableOpacity>
           </RNView>
         )}
+        archiveMode={archiveMode}
       />
     </View>
   );

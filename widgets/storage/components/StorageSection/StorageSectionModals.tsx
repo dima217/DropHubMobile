@@ -1,4 +1,5 @@
 import { StorageItem } from "@/api/types/storage";
+import { ArchiveRoomBar } from "@/shared/Modals/RoomModals/ArchiveRoomBar";
 import CreateFolderModal from "@/shared/Modals/StorageModals/CreateFolderModal";
 import GrantAccessModal from "@/shared/Modals/StorageModals/GrantAccessModal";
 import ItemInfoModal from "@/shared/Modals/StorageModals/ItemInfoModal";
@@ -21,6 +22,7 @@ export interface StorageSectionModalsState {
   moveModalVisible: boolean;
   uploadPreviewModalVisible: boolean;
   selectedItem: StorageItem | null;
+  archiveRoomModalVisible: boolean;
 }
 
 export interface StorageSectionModalsProps {
@@ -35,6 +37,7 @@ export interface StorageSectionModalsProps {
     setInfoModalVisible: (v: boolean) => void;
     setCreateFolderModalVisible: (v: boolean) => void;
     setMoveModalVisible: (v: boolean) => void;
+    setArchiveRoomModalVisible: (v: boolean) => void;
   };
   storageId: string;
   currentParentId: string | null;
@@ -49,7 +52,13 @@ export interface StorageSectionModalsProps {
     handleRemoveItemTag: (tag: string) => void;
     handleRemoveGlobalTag: (tag: string) => void;
     handleGrantAccess: (friendId: number) => void;
+    handleConfirmArchiveRoom: () => void;
   };
+  /** When set (e.g. redirect from room with archiveRoomId), show archive bar and use this onCancel */
+  archiveMode?: { onCancel: () => void };
+  /** Description for archive bar when in archiveMode (e.g. "Выберите папку...") */
+  archiveModeDescription?: string;
+  isArchivingRoom?: boolean;
   upload: {
     uploadingFiles: UploadingFile[];
     isUploadPreviewModalVisible: boolean;
@@ -69,6 +78,9 @@ export const StorageSectionModals: React.FC<StorageSectionModalsProps> = ({
   itemTags,
   globalTags,
   handlers,
+  archiveMode,
+  archiveModeDescription,
+  isArchivingRoom = false,
   upload,
 }) => {
   const {
@@ -82,6 +94,7 @@ export const StorageSectionModals: React.FC<StorageSectionModalsProps> = ({
     moveModalVisible,
     uploadPreviewModalVisible,
     selectedItem,
+    archiveRoomModalVisible,
   } = state;
 
   return (
@@ -174,6 +187,25 @@ export const StorageSectionModals: React.FC<StorageSectionModalsProps> = ({
           await upload.uploadFiles(files);
           upload.refetchStructure();
         }}
+      />
+
+      <ArchiveRoomBar
+        visible={archiveRoomModalVisible || !!archiveMode}
+        description={archiveMode ? archiveModeDescription : undefined}
+        onClose={
+          archiveMode
+            ? archiveMode.onCancel
+            : () => {
+                setters.setArchiveRoomModalVisible(false);
+                setSelectedItem(null);
+              }
+        }
+        onConfirm={() => {
+          handlers.handleConfirmArchiveRoom();
+          setters.setArchiveRoomModalVisible(false);
+          setSelectedItem(null);
+        }}
+        isLoading={isArchivingRoom}
       />
     </>
   );

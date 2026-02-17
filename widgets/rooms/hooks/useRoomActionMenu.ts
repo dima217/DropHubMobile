@@ -6,9 +6,11 @@ import { useState } from "react";
 interface UseRoomActionMenuProps {
   room: RoomItem;
   onRefresh?: () => void;
+  /** When user chooses "Archive", navigate to storage to pick destination folder */
+  onNavigateToArchive?: (roomId: string) => void;
 }
 
-export const useRoomActionMenu = ({ room, onRefresh }: UseRoomActionMenuProps) => {
+export const useRoomActionMenu = ({ room, onRefresh, onNavigateToArchive }: UseRoomActionMenuProps) => {
   const [deleteRoom, { isLoading: isDeleting }] = useDeleteRoomMutation();
   const [removeUsers, { isLoading: isRemovingUsers }] = useRemoveUsersFromRoomMutation();
   const [addUsers, { isLoading: isAddingUsers }] = useAddUsersToRoomMutation();
@@ -17,7 +19,6 @@ export const useRoomActionMenu = ({ room, onRefresh }: UseRoomActionMenuProps) =
   const [openManageUsersModal, setOpenManageUsersModal] = useState(false);
   const [manageUsersMode, setManageUsersMode] = useState<"add" | "remove">("add");
   const [openEditRoomModal, setOpenEditRoomModal] = useState(false);
-
 
   const handleDeleteRoom = async () => {
     try {
@@ -56,8 +57,8 @@ export const useRoomActionMenu = ({ room, onRefresh }: UseRoomActionMenuProps) =
     onRefresh?.();
   };
 
-  const handleShareRoom = () => {
-    console.log("Share room:", room.id);
+  const handleArchiveRoom = () => {
+    onNavigateToArchive?.(room.id);
   };
 
   const items: ActionMenuItemData[] = [
@@ -82,16 +83,20 @@ export const useRoomActionMenu = ({ room, onRefresh }: UseRoomActionMenuProps) =
       onPress: handleEditRoom,
       disabled: isDeleting || isRemovingUsers,
     },
-    {
-      id: "share",
-      icon: "share-2",
-      label: "Share Room",
-      onPress: handleShareRoom,
-      disabled: isDeleting || isRemovingUsers,
-    },
+    ...(room.archived
+      ? []
+      : [
+          {
+            id: "archive",
+            icon: "archive" as const,
+            label: "Архивировать",
+            onPress: handleArchiveRoom,
+            disabled: isDeleting || isRemovingUsers,
+          },
+        ]),
     {
       id: "delete",
-      icon: "trash-2",
+      icon: "trash-2" as const,
       label: "Delete Room",
       onPress: handleDeleteRoom,
       destructive: true,

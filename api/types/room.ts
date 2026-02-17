@@ -33,6 +33,7 @@ export interface RoomItem {
     uploadSession: {
         status: FileUploadStatus;
     };
+    archived: boolean;
     userRole: AccessRole;
     participantsDetails: {
         userId: number;
@@ -108,6 +109,6 @@ export interface UpdateRoomRequest {
 }
 
 export interface UpdateRoomResponse {
-    success: boolean;
-    roomId: string;
+  success: boolean;
+  roomId: string;
 }

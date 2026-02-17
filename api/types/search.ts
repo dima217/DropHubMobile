@@ -21,6 +21,7 @@ export interface SearchRequest {
     resourceType: SearchResourceType;
     tags?: string[];
     mimeType?: string;
+    mimeTypes?: string[];
     creatorId?: number;
 }
 export interface SearchResponse {

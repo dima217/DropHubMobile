@@ -10,7 +10,7 @@ import { SearchHistory } from "@/widgets/search/components/SearchHistory";
 import { SearchResults } from "@/widgets/search/components/SearchResults";
 import { Feather } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View as RNView,
   StyleSheet,
@@ -24,9 +24,8 @@ const GlobalSearchScreen = () => {
   const [selectedResourceType, setSelectedResourceType] =
     useState<SearchResourceType>(SearchResourceType.ALL);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [selectedMimeType, setSelectedMimeType] = useState<string | undefined>();
+  const [selectedMimeTypes, setSelectedMimeTypes] = useState<string[]>([]);
   const [selectedCreatorId, setSelectedCreatorId] = useState<number | undefined>();
-  const [showFilters, setShowFilters] = useState(false);
   const [searchHistory, setSearchHistory] = useState<string[]>([]);
 
   const { data: searchResults, isLoading } = useSearchQuery(
@@ -34,7 +33,7 @@ const GlobalSearchScreen = () => {
       query: searchQuery,
       resourceType: selectedResourceType,
       tags: selectedTags.length > 0 ? selectedTags : undefined,
-      mimeType: selectedMimeType,
+      mimeTypes: selectedMimeTypes.length > 0 ? selectedMimeTypes : undefined,
       creatorId: selectedCreatorId,
     },
     { skip: !searchQuery.trim() }
@@ -59,17 +58,6 @@ const GlobalSearchScreen = () => {
     }
   };
 
-  const mimeTypes = useMemo(() => {
-    const types = new Set<string>();
-    searchResults?.files?.forEach((file) => {
-      if (file.mimeType) {
-        const baseType = file.mimeType.split("/")[0];
-        types.add(baseType);
-      }
-    });
-    return Array.from(types);
-  }, [searchResults]);
-
   const toggleTag = (tag: string) => {
     setSelectedTags((prev) =>
       prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
@@ -86,34 +74,22 @@ const GlobalSearchScreen = () => {
       />
 
       <RNView style={styles.filtersContainer}>
-        <TouchableOpacity
-          style={styles.filterButton}
-          onPress={() => setShowFilters(!showFilters)}
-        >
-          <Feather name="filter" size={20} color={Colors.primary} />
-          <ThemedText style={styles.filterButtonText}>Фильтры</ThemedText>
-        </TouchableOpacity>
-
+        <RNView style={styles.filtersExpand}>
+          <SearchFilters
+            selectedResourceType={selectedResourceType}
+            onResourceTypeChange={setSelectedResourceType}
+            selectedMimeTypes={selectedMimeTypes}
+            onMimeTypesChange={setSelectedMimeTypes}
+            selectedCreatorId={selectedCreatorId}
+            onCreatorIdChange={setSelectedCreatorId}
+            selectedTags={selectedTags}
+            onTagToggle={toggleTag}
+          />
+        </RNView>
         <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
           <Feather name="search" size={20} color={Colors.brightText} />
         </TouchableOpacity>
       </RNView>
-
-      {showFilters && (
-        <RNView style={styles.filtersContainer}>
-        <SearchFilters
-          selectedResourceType={selectedResourceType}
-          onResourceTypeChange={setSelectedResourceType}
-          selectedMimeType={selectedMimeType}
-          onMimeTypeChange={setSelectedMimeType}
-          selectedCreatorId={selectedCreatorId}
-          onCreatorIdChange={setSelectedCreatorId}
-          selectedTags={selectedTags}
-          onTagToggle={toggleTag}
-          mimeTypes={mimeTypes}
-          />
-        </RNView>
-      )}
 
       {!searchQuery && (
         <SearchHistory
@@ -137,23 +113,12 @@ const styles = StyleSheet.create({
   },
   filtersContainer: {
     flexDirection: "row",
+    alignItems: "flex-start",
     gap: 12,
     marginBottom: 8,
   },
-  filterButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    backgroundColor: Colors.cardBackground,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  filterButtonText: {
-    color: Colors.primary,
-    fontSize: 14,
+  filtersExpand: {
+    flex: 1,
   },
   searchButton: {
     width: 44,

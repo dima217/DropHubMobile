@@ -9,8 +9,9 @@ import ActionMenu from "@/shared/ui/ActionMenu";
 import Avatar from "@/widgets/profile/components/ProfileCard/ui/Avatar";
 import { useRoomActionMenu } from "@/widgets/rooms/hooks/useRoomActionMenu";
 import { getManagedUsers } from "@/widgets/rooms/utils";
+import { useRouter } from "expo-router";
 import React from "react";
-import { StyleSheet, TouchableOpacity, View } from "react-native";
+import { StyleSheet, TouchableOpacity, View, type ViewStyle } from "react-native";
 
 interface RoomCardProps {
   room: RoomItem;
@@ -29,13 +30,28 @@ const formatBytes = (bytes: number): string => {
 };
 
 const RoomCard = ({ room, friends, onPress, notificationCount = 0, onRefresh }: RoomCardProps) => {
+  const router = useRouter();
   const participants = room.participantsDetails || [];
   const fileCount = room.files?.length || 0;
   const totalSize = room.maxBytes || 0;
-  //const owner = participants.find((p) => p.role === "admin") || participants[0];
   const ownerName = room.owner || "Room";
 
-  const { openManageUsersModal, manageUsersMode, setOpenManageUsersModal, handleConfirmManageUsers, items, openEditRoomModal, setOpenEditRoomModal, handleConfirmEditRoom } = useRoomActionMenu({ room, onRefresh });
+  const {
+    openManageUsersModal,
+    manageUsersMode,
+    setOpenManageUsersModal,
+    handleConfirmManageUsers,
+    items,
+    openEditRoomModal,
+    setOpenEditRoomModal,
+    handleConfirmEditRoom,
+  } = useRoomActionMenu({
+    room,
+    onRefresh,
+    onNavigateToArchive: (roomId) => {
+      router.push({ pathname: "/(tabs)/storage", params: { archiveRoomId: roomId } });
+    },
+  });
 
 
   const description = "Please wait a moment while we prepare your experience";
@@ -43,25 +59,39 @@ const RoomCard = ({ room, friends, onPress, notificationCount = 0, onRefresh }: 
 
   return (
     <TouchableOpacity onPress={onPress}>
-    <GradientView colors={[Colors.border, Colors.cardBackground]} locations={[0, 0.5]} style={styles.container}>
-      {notificationCount > 0 && (
+    <GradientView
+      colors={[Colors.border, Colors.cardBackground]}
+      locations={[0, 0.5]}
+      style={(room.archived ? [styles.container, styles.containerArchived] : styles.container) as ViewStyle}
+    >
+      {notificationCount > 0 && !room.archived && (
         <View style={styles.notificationBadge}>
           <ThemedText style={styles.notificationText}>
             +{notificationCount} new File{notificationCount > 1 ? "s" : ""}
           </ThemedText>
         </View>
       )}
-      
+
       <View style={styles.content}>
         <View style={styles.header}>
-          <ThemedText type="subtitle" style={styles.roomName}>
+          <ThemedText
+            type="subtitle"
+            style={room.archived && room.userRole === AccessRole.ADMIN ? [styles.roomName, styles.roomNameArchived] : styles.roomName}
+          >
             {ownerName}
           </ThemedText>
-          {room.userRole === AccessRole.ADMIN && (
-            <View pointerEvents="box-none">
-              <ActionMenu items={items} title="Room Actions" />
-            </View>
-          )}
+          <View style={styles.headerRight}>
+            {room.archived && room.userRole === AccessRole.ADMIN && (
+              <View style={styles.archivedBadge}>
+                <ThemedText style={styles.archivedText}>Архив</ThemedText>
+              </View>
+            )}
+            {room.userRole === AccessRole.ADMIN && (
+              <View pointerEvents="box-none">
+                <ActionMenu items={items} title="Room Actions" />
+              </View>
+            )}
+          </View>
         </View>
 
         {participants.length > 0 && (
@@ -127,6 +157,20 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     position: "relative",
   },
+  containerArchived: {
+    opacity: 0.85,
+  },
+  archivedBadge: {
+    backgroundColor: Colors.secondary,
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  archivedText: {
+    color: Colors.brightText,
+    fontSize: 11,
+    fontWeight: "600",
+  },
   notificationBadge: {
     position: "absolute",
     top: 12,
@@ -155,6 +199,14 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "600",
     color: Colors.brightText,
+  },
+  roomNameArchived: {
+    color: Colors.secondary,
+  },
+  headerRight: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
   },
   participantsContainer: {
     flexDirection: "row",

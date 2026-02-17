@@ -34,12 +34,12 @@ export const roomApi = createApi({
   }),
 });
 
-export const { 
-    useCreateRoomMutation, 
-    useGetByRoomsListQuery, 
-    useGetRoomDetailsQuery, 
-    useAddUsersToRoomMutation, 
-    useRemoveUsersFromRoomMutation, 
-    useDeleteRoomMutation,
-    useUpdateRoomMutation
+export const {
+  useCreateRoomMutation,
+  useGetByRoomsListQuery,
+  useGetRoomDetailsQuery,
+  useAddUsersToRoomMutation,
+  useRemoveUsersFromRoomMutation,
+  useDeleteRoomMutation,
+  useUpdateRoomMutation,
 } = roomApi;

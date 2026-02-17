@@ -3,205 +3,160 @@ import { useGetStorageInfoQuery } from "@/api/storageApi";
 import { SearchResourceType } from "@/api/types/search";
 import { Colors } from "@/constants/design-tokens";
 import { ThemedText } from "@/shared/core/ThemedText";
+import { RootState } from "@/store/store";
 import { Feather } from "@expo/vector-icons";
-import React from "react";
+import React, { useState } from "react";
 import {
   View as RNView,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
 } from "react-native";
+import { useSelector } from "react-redux";
+import { SearchFilterButtons } from "./SearchFilterButtons";
+import { SearchFilterCreatorModal } from "./modals/SearchFilterCreatorModal";
+import { SearchFilterTagModal } from "./modals/SearchFilterTagModal";
+import { SearchFilterTypeModal } from "./modals/SearchFilterTypeModal";
 
-interface SearchFiltersProps {
+export interface SearchFiltersProps {
   selectedResourceType: SearchResourceType;
   onResourceTypeChange: (type: SearchResourceType) => void;
-  selectedMimeType?: string;
-  onMimeTypeChange: (type?: string) => void;
-  selectedCreatorId?: number;
-  onCreatorIdChange: (id?: number) => void;
+  selectedMimeTypes: string[];
+  onMimeTypesChange: (types: string[]) => void;
+  selectedCreatorId: number | undefined;
+  onCreatorIdChange: (id: number | undefined) => void;
   selectedTags: string[];
   onTagToggle: (tag: string) => void;
-  mimeTypes: string[];
 }
 
 export const SearchFilters: React.FC<SearchFiltersProps> = ({
   selectedResourceType,
   onResourceTypeChange,
-  selectedMimeType,
-  onMimeTypeChange,
+  selectedMimeTypes,
+  onMimeTypesChange,
   selectedCreatorId,
   onCreatorIdChange,
   selectedTags,
   onTagToggle,
-  mimeTypes,
 }) => {
-  const { data: friends } = useGetFriendsQuery();
+  const [typeModalVisible, setTypeModalVisible] = useState(false);
+  const [tagModalVisible, setTagModalVisible] = useState(false);
+  const [creatorModalVisible, setCreatorModalVisible] = useState(false);
+
+  const { data: friends = [] } = useGetFriendsQuery();
   const { data: storageInfo } = useGetStorageInfoQuery();
+  const tagColors = useSelector(
+    (state: RootState) => (state.tagColors as { colors: Record<string, string> }).colors ?? {}
+  );
+
+  const tags = storageInfo?.tags ?? [];
 
   return (
-    <ScrollView
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      style={styles.filters}
-    >
-      <RNView style={styles.filterRow}>
-        <ThemedText style={styles.filterLabel}>Тип ресурса:</ThemedText>
-        {Object.values(SearchResourceType).map((type) => (
-          <TouchableOpacity
-            key={type}
-            style={[
-              styles.filterChip,
-              selectedResourceType === type && styles.filterChipActive,
-            ]}
-            onPress={() => onResourceTypeChange(type)}
-          >
-            <ThemedText
+    <RNView style={styles.wrapper}>
+      <RNView style={styles.resourceRow}>
+        <ThemedText style={styles.resourceLabel}>Ресурс:</ThemedText>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.resourceChips}
+        >
+          {[
+            { value: SearchResourceType.ALL, label: "Все" },
+            { value: SearchResourceType.ROOM, label: "Комнаты" },
+            { value: SearchResourceType.STORAGE, label: "Хранилище" },
+          ].map(({ value, label }) => (
+            <TouchableOpacity
+              key={value}
               style={[
-                styles.filterChipText,
-                selectedResourceType === type && styles.filterChipTextActive,
+                styles.chip,
+                selectedResourceType === value && styles.chipActive,
               ]}
+              onPress={() => onResourceTypeChange(value)}
             >
-              {type === SearchResourceType.ALL
-                ? "Все"
-                : type === SearchResourceType.ROOM
-                ? "Комнаты"
-                : "Хранилище"}
-            </ThemedText>
-          </TouchableOpacity>
-        ))}
+              <ThemedText
+                style={[
+                  styles.chipText,
+                  selectedResourceType === value && styles.chipTextActive,
+                ]}
+              >
+                {label}
+              </ThemedText>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
       </RNView>
 
-      {mimeTypes.length > 0 && (
-        <RNView style={styles.filterRow}>
-          <ThemedText style={styles.filterLabel}>Тип файла:</ThemedText>
-          {mimeTypes.map((type) => (
-            <TouchableOpacity
-              key={type}
-              style={[
-                styles.filterChip,
-                selectedMimeType === type && styles.filterChipActive,
-              ]}
-              onPress={() =>
-                onMimeTypeChange(selectedMimeType === type ? undefined : type)
-              }
-            >
-              <ThemedText
-                style={[
-                  styles.filterChipText,
-                  selectedMimeType === type && styles.filterChipTextActive,
-                ]}
-              >
-                {type}
-              </ThemedText>
-            </TouchableOpacity>
-          ))}
-        </RNView>
-      )}
+      <SearchFilterButtons
+        selectedMimeTypes={selectedMimeTypes}
+        selectedTags={selectedTags}
+        selectedCreatorId={selectedCreatorId}
+        friends={friends}
+        onPressType={() => setTypeModalVisible(true)}
+        onPressTag={() => setTagModalVisible(true)}
+        onPressCreator={() => setCreatorModalVisible(true)}
+      />
 
-      {friends && friends.length > 0 && (
-        <RNView style={styles.filterRow}>
-          <ThemedText style={styles.filterLabel}>Друг:</ThemedText>
-          {friends.map((friend) => (
-            <TouchableOpacity
-              key={friend.friendshipId}
-              style={[
-                styles.filterChip,
-                selectedCreatorId === friend.friendProfile.id &&
-                  styles.filterChipActive,
-              ]}
-              onPress={() =>
-                onCreatorIdChange(
-                  selectedCreatorId === friend.friendProfile.id
-                    ? undefined
-                    : friend.friendProfile.id
-                )
-              }
-            >
-              <ThemedText
-                style={[
-                  styles.filterChipText,
-                  selectedCreatorId === friend.friendProfile.id &&
-                    styles.filterChipTextActive,
-                ]}
-              >
-                {friend.friendProfile.firstName}
-              </ThemedText>
-            </TouchableOpacity>
-          ))}
-        </RNView>
-      )}
+      <SearchFilterTypeModal
+        visible={typeModalVisible}
+        selectedMimeTypes={selectedMimeTypes}
+        onSelect={onMimeTypesChange}
+        onClose={() => setTypeModalVisible(false)}
+      />
 
-      {storageInfo?.tags && storageInfo.tags.length > 0 && (
-        <RNView style={styles.filterRow}>
-          <ThemedText style={styles.filterLabel}>Теги:</ThemedText>
-          {storageInfo.tags.map((tag) => (
-            <TouchableOpacity
-              key={tag}
-              style={[
-                styles.filterChip,
-                selectedTags.includes(tag) && styles.filterChipActive,
-              ]}
-              onPress={() => onTagToggle(tag)}
-            >
-              <Feather
-                name={selectedTags.includes(tag) ? "check" : "tag"}
-                size={14}
-                color={
-                  selectedTags.includes(tag) ? Colors.brightText : Colors.primary
-                }
-              />
-              <ThemedText
-                style={[
-                  styles.filterChipText,
-                  selectedTags.includes(tag) && styles.filterChipTextActive,
-                ]}
-              >
-                {tag}
-              </ThemedText>
-            </TouchableOpacity>
-          ))}
-        </RNView>
-      )}
-    </ScrollView>
+      <SearchFilterTagModal
+        visible={tagModalVisible}
+        tags={tags}
+        tagColors={tagColors}
+        selectedTags={selectedTags}
+        onToggle={onTagToggle}
+        onClose={() => setTagModalVisible(false)}
+      />
+
+      <SearchFilterCreatorModal
+        visible={creatorModalVisible}
+        selectedCreatorId={selectedCreatorId}
+        onSelect={onCreatorIdChange}
+        onClose={() => setCreatorModalVisible(false)}
+      />
+    </RNView>
   );
 };
 
 const styles = StyleSheet.create({
-  filters: {
-    
+  wrapper: {
+    gap: 12,
   },
-  filterRow: {
+  resourceRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    paddingHorizontal: 16,
   },
-  filterLabel: {
+  resourceLabel: {
     fontSize: 14,
     color: Colors.secondary,
-    marginRight: 8,
   },
-  filterChip: {
+  resourceChips: {
     flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
+    gap: 8,
+  },
+  chip: {
     paddingHorizontal: 12,
     paddingVertical: 6,
-    backgroundColor: Colors.cardBackground,
     borderRadius: 16,
     borderWidth: 1,
     borderColor: Colors.border,
+    backgroundColor: Colors.cardBackground,
   },
-  filterChipActive: {
+  chipActive: {
     backgroundColor: Colors.primary,
     borderColor: Colors.primary,
   },
-  filterChipText: {
+  chipText: {
     fontSize: 12,
     color: Colors.text,
   },
-  filterChipTextActive: {
+  chipTextActive: {
     color: Colors.brightText,
+    fontWeight: "500",
   },
 });
-

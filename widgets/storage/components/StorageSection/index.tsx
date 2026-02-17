@@ -5,6 +5,7 @@ import {
   useGetStorageStructureQuery,
   useRemoveStorageTagsMutation,
 } from "@/api";
+import { useArchiveRoomToStorageMutation } from "@/api/storageApi";
 import { ResourceType } from "@/api/types/shared";
 import { StorageItem } from "@/api/types/storage";
 import { Colors } from "@/constants/design-tokens";
@@ -87,6 +88,13 @@ export interface StorageSectionProps {
   renderHeaderActions?: (params: {
     onOpenGlobalTags: () => void;
   }) => React.ReactNode;
+  /** When set, user is choosing a folder to archive a room into; show bottom bar and call API on confirm */
+  archiveMode?: {
+    roomId: string;
+    fileIds: string[];
+    onCancel: () => void;
+    onComplete: () => void;
+  };
 }
 
 /**
@@ -100,7 +108,7 @@ export interface StorageSectionProps {
  * - Parent must pass `menuOptions`; optional `getMenuItems` overrides default menu building
  */
 export const StorageSection: React.FC<StorageSectionProps> = (props) => {
-  const { options: optionsProp, menuOptions, getMenuItems: getMenuItemsProp, renderHeaderActions } = props;
+  const { options: optionsProp, menuOptions, getMenuItems: getMenuItemsProp, renderHeaderActions, archiveMode } = props;
   const options = useMemo(
     (): ResolvedStorageSectionOptions => ({ ...defaultOptions, ...optionsProp }),
     [optionsProp]
@@ -115,6 +123,7 @@ export const StorageSection: React.FC<StorageSectionProps> = (props) => {
   const [infoModalVisible, setInfoModalVisible] = useState(false);
   const [createFolderModalVisible, setCreateFolderModalVisible] = useState(false);
   const [moveModalVisible, setMoveModalVisible] = useState(false);
+  const [archiveRoomModalVisible, setArchiveRoomModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState<StorageItem | null>(null);
 
   const {
@@ -168,6 +177,23 @@ export const StorageSection: React.FC<StorageSectionProps> = (props) => {
   const [createFolder, { isLoading: isCreatingFolder }] =
     useCreateStorageFolderMutation();
   const [removeStorageTags] = useRemoveStorageTagsMutation();
+  const [archiveRoomToStorage, { isLoading: isArchivingRoom }] =
+    useArchiveRoomToStorageMutation();
+
+  const handleConfirmArchiveRoom = useCallback(async () => {
+    if (!archiveMode || !storageId) return;
+    try {
+      await archiveRoomToStorage({
+        storageId,
+        roomId: archiveMode.roomId,
+        fileIds: archiveMode.fileIds,
+        parentId: currentParentId ?? undefined,
+      }).unwrap();
+      archiveMode.onComplete();
+    } catch (e) {
+      console.error("Archive room to storage failed:", e);
+    }
+  }, [archiveMode, storageId, currentParentId, archiveRoomToStorage]);
 
   const itemsInCurrentFolder: StorageItem[] = useMemo(() => {
     if (!structure) return [];
@@ -284,6 +310,7 @@ export const StorageSection: React.FC<StorageSectionProps> = (props) => {
       moveModalVisible,
       uploadPreviewModalVisible: isUploadPreviewModalVisible,
       selectedItem,
+      archiveRoomModalVisible,
     }),
     [
       tagsModalVisible,
@@ -296,6 +323,7 @@ export const StorageSection: React.FC<StorageSectionProps> = (props) => {
       moveModalVisible,
       isUploadPreviewModalVisible,
       selectedItem,
+      archiveRoomModalVisible,
     ]
   );
 
@@ -309,6 +337,7 @@ export const StorageSection: React.FC<StorageSectionProps> = (props) => {
       setInfoModalVisible,
       setCreateFolderModalVisible,
       setMoveModalVisible,
+      setArchiveRoomModalVisible,
     }),
     []
   );
@@ -391,7 +420,15 @@ export const StorageSection: React.FC<StorageSectionProps> = (props) => {
           handleRemoveItemTag,
           handleRemoveGlobalTag,
           handleGrantAccess,
+          handleConfirmArchiveRoom,
         }}
+        archiveMode={archiveMode ? { onCancel: archiveMode.onCancel } : undefined}
+        archiveModeDescription={
+          archiveMode
+            ? "Выберите папку в хранилище, затем нажмите «Архивировать»."
+            : undefined
+        }
+        isArchivingRoom={isArchivingRoom}
         upload={{
           uploadingFiles,
           isUploadPreviewModalVisible,
