@@ -2,7 +2,7 @@ import { FriendRequestResponse } from "@/api/types/friend";
 import { useEffect } from "react";
 import { useWebSocket } from "../websocket/useWebSocket";
 
-const WS_URL = "http://10.78.194.195:3000";
+const WS_URL = "http://10.205.168.195:3000";
 
 export const useFriendRequestUpdate = (
   accessToken: string,
@@ -20,7 +20,7 @@ export const useFriendRequestUpdate = (
       onFriendRequestUpdate(updatedFriendRequest);
     };
 
-    emit('subscribeToFriends');
+    emit("subscribeToFriends");
     on("friendRequest", handleUpdate);
 
     return () => {

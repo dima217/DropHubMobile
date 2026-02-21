@@ -195,7 +195,7 @@ export const StorageSection: React.FC<StorageSectionProps> = (props) => {
     }
   }, [archiveMode, storageId, currentParentId, archiveRoomToStorage]);
 
-  const itemsInCurrentFolder: StorageItem[] = useMemo(() => {
+  const itemsInCurrentFolderRaw: StorageItem[] = useMemo(() => {
     if (!structure) return [];
     return structure
       .filter((item) => item.parentId === currentParentId && !item.deletedAt)
@@ -205,6 +205,32 @@ export const StorageSection: React.FC<StorageSectionProps> = (props) => {
         return a.name.localeCompare(b.name);
       });
   }, [structure, currentParentId]);
+
+  const currentFolderItemIds = useMemo(
+    () => new Set(itemsInCurrentFolderRaw.map((i) => i.id)),
+    [itemsInCurrentFolderRaw]
+  );
+
+  const {
+    globalTags,
+    itemTags,
+    selectedItemState,
+    removeGlobalTag,
+    addItemTag,
+    removeItemTag,
+    getItemTags,
+  } = useSelectedItemState({
+    storageTags: storageInfo?.tags || [],
+    selectedItemFromProps: selectedItem,
+    currentFolderItemIds,
+  });
+
+  const itemsInCurrentFolder: StorageItem[] = useMemo(() => {
+    return itemsInCurrentFolderRaw.map((item) => ({
+      ...item,
+      tags: getItemTags(item.id, item.tags || []),
+    }));
+  }, [itemsInCurrentFolderRaw, getItemTags]);
 
   const {
     uploadingFiles,
@@ -235,24 +261,12 @@ export const StorageSection: React.FC<StorageSectionProps> = (props) => {
   );
 
   const {
-    globalTags,
-    itemTags,
-    selectedItemState,
-    removeGlobalTag,
-    addItemTag,
-    removeItemTag,
-  } = useSelectedItemState({
-    storageTags: storageInfo?.tags || [],
-    selectedItemFromProps: selectedItem,
-  });
-
-  const {
     handleCreateFolder,
     handleRemoveGlobalTag,
     handleConfirmRename,
     handleConfirmMove,
-    handleAddItemTag,
-    handleRemoveItemTag,
+    handleAddItemTag: handleAddItemTagApi,
+    handleRemoveItemTag: handleRemoveItemTagApi,
     handleGrantAccess,
   } = useStorageScreenHandlers({
     storageId,
@@ -265,6 +279,22 @@ export const StorageSection: React.FC<StorageSectionProps> = (props) => {
     selectedItem: selectedItemState,
     actions,
   });
+
+  const handleAddItemTag = useCallback(
+    (tag: string) => {
+      addItemTag(tag);
+      handleAddItemTagApi(tag);
+    },
+    [addItemTag, handleAddItemTagApi]
+  );
+
+  const handleRemoveItemTag = useCallback(
+    (tag: string) => {
+      removeItemTag(tag);
+      handleRemoveItemTagApi(tag);
+    },
+    [removeItemTag, handleRemoveItemTagApi]
+  );
 
   const getMenuItems = useCallback(
     (item: StorageItem, ctx: { isFavorite: boolean }) => {

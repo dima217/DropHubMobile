@@ -1,7 +1,7 @@
-import { useEffect } from 'react';
-import { useWebSocket } from '../websocket/useWebSocket';
+import { useEffect } from "react";
+import { useWebSocket } from "../websocket/useWebSocket";
 
-const WS_URL = 'http://10.78.194.195:3000';
+const WS_URL = "http://10.205.168.195:3000";
 
 export const useRemovedFromRoom = (
   accessToken: string,
@@ -13,16 +13,16 @@ export const useRemovedFromRoom = (
   useEffect(() => {
     if (!isConnected || !isEnabled) return;
 
-    emit('subscribeToRemovalFromRoom');
+    emit("subscribeToRemovalFromRoom");
 
     const handler = (data: { roomId: string }) => {
       onRemoved(data.roomId);
     };
 
-    on('removedFromRoom', handler);
+    on("removedFromRoom", handler);
 
     return () => {
-      off('removedFromRoom', handler);
+      off("removedFromRoom", handler);
     };
   }, [isConnected, isEnabled, emit, on, off, onRemoved]);
 };

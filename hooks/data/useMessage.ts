@@ -1,7 +1,7 @@
-import { useCallback, useEffect } from 'react';
-import { useWebSocket } from '../websocket/useWebSocket';
+import { useCallback, useEffect } from "react";
+import { useWebSocket } from "../websocket/useWebSocket";
 
-const WS_URL = 'http://10.78.194.195:3000';
+const WS_URL = "http://10.205.168.195:3000";
 
 export interface ChatMessage {
   id: string;
@@ -40,10 +40,10 @@ export const useRoomChat = (
   useEffect(() => {
     if (!isConnected || !isEnabled || !roomId) return;
 
-    emit('join_room', { roomId });
+    emit("join_room", { roomId });
 
     return () => {
-      emit('leave_room', { roomId });
+      emit("leave_room", { roomId });
     };
   }, [isConnected, isEnabled, roomId, emit]);
 
@@ -52,14 +52,14 @@ export const useRoomChat = (
   useEffect(() => {
     if (!isConnected || !isEnabled) return;
 
-    if (onNewMessage) on('new_message', onNewMessage);
-    if (onMessageUpdated) on('message_updated', onMessageUpdated);
-    if (onMessageDeleted) on('message_deleted', onMessageDeleted);
+    if (onNewMessage) on("new_message", onNewMessage);
+    if (onMessageUpdated) on("message_updated", onMessageUpdated);
+    if (onMessageDeleted) on("message_deleted", onMessageDeleted);
 
     return () => {
-      if (onNewMessage) off('new_message', onNewMessage);
-      if (onMessageUpdated) off('message_updated', onMessageUpdated);
-      if (onMessageDeleted) off('message_deleted', onMessageDeleted);
+      if (onNewMessage) off("new_message", onNewMessage);
+      if (onMessageUpdated) off("message_updated", onMessageUpdated);
+      if (onMessageDeleted) off("message_deleted", onMessageDeleted);
     };
   }, [
     isConnected,
@@ -77,35 +77,34 @@ export const useRoomChat = (
     (content: string) => {
       if (!roomId) return;
 
-      console.log('[sendMessage] emit', { content, roomId });
+      console.log("[sendMessage] emit", { content, roomId });
 
-      emit('send_message', {
+      emit("send_message", {
         roomId: roomId.toString(),
         content: content.toString(),
       });
-      console.log('[sendMessage] emitted', { content, roomId });
-
+      console.log("[sendMessage] emitted", { content, roomId });
     },
-    [emit, roomId],
+    [emit, roomId]
   );
 
   const updateMessage = useCallback(
     (commentId: string, content: string) => {
-      emit('update_message', {
+      emit("update_message", {
         commentId,
         content,
       });
     },
-    [emit],
+    [emit]
   );
 
   const deleteMessage = useCallback(
     (commentId: string) => {
-      emit('delete_message', {
+      emit("delete_message", {
         commentId,
       });
     },
-    [emit],
+    [emit]
   );
 
   return {

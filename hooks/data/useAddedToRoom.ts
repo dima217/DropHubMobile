@@ -1,8 +1,8 @@
-import { RoomDetails } from '@/api/types/room';
-import { useEffect } from 'react';
-import { useWebSocket } from '../websocket/useWebSocket';
+import { RoomDetails } from "@/api/types/room";
+import { useEffect } from "react";
+import { useWebSocket } from "../websocket/useWebSocket";
 
-const WS_URL = 'http://10.78.194.195:3000';
+const WS_URL = "http://10.205.168.195:3000";
 
 export const useAddedToRoom = (
   accessToken: string,
@@ -14,16 +14,16 @@ export const useAddedToRoom = (
   useEffect(() => {
     if (!isConnected || !isEnabled) return;
 
-    emit('subscribeToAdditionToRoom');
+    emit("subscribeToAdditionToRoom");
 
     const handler = (room: RoomDetails) => {
       onAdded(room);
     };
 
-    on('addedToRoom', handler);
+    on("addedToRoom", handler);
 
     return () => {
-      off('addedToRoom', handler);
+      off("addedToRoom", handler);
     };
   }, [isConnected, isEnabled, emit, on, off, onAdded]);
 };
