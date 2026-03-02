@@ -4,7 +4,6 @@ import { Colors } from "@/constants/design-tokens";
 import Header from "@/shared/Header";
 import SearchInput from "@/shared/SearchInput";
 import View from "@/shared/View";
-import { ThemedText } from "@/shared/core/ThemedText";
 import { SearchFilters } from "@/widgets/search/components/SearchFilters";
 import { SearchHistory } from "@/widgets/search/components/SearchHistory";
 import { SearchResults } from "@/widgets/search/components/SearchResults";
@@ -102,6 +101,7 @@ const GlobalSearchScreen = () => {
         results={searchResults}
         isLoading={isLoading}
         searchQuery={searchQuery}
+        resourceType={selectedResourceType}
       />
     </View>
   );

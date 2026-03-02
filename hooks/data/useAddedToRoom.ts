@@ -2,7 +2,7 @@ import { RoomDetails } from "@/api/types/room";
 import { useEffect } from "react";
 import { useWebSocket } from "../websocket/useWebSocket";
 
-const WS_URL = "http://10.205.168.195:3000";
+const WS_URL = "http://10.65.92.195:3000";
 
 export const useAddedToRoom = (
   accessToken: string,

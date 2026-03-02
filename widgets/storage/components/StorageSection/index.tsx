@@ -54,6 +54,21 @@ export interface StorageSectionOptions {
   showGlobalTagsButton?: boolean;
   /** Target parent folder id for initial navigation (e.g. when opening from favorites) */
   targetParentId?: string;
+  /**
+   * Custom label for the logical root in breadcrumbs.
+   * Defaults to "Root" when not provided.
+   */
+  rootLabel?: string;
+  /**
+   * Optional initial set of items that will be shown when the user
+   * is at the logical root (i.e. before navigating into any folder).
+   *
+   * This is used to support "virtual roots" such as search results,
+   * favorites, etc. When provided and the current parent is `null`,
+   * these items are rendered instead of fetching the real root
+   * contents from the storage structure API.
+   */
+  initialItems?: StorageItem[];
 }
 
 /**
@@ -141,7 +156,9 @@ export const StorageSection: React.FC<StorageSectionProps> = (props) => {
     setPath,
     openFolder,
     navigateTo,
-  } = useFolderPathNavigation("Root");
+  } = useFolderPathNavigation(options.rootLabel ?? "Root");
+
+  const isAtLogicalRoot = currentParentId === null;
 
   const {
     data: structure,
@@ -150,7 +167,12 @@ export const StorageSection: React.FC<StorageSectionProps> = (props) => {
     isError: isStructureError,
   } = useGetStorageStructureQuery(
     storageId
-      ? { storageId, parentId: currentParentId ?? undefined }
+      ? // When `initialItems` are provided and we are at the logical root,
+        // we treat them as a "virtual root" and do not request the real
+        // root contents from the API.
+        options.initialItems && isAtLogicalRoot
+        ? skipToken
+        : { storageId, parentId: currentParentId ?? undefined }
       : skipToken
   );
 
@@ -196,6 +218,18 @@ export const StorageSection: React.FC<StorageSectionProps> = (props) => {
   }, [archiveMode, storageId, currentParentId, archiveRoomToStorage]);
 
   const itemsInCurrentFolderRaw: StorageItem[] = useMemo(() => {
+    // When `initialItems` are passed and we are at the logical root,
+    // use them as the visible contents instead of structure-based root.
+    if (options.initialItems && isAtLogicalRoot) {
+      return options.initialItems
+        .filter((item) => !item.deletedAt)
+        .sort((a, b) => {
+          if (a.isDirectory && !b.isDirectory) return -1;
+          if (!a.isDirectory && b.isDirectory) return 1;
+          return a.name.localeCompare(b.name);
+        });
+    }
+
     if (!structure) return [];
     return structure
       .filter((item) => item.parentId === currentParentId && !item.deletedAt)
@@ -204,7 +238,7 @@ export const StorageSection: React.FC<StorageSectionProps> = (props) => {
         if (!a.isDirectory && b.isDirectory) return 1;
         return a.name.localeCompare(b.name);
       });
-  }, [structure, currentParentId]);
+  }, [structure, currentParentId, options.initialItems, isAtLogicalRoot]);
 
   const currentFolderItemIds = useMemo(
     () => new Set(itemsInCurrentFolderRaw.map((i) => i.id)),

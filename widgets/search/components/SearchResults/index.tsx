@@ -1,10 +1,16 @@
 import { FileItem, FileUploadStatus } from "@/api/types/file";
-import { SearchFile, SearchResourceType, SearchResponse } from "@/api/types/search";
+import {
+  SearchFile,
+  SearchResourceType,
+  SearchResponse,
+} from "@/api/types/search";
 import { StorageItem } from "@/api/types/storage";
 import { Colors } from "@/constants/design-tokens";
 import { ThemedText } from "@/shared/core/ThemedText";
 import FileCard from "@/widgets/rooms/components/FileCard";
 import FolderCard from "@/widgets/rooms/components/FolderCard";
+import { StorageSection } from "@/widgets/storage/components/StorageSection";
+import { menuOptions as storageMenuOptions } from "@/widgets/storage/components/StorageSection/data/defaultOptions";
 import { useRouter } from "expo-router";
 import React from "react";
 import {
@@ -38,12 +44,14 @@ interface SearchResultsProps {
   results: SearchResponse | undefined;
   isLoading: boolean;
   searchQuery: string;
+  resourceType: SearchResourceType;
 }
 
 export const SearchResults: React.FC<SearchResultsProps> = ({
   results,
   isLoading,
   searchQuery,
+  resourceType,
 }) => {
   const router = useRouter();
 
@@ -51,6 +59,39 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
     return (
       <RNView style={styles.center}>
         <ActivityIndicator size="large" color={Colors.primary} />
+      </RNView>
+    );
+  }
+
+  // When searching only in storage, show a full-featured StorageSection
+  // with search results acting as a "virtual root", so that the user
+  // can work with them exactly as if they opened the storage screen.
+  if (resourceType === SearchResourceType.STORAGE) {
+    const storageItems = results?.storageItems ?? [];
+
+    if (storageItems.length === 0) {
+      return (
+        <RNView style={styles.emptyContainer}>
+          <ThemedText style={styles.emptyText}>
+            {searchQuery ? "Ничего не найдено" : "Введите запрос для поиска"}
+          </ThemedText>
+        </RNView>
+      );
+    }
+
+    return (
+      <RNView style={styles.storageSectionContainer}>
+        <StorageSection
+          options={{
+            showBreadcrumbs: true,
+            showPreviewToggle: true,
+            showFAB: true,
+            showGlobalTagsButton: false,
+            rootLabel: "Результаты поиска",
+            initialItems: storageItems,
+          }}
+          menuOptions={storageMenuOptions}
+        />
       </RNView>
     );
   }
@@ -158,6 +199,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     paddingTop: 100,
+  },
+  storageSectionContainer: {
+    flex: 1,
   },
   listContent: {
     paddingVertical: 12,

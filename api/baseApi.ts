@@ -9,7 +9,7 @@ import {
 import { FetchArgsWithAuth } from "./types/base";
 
 const rawBaseQuery = fetchBaseQuery({
-  baseUrl: "http://10.205.168.195:3000",
+  baseUrl: "http://10.65.92.195:3000",
   credentials: "include",
   prepareHeaders: async (headers, { getState }) => {
     const token = await secureStore.getAccessToken();
@@ -29,7 +29,7 @@ const refreshTokens = async (api: any): Promise<boolean> => {
 
   try {
     const response = await fetch(
-      "http://10.205.168.195:3000/auth/new-access-token",
+      "http://10.65.92.195:3000/auth/new-access-token",
       {
         method: "POST",
         headers: {

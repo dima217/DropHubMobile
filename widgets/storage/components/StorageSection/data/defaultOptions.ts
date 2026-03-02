@@ -7,6 +7,8 @@ export const defaultOptions: ResolvedStorageSectionOptions = {
   showFAB: false,
   showGlobalTagsButton: false,
   targetParentId: undefined,
+  rootLabel: "Root",
+  initialItems: undefined,
 };
   
 export const menuOptions: StorageItemMenuOptions =
