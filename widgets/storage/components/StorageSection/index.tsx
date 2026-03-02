@@ -110,6 +110,19 @@ export interface StorageSectionProps {
     onCancel: () => void;
     onComplete: () => void;
   };
+  /**
+   * Optional external data source for items and navigation.
+   * When provided, `StorageSection` will use these items and path
+   * instead of computing them from `useGetStorageStructureQuery`.
+   * This is useful for shared views or other virtual structures where
+   * the list of items is managed by the parent component.
+   */
+  externalData?: {
+    items: StorageItem[];
+    path: { id: string | null; name: string }[];
+    onFolderPress: (folder: StorageItem) => void;
+    onNavigate: (segmentId: string | null, index: number) => void;
+  };
 }
 
 /**
@@ -123,7 +136,14 @@ export interface StorageSectionProps {
  * - Parent must pass `menuOptions`; optional `getMenuItems` overrides default menu building
  */
 export const StorageSection: React.FC<StorageSectionProps> = (props) => {
-  const { options: optionsProp, menuOptions, getMenuItems: getMenuItemsProp, renderHeaderActions, archiveMode } = props;
+  const {
+    options: optionsProp,
+    menuOptions,
+    getMenuItems: getMenuItemsProp,
+    renderHeaderActions,
+    archiveMode,
+    externalData,
+  } = props;
   const options = useMemo(
     (): ResolvedStorageSectionOptions => ({ ...defaultOptions, ...optionsProp }),
     [optionsProp]
@@ -218,6 +238,18 @@ export const StorageSection: React.FC<StorageSectionProps> = (props) => {
   }, [archiveMode, storageId, currentParentId, archiveRoomToStorage]);
 
   const itemsInCurrentFolderRaw: StorageItem[] = useMemo(() => {
+    // When external data is provided, completely delegate visible items
+    // to the parent component.
+    if (externalData) {
+      return externalData.items
+        .filter((item) => !item.deletedAt)
+        .sort((a, b) => {
+          if (a.isDirectory && !b.isDirectory) return -1;
+          if (!a.isDirectory && b.isDirectory) return 1;
+          return a.name.localeCompare(b.name);
+        });
+    }
+
     // When `initialItems` are passed and we are at the logical root,
     // use them as the visible contents instead of structure-based root.
     if (options.initialItems && isAtLogicalRoot) {
@@ -238,7 +270,7 @@ export const StorageSection: React.FC<StorageSectionProps> = (props) => {
         if (!a.isDirectory && b.isDirectory) return 1;
         return a.name.localeCompare(b.name);
       });
-  }, [structure, currentParentId, options.initialItems, isAtLogicalRoot]);
+  }, [structure, currentParentId, options.initialItems, isAtLogicalRoot, externalData]);
 
   const currentFolderItemIds = useMemo(
     () => new Set(itemsInCurrentFolderRaw.map((i) => i.id)),
@@ -430,10 +462,12 @@ export const StorageSection: React.FC<StorageSectionProps> = (props) => {
         <>
           <View style={styles.headerRow}>
             {options.showBreadcrumbs && (
-                <StorageBreadcrumbs
-                  path={path}
-                  onNavigate={(segmentId, index) => navigateTo(segmentId, index)}
-                />
+              <StorageBreadcrumbs
+                path={externalData?.path ?? path}
+                onNavigate={(segmentId, index) =>
+                  (externalData?.onNavigate ?? navigateTo)(segmentId, index)
+                }
+              />
             )}
             {options.showPreviewToggle && (
               <PreviewToggleSwitch
@@ -452,7 +486,7 @@ export const StorageSection: React.FC<StorageSectionProps> = (props) => {
             favoriteItemIds={favoriteItemIds}
             previewUrls={previewUrls}
             disabledFolderIds={disabledFolderIds}
-            onFolderPress={openFolder}
+            onFolderPress={externalData?.onFolderPress ?? openFolder}
             getMenuItems={getMenuItems}
           />
         </>
