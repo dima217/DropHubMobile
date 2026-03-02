@@ -64,14 +64,14 @@ export const fileApi = createApi({
         }),
         uploadSharedInit: build.mutation<UploadSharedInitResponse, UploadSharedInitRequest>({
             query: (body) => ({
-                url: `/upload/auth/init-shared`,
+                url: `/upload/auth/storage/init-shared`,
                 method: "POST",
                 body,
             }),
         }),
         uploadSharedConfirm: build.mutation<UploadSharedConfirmResponse, UploadSharedConfirmRequest>({
             query: (body) => ({
-                url: `/upload/auth/confirm-shared`,
+                url: `/upload/auth/storage/confirm-shared`,
                 method: "POST",
                 body,
             }),

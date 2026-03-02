@@ -143,7 +143,6 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 12,
     marginBottom: 12,
-    marginHorizontal: 16,
   },
   itemTitle: {
     fontSize: 16,
