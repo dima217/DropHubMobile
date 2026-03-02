@@ -28,6 +28,15 @@ export interface GrantPermissionsResponse {
 
 export interface GetSharedResourcesResponse extends StorageItem {
     userRole: AccessRole;
+    creator?: {
+        id: number;
+        email: string;
+        profile: {
+            id: number;
+            firstName: string;
+            avatarUrl: string;
+        };
+    };
 }
 
 export interface RevokePermissionsRequest {

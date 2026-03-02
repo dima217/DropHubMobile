@@ -123,6 +123,16 @@ export interface StorageSectionProps {
     onFolderPress: (folder: StorageItem) => void;
     onNavigate: (segmentId: string | null, index: number) => void;
   };
+  /**
+   * Optional authorship rendering for items.
+   * When provided, authorship data is passed down to cards.
+   */
+  showAuthorship?: boolean;
+  getItemAuthor?: (item: StorageItem) => {
+    avatarUrl?: string;
+    firstName?: string;
+    userId?: number;
+  } | null;
 }
 
 /**
@@ -143,6 +153,8 @@ export const StorageSection: React.FC<StorageSectionProps> = (props) => {
     renderHeaderActions,
     archiveMode,
     externalData,
+    showAuthorship,
+    getItemAuthor,
   } = props;
   const options = useMemo(
     (): ResolvedStorageSectionOptions => ({ ...defaultOptions, ...optionsProp }),
@@ -488,6 +500,8 @@ export const StorageSection: React.FC<StorageSectionProps> = (props) => {
             disabledFolderIds={disabledFolderIds}
             onFolderPress={externalData?.onFolderPress ?? openFolder}
             getMenuItems={getMenuItems}
+            showAuthorship={showAuthorship}
+            getItemAuthor={getItemAuthor}
           />
         </>
       )}

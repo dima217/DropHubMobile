@@ -20,7 +20,6 @@ import View from "@/shared/View";
 import { useSharedFileUpload } from "@/widgets/shared/hooks/useSharedFileUpload";
 import { StorageFAB } from "@/widgets/storage/components/StorageFAB";
 import { StorageSection } from "@/widgets/storage/components/StorageSection";
-import { useStoragePreviewUrls } from "@/widgets/storage/hooks/useStoragePreviewUrls";
 import { useFolderPathNavigation } from "@/widgets/storageList/hooks/useFolderPathNavigation";
 import {
   createStorageItemMenuItems,
@@ -31,200 +30,46 @@ import React, { useCallback, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
-  FlatList,
   View as RNView,
   StyleSheet,
-  TouchableOpacity,
 } from "react-native";
+
+const menuOptions: StorageItemMenuOptions = {
+  folder: ["permissions", "info"],
+  file: ["download", "permissions", "info"],
+};
 
 const SharedScreen = () => {
   const { data: sharedResources, isLoading } = useGetSharedResourcesQuery();
   const [downloadSharedFile] = useLazyDownloadSharedFileQuery();
-  const [activeResource, setActiveResource] =
-    useState<GetSharedResourcesResponse | null>(null);
-
-  const handleItemPress = useCallback(
-    async (item: GetSharedResourcesResponse) => {
-      if (item.isDirectory) {
-        setActiveResource(item);
-        return;
-      }
-
-      if (!item.fileId) {
-        Alert.alert("Ошибка", "У файла нет fileId");
-        return;
-      }
-
-      try {
-        const response = await downloadSharedFile({
-          resourceId: item.id,
-          fileIds: [item.fileId],
-        }).unwrap();
-        const uploader = createUploader(UploadProvider.MINIO);
-        for (const { url } of response) {
-          await uploader.download(url);
-        }
-        Alert.alert("Успешно", "Файл загружен");
-      } catch (e) {
-        console.log("Shared download failed", e);
-        Alert.alert("Ошибка", "Не удалось скачать файл");
-      }
-    },
-    [downloadSharedFile]
-  );
-
-  const headerRightAction = activeResource ? (
-    <TouchableOpacity onPress={() => setActiveResource(null)}>
-      <ThemedText style={styles.backText}>Назад</ThemedText>
-    </TouchableOpacity>
-  ) : (
-    <SearchButton />
-  );
-
-  return (
-    <View>
-      <Header title="Shared" rightAction={headerRightAction} />
-
-      {isLoading ? (
-        <RNView style={styles.center}>
-          <ActivityIndicator size="large" color={Colors.primary} />
-        </RNView>
-      ) : activeResource ? (
-        <SharedResourceView
-          resource={activeResource}
-          onClose={() => setActiveResource(null)}
-        />
-      ) : (
-        <FlatList
-          data={sharedResources || []}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={styles.itemCard}
-              onPress={() => handleItemPress(item as GetSharedResourcesResponse)}
-            >
-              <ThemedText style={styles.itemTitle}>
-                {item.isDirectory ? "Папка" : "Файл"}
-              </ThemedText>
-              <ThemedText style={styles.itemSubtitle}>
-                ID: {item.id}
-              </ThemedText>
-              <ThemedText style={styles.itemRole}>
-                Роль: {item.userRole}
-              </ThemedText>
-            </TouchableOpacity>
-          )}
-          ListEmptyComponent={
-            <RNView style={styles.emptyContainer}>
-              <ThemedText style={styles.emptyText}>
-                Нет общих ресурсов
-              </ThemedText>
-            </RNView>
-          }
-          contentContainerStyle={styles.listContent}
-        />
-      )}
-    </View>
-  );
-};
-
-const styles = StyleSheet.create({
-  center: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingTop: 100,
-  },
-  listContent: {
-    paddingVertical: 12,
-  },
-  itemCard: {
-    backgroundColor: Colors.cardBackground,
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 12,
-  },
-  itemTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: Colors.brightText,
-    marginBottom: 4,
-  },
-  itemSubtitle: {
-    fontSize: 12,
-    color: Colors.secondary,
-    marginBottom: 4,
-  },
-  itemRole: {
-    fontSize: 14,
-    color: Colors.primary,
-  },
-  emptyContainer: {
-    padding: 40,
-    alignItems: "center",
-  },
-  emptyText: {
-    color: Colors.secondary,
-    fontSize: 14,
-  },
-  backText: {
-    color: Colors.primary,
-    fontSize: 14,
-  },
-});
-
-export default SharedScreen;
-
-interface SharedResourceViewProps {
-  resource: GetSharedResourcesResponse;
-  onClose: () => void;
-}
-
-const SharedResourceView: React.FC<SharedResourceViewProps> = ({
-  resource,
-}) => {
-  const [previewEnabled, setPreviewEnabled] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<StorageItem | null>(null);
   const [permissionsVisible, setPermissionsVisible] = useState(false);
   const [infoVisible, setInfoVisible] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<StorageItem | null>(null);
-  const [createFolderVisible, setCreateFolderVisible] = useState(false);
 
   const { currentParentId, path, openFolder, navigateTo } =
-    useFolderPathNavigation("Root");
+    useFolderPathNavigation("Shared");
 
+  const storageId = sharedResources?.[0]?.storageId ?? "";
+  const rootResourceId = path[1]?.id ?? currentParentId ?? "";
+  const currentResource =
+    sharedResources?.find((r) => r.id === rootResourceId) ??
+    sharedResources?.find((r) => r.isDirectory) ??
+    sharedResources?.[0];
   const canWrite =
-    resource.userRole === AccessRole.WRITE ||
-    resource.userRole === AccessRole.ADMIN;
+    currentResource?.userRole === AccessRole.WRITE ||
+    currentResource?.userRole === AccessRole.ADMIN;
 
-  const effectiveParentId = currentParentId ?? resource.id ?? null;
-
-  const { data: structure, isLoading, isError, error, refetch } =
+  const effectiveParentId = currentParentId ?? currentResource?.id ?? "";
+  const { data: structure, isLoading: isStructureLoading, refetch } =
     useGetSharedStructureQuery(
-      resource.storageId && resource.id
+      storageId && currentParentId && rootResourceId
         ? {
-            storageId: resource.storageId,
-            resourceId: resource.id,
-            parentId: effectiveParentId ?? undefined,
+            storageId,
+            resourceId: rootResourceId,
+            parentId: currentParentId,
           }
         : skipToken
     );
-
-  const itemsInCurrentFolder = useMemo(() => {
-    if (!structure) return [];
-    return structure
-      .filter((item) => item.parentId === effectiveParentId && !item.deletedAt)
-      .sort((a, b) => {
-        if (a.isDirectory && !b.isDirectory) return -1;
-        if (!a.isDirectory && b.isDirectory) return 1;
-        return a.name.localeCompare(b.name);
-      });
-  }, [structure, effectiveParentId]);
-
-  const previewUrls = useStoragePreviewUrls(
-    resource.storageId || "",
-    itemsInCurrentFolder,
-    previewEnabled
-  );
 
   const {
     uploadingFiles,
@@ -233,20 +78,70 @@ const SharedResourceView: React.FC<SharedResourceViewProps> = ({
     uploadFiles,
     clearUploads,
   } = useSharedFileUpload(
-    resource.storageId || "",
-    resource.id || "",
-    (effectiveParentId || resource.id || "") as string,
+    storageId,
+    rootResourceId || currentResource?.id || "",
+    effectiveParentId,
     undefined
   );
 
-  const [downloadSharedFile] = useLazyDownloadSharedFileQuery();
+  const [createSharedItem, { isLoading: isCreating }] =
+    useCreateSharedItemMutation();
+
+  const handleCreateFolder = useCallback(
+    async (name: string) => {
+      if (!storageId || !currentResource?.id) return;
+      if (!canWrite) {
+        Alert.alert("Нет прав", "У вас нет прав на создание элементов");
+        return;
+      }
+      try {
+        await createSharedItem({
+          storageId,
+          resourceId: currentResource.id,
+          name,
+          parentId: effectiveParentId || currentResource.id,
+          isDirectory: true,
+        }).unwrap();
+        refetch();
+        Alert.alert("Успешно", "Папка создана");
+      } catch (e) {
+        Alert.alert("Ошибка", "Не удалось создать папку");
+      }
+    },
+    [storageId, currentResource, canWrite, createSharedItem, effectiveParentId, refetch]
+  );
+
+  const [createFolderVisible, setCreateFolderVisible] = useState(false);
+
+  const items = useMemo(() => {
+    if (currentParentId === null) {
+      return (sharedResources ?? [])
+        .filter((i) => !i.deletedAt)
+        .sort((a, b) => {
+          if (a.isDirectory && !b.isDirectory) return -1;
+          if (!a.isDirectory && b.isDirectory) return 1;
+          return a.name.localeCompare(b.name);
+        });
+    }
+    return (structure ?? [])
+      .filter((i) => !i.deletedAt)
+      .sort((a, b) => {
+        if (a.isDirectory && !b.isDirectory) return -1;
+        if (!a.isDirectory && b.isDirectory) return 1;
+        return a.name.localeCompare(b.name);
+      });
+  }, [currentParentId, sharedResources, structure]);
 
   const handleDownload = useCallback(
     async (item: StorageItem) => {
-      if (!resource.id || !item.fileId) return;
+      const res =
+        sharedResources?.find((r) => r.id === item.parentId) ??
+        sharedResources?.find((r) => r.isDirectory) ??
+        sharedResources?.[0];
+      if (!res?.id || !item.fileId) return;
       try {
         const response = await downloadSharedFile({
-          resourceId: resource.id,
+          resourceId: res.id,
           fileIds: [item.fileId],
         }).unwrap();
         const uploader = createUploader(UploadProvider.MINIO);
@@ -255,19 +150,10 @@ const SharedResourceView: React.FC<SharedResourceViewProps> = ({
         }
         Alert.alert("Успешно", "Файл загружен");
       } catch (e) {
-        console.log("Shared download failed", e);
         Alert.alert("Ошибка", "Не удалось скачать файл");
       }
     },
-    [downloadSharedFile, resource.id]
-  );
-
-  const menuOptions: StorageItemMenuOptions = useMemo(
-    () => ({
-      folder: ["permissions", "info"],
-      file: ["download", "permissions", "info"],
-    }),
-    []
+    [downloadSharedFile, sharedResources]
   );
 
   const getMenuItems = useCallback(
@@ -288,117 +174,121 @@ const SharedResourceView: React.FC<SharedResourceViewProps> = ({
         },
         menuOptions
       ),
-    [handleDownload, menuOptions]
+    [handleDownload]
   );
 
-  const [createSharedItem, { isLoading: isCreating }] =
-    useCreateSharedItemMutation();
+  const getItemAuthor = useCallback((item: StorageItem) => {
+    const res = item as GetSharedResourcesResponse;
+    return res.creator
+      ? {
+          avatarUrl: res.creator.profile.avatarUrl,
+          firstName: res.creator.profile.firstName,
+          userId: res.creator.id,
+        }
+      : null;
+  }, []);
 
-  const handleCreateFolder = useCallback(
-    async (name: string) => {
-      if (!resource.storageId || !resource.id) return;
-      if (!canWrite) {
-        Alert.alert("Нет прав", "У вас нет прав на создание элементов");
-        return;
-      }
-      try {
-        await createSharedItem({
-          storageId: resource.storageId,
-          resourceId: resource.id,
-          name,
-          parentId: effectiveParentId || resource.id,
-          isDirectory: true,
-        }).unwrap();
-        refetch();
-        Alert.alert("Успешно", "Папка создана");
-      } catch (e) {
-        console.log("Create shared folder failed", e);
-        Alert.alert("Ошибка", "Не удалось создать папку");
-      }
-    },
-    [resource.storageId, resource.id, canWrite, createSharedItem, effectiveParentId, refetch]
-  );
-
-  if (isError) {
-    return (
-      <RNView style={styles.center}>
-        <ThemedText style={styles.emptyText}>
-          {(error as any)?.data?.message || "Ошибка загрузки общего ресурса"}
-        </ThemedText>
-      </RNView>
-    );
-  }
+  const loading = isLoading || (currentParentId !== null && isStructureLoading);
 
   return (
-    <>
-      {isLoading ? (
+    <View>
+      <Header title="Shared" rightAction={<SearchButton />} />
+
+      {loading ? (
         <RNView style={styles.center}>
           <ActivityIndicator size="large" color={Colors.primary} />
         </RNView>
+      ) : !sharedResources?.length ? (
+        <RNView style={styles.emptyContainer}>
+          <ThemedText style={styles.emptyText}>Нет общих ресурсов</ThemedText>
+        </RNView>
       ) : (
-        <StorageSection
-          options={{
-            showBreadcrumbs: true,
-            showPreviewToggle: true,
-            showFAB: false,
-            showGlobalTagsButton: false,
-            rootLabel: "Root",
-          }}
-          menuOptions={menuOptions}
-          getMenuItems={getMenuItems}
-          externalData={{
-            items: itemsInCurrentFolder,
-            path,
-            onFolderPress: openFolder,
-            onNavigate: navigateTo,
-          }}
-        />
+        <>
+          <StorageSection
+            options={{
+              showBreadcrumbs: true,
+              showPreviewToggle: true,
+              showFAB: false,
+              showGlobalTagsButton: false,
+              rootLabel: "Shared",
+            }}
+            menuOptions={menuOptions}
+            getMenuItems={getMenuItems}
+            externalData={{
+              items,
+              path,
+              onFolderPress: openFolder,
+              onNavigate: navigateTo,
+            }}
+            showAuthorship
+            getItemAuthor={getItemAuthor}
+          />
+
+          <PermissionsModal
+            visible={permissionsVisible}
+            itemId={selectedItem?.id || ""}
+            storageId={storageId}
+            onClose={() => {
+              setPermissionsVisible(false);
+              setSelectedItem(null);
+            }}
+          />
+
+          <ItemInfoModal
+            visible={infoVisible}
+            item={selectedItem}
+            onClose={() => {
+              setInfoVisible(false);
+              setSelectedItem(null);
+            }}
+          />
+
+          {canWrite && currentParentId !== null && (
+            <StorageFAB
+              onCreateFolder={() => setCreateFolderVisible(true)}
+              onUploadFiles={pickFiles}
+              isCreatingFolder={isCreating}
+              isStorageReady={!!storageId && !!currentResource?.id}
+            />
+          )}
+
+          <CreateFolderModal
+            visible={createFolderVisible}
+            onClose={() => setCreateFolderVisible(false)}
+            onConfirm={handleCreateFolder}
+          />
+
+          <UploadPreviewModal
+            visible={isUploadPreviewModalVisible}
+            files={uploadingFiles}
+            onClose={clearUploads}
+            onUpload={async (files) => {
+              await uploadFiles(files);
+              refetch();
+            }}
+          />
+        </>
       )}
-
-      <PermissionsModal
-        visible={permissionsVisible}
-        itemId={selectedItem?.id || ""}
-        storageId={resource.storageId}
-        onClose={() => {
-          setPermissionsVisible(false);
-          setSelectedItem(null);
-        }}
-      />
-
-      <ItemInfoModal
-        visible={infoVisible}
-        item={selectedItem}
-        onClose={() => {
-          setInfoVisible(false);
-          setSelectedItem(null);
-        }}
-      />
-
-      <CreateFolderModal
-        visible={createFolderVisible}
-        onClose={() => setCreateFolderVisible(false)}
-        onConfirm={handleCreateFolder}
-      />
-
-      {canWrite && (
-        <StorageFAB
-          onCreateFolder={() => setCreateFolderVisible(true)}
-          onUploadFiles={pickFiles}
-          isCreatingFolder={isCreating}
-          isStorageReady={!!resource.storageId && !!resource.id}
-        />
-      )}
-
-      <UploadPreviewModal
-        visible={isUploadPreviewModalVisible}
-        files={uploadingFiles}
-        onClose={clearUploads}
-        onUpload={async (files) => {
-          await uploadFiles(files as any);
-          refetch();
-        }}
-      />
-    </>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  center: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingTop: 100,
+  },
+  emptyContainer: {
+    padding: 40,
+    alignItems: "center",
+  },
+  emptyText: {
+    color: Colors.secondary,
+    fontSize: 14,
+  },
+});
+
+export default SharedScreen;
 

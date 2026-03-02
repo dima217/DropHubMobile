@@ -45,6 +45,16 @@ interface StorageItemListProps {
     item: StorageItem,
     ctx: { isFavorite: boolean }
   ) => ActionMenuItemData[];
+  /**
+   * Optional authorship rendering for each item.
+   * When enabled, cards can show owner avatar/name.
+   */
+  showAuthorship?: boolean;
+  getItemAuthor?: (item: StorageItem) => {
+    avatarUrl?: string;
+    firstName?: string;
+    userId?: number;
+  } | null;
 }
 
 export const StorageItemList: React.FC<StorageItemListProps> = ({
@@ -55,6 +65,8 @@ export const StorageItemList: React.FC<StorageItemListProps> = ({
   onFolderPress,
   disabledFolderIds,
   getMenuItems,
+  showAuthorship = false,
+  getItemAuthor,
 }) => {
   const tagColors = useSelector(
     (state: RootState) => (state.tagColors as { colors: TagColorMap }).colors
@@ -63,6 +75,7 @@ export const StorageItemList: React.FC<StorageItemListProps> = ({
   const renderItem = ({ item }: { item: StorageItem }) => {
     const isFavorite = favoriteItemIds?.has(item.id) ?? false;
     const itemTags = item.tags || [];
+    const author = getItemAuthor ? getItemAuthor(item) : null;
 
     if (item.isDirectory) {
       const isDisabled = disabledFolderIds?.has(item.id) ?? false;
@@ -76,6 +89,10 @@ export const StorageItemList: React.FC<StorageItemListProps> = ({
           folderId={item.id}
           folderName={item.name}
           itemCount={itemCount}
+          showAuthorship={showAuthorship}
+          authorAvatarUrl={author?.avatarUrl}
+          authorFirstName={author?.firstName}
+          authorUserId={author?.userId}
           menuItems={menuItems}
           disabled={isDisabled}
           onPress={() => {
@@ -98,6 +115,10 @@ export const StorageItemList: React.FC<StorageItemListProps> = ({
       <FileCard
         file={file}
         showPreview={previewEnabled}
+        showAuthorship={showAuthorship}
+        authorAvatarUrl={author?.avatarUrl}
+        authorFirstName={author?.firstName}
+        authorUserId={author?.userId}
         menuItems={
           menuItems.length > 0
             ? {
