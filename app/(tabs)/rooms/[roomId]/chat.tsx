@@ -1,189 +1,132 @@
-import { chatApi, useGetChatMessagesQuery } from "@/api/chatApi";
-import { ChatMessage as ApiChatMessage } from "@/api/types/chat";
+import { useGetRoomDetailsQuery } from "@/api/roomApi";
 import { Colors } from "@/constants/design-tokens";
-import { useRoomChat, ChatMessage as WSChatMessage } from "@/hooks/data/useMessage";
-import { secureStore } from "@/services/secureStore";
+import { getUserIdFromAccessToken } from "@/services/auth/getUserIdFromAccessToken";
 import Header from "@/shared/Header";
 import View from "@/shared/View";
 import { RootState } from "@/store/store";
-import ChatInput from "@/widgets/rooms/components/Chat/ChatInput";
-import MessageList, { Message } from "@/widgets/rooms/components/Chat/MessageList";
+import { MessageInput } from "@/widgets/chat/components/MessageInput";
+import { MessageList } from "@/widgets/chat/components/MessageList";
+import { PinnedMessagesModal } from "@/widgets/chat/components/PinnedMessagesModal";
+import { useChat } from "@/widgets/chat/hooks/useChat";
+import { useWebSocket } from "@/widgets/chat/hooks/useWebSocket";
+import { Feather } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import {
-  ActivityIndicator,
-  FlatList,
   KeyboardAvoidingView,
   Platform,
+  Pressable,
   StyleSheet,
+  Text,
 } from "react-native";
-import { useDispatch, useSelector } from "react-redux";
-
-type UnifiedChatMessage = ApiChatMessage & { roomId?: string };
-
-const convertToMessage = (msg: UnifiedChatMessage): Message => ({
-  id: msg.id,
-  content: msg.content,
-  createdAt: msg.createdAt,
-  author: msg.author,
-});
+import { useSelector } from "react-redux";
 
 const RoomChatScreen = () => {
   const { roomId } = useLocalSearchParams<{ roomId: string }>();
   const user = useSelector((state: RootState) => state.auth.user);
-  const [accessToken, setAccessToken] = useState<string | null>(null);
-  const [messageText, setMessageText] = useState("");
-  const [messages, setMessages] = useState<UnifiedChatMessage[]>([]);
-  const flatListRef = useRef<FlatList>(null);
-  const dispatch = useDispatch();
+  const accessToken = useSelector((state: RootState) => state.auth.accessToken);
+  const [pinsOpen, setPinsOpen] = useState(false);
 
+  const { data: roomDetails } = useGetRoomDetailsQuery(roomId || "", {
+    skip: !roomId,
+  });
 
-  const { data: initialMessages, isLoading } = useGetChatMessagesQuery(
-    { roomId: roomId || "" },
-    { skip: !roomId }
-  );
+  const boundChannelId = useMemo(() => {
+    if (!roomId) return null;
+    return roomDetails?.channelId ?? roomId;
+  }, [roomId, roomDetails?.channelId]);
 
-  useEffect(() => {
-    secureStore.getAccessToken().then(setAccessToken);
-  }, []);
+  const currentUserId = useMemo(() => {
+    if (user?.id) return String(user.id);
+    return getUserIdFromAccessToken(accessToken) ?? "";
+  }, [user?.id, accessToken]);
 
-  useEffect(() => {
-    if (initialMessages) {
-      setMessages(
-        initialMessages.map((msg) => ({
-          ...msg,
-          roomId: roomId || "",
-          author: {
-            ...msg.author,
-            profile: msg.author.profile ?? null,
-          },
-        }))
-      );
-    }
-  }, [initialMessages, roomId]);
+  const shouldConnectWs = Boolean(currentUserId && roomId);
 
-  const messagesList = useMemo(() => {
-    return messages.map(convertToMessage);
-  }, [messages]);
+  useWebSocket(shouldConnectWs);
 
-  const handleNewMessage = useCallback((message: WSChatMessage) => {
-    setMessages((prev) => {
-      if (prev.some((m) => m.id === message.id)) {
-        return prev;
-      }
-      const unifiedMessage: UnifiedChatMessage = {
-        id: message.id,
-        content: message.content,
-        createdAt: message.createdAt,
-        updatedAt: message.updatedAt,
-        roomId: message.roomId,
-        author: {
-          id: message.author.id.toString(),
-          email: message.author.email,
-          profile: message.author.profile ?? null,
-        },
-      };
-      return [...prev, unifiedMessage];
-    });
-    dispatch(
-      chatApi.util.invalidateTags([
-        { type: "ChatMessages", id: message.roomId },
-      ])
-    );
-    setTimeout(() => {
-      flatListRef.current?.scrollToEnd({ animated: true });
-    }, 100);
-  }, [dispatch]);
+  const {
+    messages,
+    loadingMessages,
+    sendMessage,
+    sendTyping,
+    sendRead,
+    toggleReaction,
+    editMessage,
+    deleteMessage,
+    togglePin,
+    replyTo,
+    setReplyTo,
+    pinnedMessages,
+    typingUserIds,
+    readReceipts,
+  } = useChat(currentUserId, { boundChannelId });
 
-  const handleMessageUpdated = useCallback((message: WSChatMessage) => {
-    setMessages((prev) =>
-      prev.map((m) => {
-        if (m.id === message.id) {
-          return {
-            id: message.id,
-            content: message.content,
-            createdAt: message.createdAt,
-            updatedAt: message.updatedAt,
-            roomId: message.roomId,
-            author: {
-              id: message.author.id.toString(),
-              email: message.author.email,
-              profile: message.author.profile ?? null,
-            },
-          };
-        }
-        return m;
-      })
-    );
-  }, []);
-
-  const handleMessageDeleted = useCallback((payload: { id: string }) => {
-    setMessages((prev) => prev.filter((m) => m.id !== payload.id));
-  }, []);
-
-  const { sendMessage, isConnected } = useRoomChat(
-    roomId || "",
-    accessToken || "",
-    {
-      onNewMessage: handleNewMessage,
-      onMessageUpdated: handleMessageUpdated,
-      onMessageDeleted: handleMessageDeleted,
+  const handleSend = useCallback(
+    (content: string) => {
+      if (!content.trim()) return;
+      sendMessage(content.trim());
     },
-    !!roomId && !!accessToken
+    [sendMessage]
   );
 
-  const handleSendMessage = useCallback(() => {
-    if (!messageText.trim() || !isConnected) {
-      return;
-    }
-    sendMessage(messageText.trim());
-    setMessageText("");
-  }, [messageText, sendMessage, isConnected]);
-
-  const sortedMessages = useMemo(() => {
-    return [...messagesList].sort(
-      (a, b) =>
-        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-    );
-  }, [messagesList]);
-
-  const isMyMessage = useCallback(
-    (message: Message) => {
-      return message.author.email === user?.email;
-    },
-    [user]
+  const pinHeaderAction = useMemo(
+    () => (
+      <Pressable
+        onPress={() => setPinsOpen(true)}
+        style={styles.pinBtn}
+        hitSlop={10}
+      >
+        <Feather name="bookmark" size={20} color={Colors.primary} />
+        {pinnedMessages.length > 0 ? (
+          <Text style={styles.pinBadge}>{pinnedMessages.length}</Text>
+        ) : null}
+      </Pressable>
+    ),
+    [pinnedMessages.length]
   );
 
-  if (isLoading) {
+  if (!roomId) {
     return (
       <View style={styles.container}>
         <Header title="Chat" />
-        <ActivityIndicator
-          size="large"
-          color={Colors.primary}
-          style={styles.loader}
-        />
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
-      <Header title="Chat" />
+      <Header title="Chat" rightAction={pinHeaderAction} />
+      <PinnedMessagesModal
+        visible={pinsOpen}
+        onClose={() => setPinsOpen(false)}
+        messages={pinnedMessages}
+        onUnpin={togglePin}
+      />
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : 'height'}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
         keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
+        style={styles.flex}
       >
         <MessageList
-          ref={flatListRef}
-          messages={sortedMessages}
-          isMyMessage={isMyMessage}
+          channelId={boundChannelId}
+          messages={messages}
+          currentUserId={currentUserId}
+          loading={loadingMessages}
+          onReaction={toggleReaction}
+          onReply={setReplyTo}
+          onEdit={editMessage}
+          onDelete={deleteMessage}
+          onPin={togglePin}
+          onRead={sendRead}
+          typingUserIds={typingUserIds}
+          readReceipts={readReceipts}
         />
-        <ChatInput
-          messageText={messageText}
-          onMessageTextChange={setMessageText}
-          onSend={handleSendMessage}
-          isConnected={isConnected}
+        <MessageInput
+          onSend={handleSend}
+          onTyping={sendTyping}
+          replyTo={replyTo}
+          onCancelReply={() => setReplyTo(null)}
         />
       </KeyboardAvoidingView>
     </View>
@@ -194,12 +137,24 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background,
-    paddingBottom: 120,
   },
-  loader: {
-    marginTop: 50,
+  flex: {
+    flex: 1,
+  },
+  pinBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingVertical: 4,
+    paddingHorizontal: 4,
+  },
+  pinBadge: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: Colors.primary,
+    minWidth: 18,
+    textAlign: "center",
   },
 });
 
 export default RoomChatScreen;
-

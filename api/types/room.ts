@@ -48,6 +48,8 @@ export interface RoomItem {
 
 export interface RoomDetails {
     id: string;
+    /** Chat channel bound to this room (when set by API). Falls back to `id` in the client. */
+    channelId?: string;
     files: FileItem[];
     groups: string[];
     createdAt: string;

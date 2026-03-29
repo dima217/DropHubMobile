@@ -7,6 +7,7 @@ import {
 import { secureStore } from "@/services/secureStore";
 import { createUploader, UploadProvider } from "@/services/upload/UploaderFactory";
 import { isDefaultImage } from "@/shared/MediaUploader/utils";
+import { getUserIdFromAccessToken } from "@/services/auth/getUserIdFromAccessToken";
 import { setCredentials } from "@/store/slices/authSlice";
 import { useRouter } from "expo-router";
 import { useCallback, useState } from "react";
@@ -163,10 +164,13 @@ export const useSignUpCodeFlow = () => {
         avatarUrl = result.publicUrl;
       }
 
+      const idFromToken = getUserIdFromAccessToken(result.accessToken);
+
       const userData = {
         email: finalData.email,
         firstName: finalData.username,
         avatarUrl: avatarUrl ?? undefined,
+        ...(idFromToken ? { id: idFromToken } : {}),
       };
 
       dispatch(

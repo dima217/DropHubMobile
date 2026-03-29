@@ -29,7 +29,12 @@ export const useSelectedItemState = ({
   }, [selectedItemFromProps]);
 
   useEffect(() => {
-    setGlobalTags(storageTags);
+    setGlobalTags((prev) =>
+      prev.length === storageTags.length &&
+      prev.every((t, i) => t === storageTags[i])
+        ? prev
+        : storageTags
+    );
   }, [storageTags]);
 
   // After structure refetch, clear overrides for items in current folder so we use server data

@@ -17,6 +17,10 @@ export const roomApi = createApi({
     }),
     getRoomDetails: build.query<RoomDetails, string>({
       query: (roomId) => ({ url: `/room/${roomId}/details`, method: "GET", auth: true }),
+      transformResponse: (raw: RoomDetails & { channel_id?: string }) => ({
+        ...raw,
+        channelId: raw.channelId ?? raw.channel_id,
+      }),
       providesTags: (result, error, roomId) => [{ type: "Room", id: roomId }],
     }),
     addUsersToRoom: build.mutation<AddUserToRoomResponse, AddUserToRoomRequest>({

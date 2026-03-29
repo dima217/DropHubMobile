@@ -181,6 +181,11 @@ export const StorageSection: React.FC<StorageSectionProps> = (props) => {
 
   const storageId = storageInfo?.id || "";
 
+  const storageTags = useMemo(
+    () => storageInfo?.tags ?? [],
+    [storageInfo?.tags]
+  );
+
   const {
     currentParentId,
     setCurrentParentId,
@@ -298,7 +303,7 @@ export const StorageSection: React.FC<StorageSectionProps> = (props) => {
     removeItemTag,
     getItemTags,
   } = useSelectedItemState({
-    storageTags: storageInfo?.tags || [],
+    storageTags,
     selectedItemFromProps: selectedItem,
     currentFolderItemIds,
   });
@@ -521,7 +526,7 @@ export const StorageSection: React.FC<StorageSectionProps> = (props) => {
         setters={modalsSetters}
         storageId={storageId}
         currentParentId={currentParentId}
-        storageTags={storageInfo?.tags || []}
+        storageTags={storageTags}
         itemTags={itemTags}
         globalTags={globalTags}
         handlers={{

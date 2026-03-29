@@ -1,6 +1,6 @@
 import { authApi } from "@/api/authApi";
 import { avatarApi } from "@/api/avatarApi";
-import { chatApi } from "@/api/chatApi";
+import { chatChannelsApi } from "@/api/chatChannelsApi";
 import { fileApi } from "@/api/fileApi";
 import { friendApi } from "@/api/friendApi";
 import { roomApi } from "@/api/roomApi";
@@ -25,7 +25,7 @@ const rootReducer = combineReducers({
   tagColors: tagColorsReducer,
   [authApi.reducerPath]: authApi.reducer,
   [avatarApi.reducerPath]: avatarApi.reducer,
-  [chatApi.reducerPath]: chatApi.reducer,
+  [chatChannelsApi.reducerPath]: chatChannelsApi.reducer,
   [friendApi.reducerPath]: friendApi.reducer,
   [fileApi.reducerPath]: fileApi.reducer,
   [roomApi.reducerPath]: roomApi.reducer,
@@ -45,7 +45,7 @@ export const store = configureStore({
     })
       .concat(authApi.middleware)
       .concat(avatarApi.middleware)
-      .concat(chatApi.middleware)
+      .concat(chatChannelsApi.middleware)
       .concat(friendApi.middleware)
       .concat(fileApi.middleware)
       .concat(roomApi.middleware)

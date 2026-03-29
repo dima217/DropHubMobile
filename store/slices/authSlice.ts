@@ -1,3 +1,4 @@
+import { getUserIdFromAccessToken } from "@/services/auth/getUserIdFromAccessToken";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export interface User {
@@ -32,9 +33,15 @@ const slice = createSlice({
         accessToken: string | null;
       }>
     ) {
-      state.user = action.payload.user;
+      const token = action.payload.accessToken;
+      const idFromToken = getUserIdFromAccessToken(token);
+      const user = action.payload.user;
+      state.user =
+        user && idFromToken && !user.id
+          ? { ...user, id: idFromToken }
+          : user;
       state.isAuthenticated = true;
-      state.accessToken = action.payload.accessToken;
+      state.accessToken = token;
     },
     setAuth(state, action: PayloadAction<string | null>) {
       state.isAuthenticated = !!action.payload;
@@ -55,6 +62,10 @@ const slice = createSlice({
       }>
     ) {
       state.accessToken = action.payload.accessToken;
+      const id = getUserIdFromAccessToken(action.payload.accessToken);
+      if (id && state.user && !state.user.id) {
+        state.user.id = id;
+      }
     },
     setProfile(state, action: PayloadAction<{ avatarUrl: string | null, firstName: string | null }>) {
       state.user!.avatarUrl = action.payload?.avatarUrl ?? undefined;
