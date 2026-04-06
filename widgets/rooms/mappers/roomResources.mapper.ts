@@ -8,36 +8,38 @@ export const mapUploadingFilesToResources = (
   uploadingFiles: UploadingFile[],
   user: User | null
 ): ResourceItem[] =>
-  uploadingFiles.map((uploadingFile) => ({
-    id: uploadingFile.id,
-    type: "file",
-    file: uploadingFile.fileItem ?? {
-      _id: uploadingFile.id,
-      originalName: uploadingFile.fileName,
-      key: "",
-      size: uploadingFile.fileSize,
-      mimeType: uploadingFile.mimeType,
-      uploadTime: new Date().toISOString(),
-      downloadCount: 0,
-      uploadedParts: 0,
-      expiresAt: null,
-      creatorId: user?.id ? parseInt(user.id) : 0,
-      storedName: "",
-      uploadSession: {
-        status:
-          uploadingFile.status === "completed"
-            ? FileUploadStatus.COMPLETE
-            : FileUploadStatus.IN_PROGRESS,
+  uploadingFiles.map((uploadingFile) => {
+    return {
+      id: uploadingFile.id,
+      type: "file",
+      file: uploadingFile.fileItem ?? {
+        _id: uploadingFile.id,
+        originalName: uploadingFile.fileName,
+        key: "",
+        size: uploadingFile.fileSize,
+        mimeType: uploadingFile.mimeType,
+        uploadTime: new Date().toISOString(),
+        downloadCount: 0,
+        uploadedParts: 0,
+        expiresAt: null,
+        creatorId: user?.id ? parseInt(user.id) : 0,
+        storedName: "",
+        uploadSession: {
+          status:
+            uploadingFile.status === "completed"
+              ? FileUploadStatus.COMPLETE
+              : FileUploadStatus.IN_PROGRESS,
+        },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        __v: 0,
       },
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      __v: 0,
-    },
-    authorAvatarUrl: user?.avatarUrl,
-    authorFirstName: user?.firstName,
-    authorUserId: user?.id ? parseInt(user.id) : undefined,
-    uploadProgress: uploadingFile.progress,
-  }));
+      authorAvatarUrl: user?.avatarUrl,
+      authorFirstName: user?.firstName,
+      authorUserId: user?.id ? parseInt(user.id) : undefined,
+      uploadProgress: uploadingFile.progress,
+    };
+  });
 
 export const mapRoomFilesToResources = (
   roomDetails: RoomDetails | undefined

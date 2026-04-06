@@ -26,6 +26,7 @@ export const menuOptions: StorageItemMenuOptions =
     ],
     file: [
       "download",
+      "convert",
       "rename",
       "copy",
       "move",

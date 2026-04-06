@@ -1,10 +1,14 @@
+import { useConvertRoomFileMutation } from "@/api/fileApi";
 import { useGetRoomDetailsQuery } from "@/api/roomApi";
+import type { FileConversionType } from "@/api/types/file";
 import { Colors } from "@/constants/design-tokens";
 import { useRoomFilesUpdate } from "@/hooks/data/useRoomFilesUpdate";
 import { secureStore } from "@/services/secureStore";
 import Header from "@/shared/Header";
+import ConversionPickerModal from "@/shared/Modals/ConversionPickerModal";
 import UpdateFileModal from "@/shared/Modals/UpdateFileModal";
 import UploadPreviewModal from "@/shared/Modals/UploadPreviewModal";
+import { getConversionOptions } from "@/shared/fileConversion/getConversionOptions";
 import SearchInput from "@/shared/SearchInput";
 import MultiSelectBar from "@/shared/ui/MultiSelectBar";
 import View from "@/shared/View";
@@ -20,7 +24,7 @@ import { createMultiSelectMenuItems } from "@/widgets/rooms/menu/multiSelectorMe
 import { Feather } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useMemo, useState } from "react";
-import { ActivityIndicator, StyleSheet, TouchableOpacity } from "react-native";
+import { ActivityIndicator, Alert, StyleSheet, TouchableOpacity } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useSelector } from "react-redux";
 import RoomPlaceholder from "./room-placeholder";
@@ -31,7 +35,53 @@ const RoomDetailsScreen = () => {
   const user = useSelector((state: RootState) => state.auth.user);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [convertTarget, setConvertTarget] = useState<{
+    fileId: string;
+    storedName: string;
+    mimeType: string;
+  } | null>(null);
+  const [convertSubmitting, setConvertSubmitting] = useState(false);
+  const [convertRoomFile] = useConvertRoomFileMutation();
   const insets = useSafeAreaInsets();
+
+  const roomConversionOptions = useMemo(
+    () =>
+      convertTarget
+        ? getConversionOptions(convertTarget.mimeType, convertTarget.storedName)
+        : [],
+    [convertTarget]
+  );
+
+  const handleRoomConvertSelect = useCallback(
+    async (conversion: FileConversionType) => {
+      if (!roomId || !convertTarget) return;
+      setConvertSubmitting(true);
+      try {
+        const result = await convertRoomFile({
+          roomId,
+          fileId: convertTarget.fileId,
+          conversion,
+        }).unwrap();
+        const n = result.createdFiles?.length ?? 0;
+        Alert.alert(
+          "Готово",
+          n > 1 ? `Создано файлов: ${n}` : "Файл сконвертирован и сохранён"
+        );
+        setConvertTarget(null);
+      } catch (e: unknown) {
+        const err = e as { data?: { message?: string }; message?: string };
+        Alert.alert(
+          "Ошибка",
+          String(
+            err?.data?.message ?? err?.message ?? "Не удалось конвертировать"
+          )
+        );
+      } finally {
+        setConvertSubmitting(false);
+      }
+    },
+    [roomId, convertTarget, convertRoomFile]
+  );
 
   const { data: roomDetails, isLoading, refetch } = useGetRoomDetailsQuery(roomId || "", {
     skip: !roomId,
@@ -80,11 +130,23 @@ const RoomDetailsScreen = () => {
   );
 
   const fileMenuManager = useMemo(
-    () => new FileMenuManager(handleDownloadFiles, handleDeleteFiles, handleShareFiles,  
-      (fileId: string, storedName: string) => {
-      openEditFileModal(fileId, storedName);
-    }),
-    [handleDownloadFiles, handleDeleteFiles, handleShareFiles, openEditFileModal]
+    () =>
+      new FileMenuManager(
+        handleDownloadFiles,
+        handleDeleteFiles,
+        handleShareFiles,
+        (fileId: string, storedName: string) => {
+          openEditFileModal(fileId, storedName);
+        },
+        (fileId, storedName, mimeType) =>
+          setConvertTarget({ fileId, storedName, mimeType })
+      ),
+    [
+      handleDownloadFiles,
+      handleDeleteFiles,
+      handleShareFiles,
+      openEditFileModal,
+    ]
   );
 
   const multiSelectMenuItems = useMemo(
@@ -161,8 +223,6 @@ const RoomDetailsScreen = () => {
         onFilePress={(file) => {
           if (isMultiSelectMode) {
             toggleSelection(file._id);
-          } else {
-            // TODO: Open file preview or perform default action
           }
         }}
         onFileLongPress={(file) => toggleSelection(file._id)}
@@ -196,6 +256,15 @@ const RoomDetailsScreen = () => {
         storedName={newFileName || ""}
         onClose={cancelEdit}
         onUpdate={handleUpdateFile}
+      />
+
+      <ConversionPickerModal
+        visible={convertTarget !== null}
+        fileName={convertTarget?.storedName ?? ""}
+        options={roomConversionOptions}
+        isSubmitting={convertSubmitting}
+        onClose={() => !convertSubmitting && setConvertTarget(null)}
+        onSelect={handleRoomConvertSelect}
       />
     </View>
   );

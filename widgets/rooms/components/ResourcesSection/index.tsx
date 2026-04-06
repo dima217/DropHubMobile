@@ -2,8 +2,7 @@ import { FileItem } from '@/api/types/file';
 import { Colors } from '@/constants/design-tokens';
 import { ThemedText } from '@/shared/core/ThemedText';
 import { ActionMenuItemData } from '@/shared/ui/ActionMenu/ActionMenuItem';
-import PreviewToggleSwitch from '@/shared/ui/PreviewToggleSwitch';
-import React, { useState } from 'react';
+import React from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
 import { FileMenuManager } from '../../menu/fileMenu';
 import FileCard from '../FileCard';
@@ -50,8 +49,6 @@ const ResourcesSection: React.FC<ResourcesSectionProps> = ({
   onSelectionChange,
   isMultiSelectMode = false,
 }) => {
-  const [previewEnabled, setPreviewEnabled] = useState(false);
-
   const handleFilePress = (file: FileItem) => {
     if (onFilePress) {
       onFilePress(file);
@@ -97,7 +94,7 @@ const ResourcesSection: React.FC<ResourcesSectionProps> = ({
       return (
         <FileCard
           file={item.file}
-          showPreview={previewEnabled}
+          showPreview
           showAuthorship={showAuthorship}
           authorAvatarUrl={item.authorAvatarUrl}
           authorFirstName={item.authorFirstName}
@@ -134,10 +131,6 @@ const ResourcesSection: React.FC<ResourcesSectionProps> = ({
     <View style={styles.container}>
       <View style={styles.header}>
         <ThemedText style={styles.title}>Resources</ThemedText>
-        <PreviewToggleSwitch
-          isEnabled={previewEnabled}
-          onToggle={setPreviewEnabled}
-        />
       </View>
 
       <FlatList
@@ -175,4 +168,3 @@ const styles = StyleSheet.create({
 });
 
 export default ResourcesSection;
-

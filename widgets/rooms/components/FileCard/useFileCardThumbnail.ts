@@ -15,11 +15,17 @@ export function useFileCardThumbnail(
         VideoThumbnails.getThumbnailAsync(fileKey, { time: 1000 })
           .then(({ uri }) => setThumbnailUri(uri))
           .catch(() => setThumbnailUri(null));
+      } else if (fileKey.startsWith('file://')) {
+        VideoThumbnails.getThumbnailAsync(fileKey, { time: 1000 })
+          .then(({ uri }) => setThumbnailUri(uri))
+          .catch(() => setThumbnailUri(null));
       } else {
         setThumbnailUri(null);
       }
     } else if (isImage && showPreview && fileKey) {
       if (fileKey.startsWith('http://') || fileKey.startsWith('https://')) {
+        setThumbnailUri(fileKey);
+      } else if (fileKey.startsWith('file://')) {
         setThumbnailUri(fileKey);
       } else {
         setThumbnailUri(null);

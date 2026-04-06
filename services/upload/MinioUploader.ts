@@ -40,10 +40,7 @@ export class MinioUploader extends AbstractUploader {
 
     const fileUri = FileSystem.documentDirectory + fileName;
 
-    const { uri } = await FileSystem.downloadAsync(
-      downloadUrl,
-      fileUri
-    );
+    const { uri } = await FileSystem.downloadAsync(downloadUrl, fileUri);
 
     if (await Sharing.isAvailableAsync()) {
       await Sharing.shareAsync(uri);

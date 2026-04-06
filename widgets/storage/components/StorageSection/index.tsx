@@ -1,14 +1,18 @@
 import {
+  useConvertStorageFileMutation,
   useCreateStorageFolderMutation,
   useGetFavoritesQuery,
   useGetStorageInfoQuery,
   useGetStorageStructureQuery,
   useRemoveStorageTagsMutation,
 } from "@/api";
+import type { FileConversionType } from "@/api/types/file";
 import { useArchiveRoomToStorageMutation } from "@/api/storageApi";
 import { ResourceType } from "@/api/types/shared";
 import { StorageItem } from "@/api/types/storage";
 import { Colors } from "@/constants/design-tokens";
+import ConversionPickerModal from "@/shared/Modals/ConversionPickerModal";
+import { getConversionOptions } from "@/shared/fileConversion/getConversionOptions";
 import { ActionMenuItemData } from "@/shared/ui/ActionMenu/ActionMenuItem";
 import PreviewToggleSwitch from "@/shared/ui/PreviewToggleSwitch";
 import { useFolderPathNavigation } from "@/widgets/storageList/hooks/useFolderPathNavigation";
@@ -20,9 +24,10 @@ import { skipToken } from "@reduxjs/toolkit/query";
 import React, { useCallback, useMemo, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   View as RNView,
   StyleSheet,
-  View
+  View,
 } from "react-native";
 import { useStorageActions } from "../../hooks/useStorageActions";
 import { useStorageFileUpload } from "../../hooks/useStorageFileUpload";
@@ -172,6 +177,8 @@ export const StorageSection: React.FC<StorageSectionProps> = (props) => {
   const [moveModalVisible, setMoveModalVisible] = useState(false);
   const [archiveRoomModalVisible, setArchiveRoomModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState<StorageItem | null>(null);
+  const [convertItem, setConvertItem] = useState<StorageItem | null>(null);
+  const [convertSubmitting, setConvertSubmitting] = useState(false);
 
   const {
     data: storageInfo,
@@ -238,6 +245,50 @@ export const StorageSection: React.FC<StorageSectionProps> = (props) => {
   const [removeStorageTags] = useRemoveStorageTagsMutation();
   const [archiveRoomToStorage, { isLoading: isArchivingRoom }] =
     useArchiveRoomToStorageMutation();
+  const [convertStorageFile] = useConvertStorageFileMutation();
+
+  const storageConversionOptions = useMemo(
+    () =>
+      convertItem && !convertItem.isDirectory && convertItem.fileId
+        ? getConversionOptions(
+            convertItem.fileMeta?.mimeType ?? "",
+            convertItem.name
+          )
+        : [],
+    [convertItem]
+  );
+
+  const handleStorageConvertSelect = useCallback(
+    async (conversion: FileConversionType) => {
+      if (!storageId || !convertItem?.fileId) return;
+      setConvertSubmitting(true);
+      try {
+        const result = await convertStorageFile({
+          storageId,
+          fileId: convertItem.fileId,
+          parentId: convertItem.parentId ?? undefined,
+          conversion,
+        }).unwrap();
+        const n = result.createdFiles?.length ?? 0;
+        Alert.alert(
+          "Готово",
+          n > 1 ? `Создано файлов: ${n}` : "Файл сконвертирован и сохранён"
+        );
+        setConvertItem(null);
+      } catch (e: unknown) {
+        const err = e as { data?: { message?: string }; message?: string };
+        Alert.alert(
+          "Ошибка",
+          String(
+            err?.data?.message ?? err?.message ?? "Не удалось конвертировать"
+          )
+        );
+      } finally {
+        setConvertSubmitting(false);
+      }
+    },
+    [storageId, convertItem, convertStorageFile]
+  );
 
   const handleConfirmArchiveRoom = useCallback(async () => {
     if (!archiveMode || !storageId) return;
@@ -327,6 +378,7 @@ export const StorageSection: React.FC<StorageSectionProps> = (props) => {
     storageId,
     currentParentId,
     refetchStructure,
+    onConvertRequest: setConvertItem,
     setSelectedItem,
     setTagsModalVisible,
     setGrantAccessModalVisible,
@@ -387,6 +439,7 @@ export const StorageSection: React.FC<StorageSectionProps> = (props) => {
         ctx,
         {
           onDownload: actions.handleDownloadFile,
+          onConvert: actions.handleConvert,
           onRename: actions.handleRename,
           onCopy: actions.handleCopy,
           onMove: actions.handleMove,
@@ -519,6 +572,15 @@ export const StorageSection: React.FC<StorageSectionProps> = (props) => {
           isStorageReady={!!storageId}
         />
       )}
+
+      <ConversionPickerModal
+        visible={convertItem !== null}
+        fileName={convertItem?.name ?? ""}
+        options={storageConversionOptions}
+        isSubmitting={convertSubmitting}
+        onClose={() => !convertSubmitting && setConvertItem(null)}
+        onSelect={handleStorageConvertSelect}
+      />
 
       <StorageSectionModals
         state={modalsState}

@@ -44,11 +44,6 @@ export abstract class AbstractUploader {
       return uploadUrl.split("?")[0];
     }
 
-    /**
-     * Share a file
-     */
-    abstract share(
-      fileUri: string
-    ): Promise<void>;
+    abstract share(downloadUrl: string): Promise<void>;
   }
   

@@ -1,8 +1,10 @@
 import { StorageItem } from "@/api/types/storage";
+import { getConversionOptions } from "@/shared/fileConversion/getConversionOptions";
 import { ActionMenuItemData } from "@/shared/ui/ActionMenu/ActionMenuItem";
 
 export type StorageItemMenuOption =
   | "download"
+  | "convert"
   | "rename"
   | "copy"
   | "move"
@@ -24,6 +26,7 @@ export type StorageItemMenuOptions =
 
 export interface StorageItemMenuHandlers {
   onDownload?: (item: StorageItem) => void;
+  onConvert?: (item: StorageItem) => void;
   onRename?: (item: StorageItem) => void;
   onCopy?: (item: StorageItem) => void;
   onMove?: (item: StorageItem) => void;
@@ -56,6 +59,7 @@ export const createStorageItemMenuItems = (
 ): ActionMenuItemData[] => {
   const {
     onDownload,
+    onConvert,
     onRename,
     onCopy,
     onMove,
@@ -77,6 +81,12 @@ export const createStorageItemMenuItems = (
     return menuItem;
   };
 
+  const mime = item.fileMeta?.mimeType ?? "";
+  const convertChoices =
+    !item.isDirectory && item.fileId
+      ? getConversionOptions(mime, item.name)
+      : [];
+
   const items: (ActionMenuItemData | null)[] = [
     onDownload
       ? maybe("download", {
@@ -85,6 +95,14 @@ export const createStorageItemMenuItems = (
       label: "Скачать",
       onPress: () => onDownload!(item),
     })
+      : null,
+    onConvert && convertChoices.length > 0
+      ? maybe("convert", {
+          id: "convert",
+          icon: "refresh-cw",
+          label: "Конвертировать",
+          onPress: () => onConvert!(item),
+        })
       : null,
     onRename
       ? maybe("rename", {

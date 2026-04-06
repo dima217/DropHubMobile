@@ -84,7 +84,9 @@ const Header = ({
         </ThemedText>
       </View>
       {menuItems && (
-        <ActionMenu items={menuItems.getMenuItems(file._id, file.storedName)} />
+        <ActionMenu
+          items={menuItems.getMenuItems(file._id, file.storedName, file.mimeType)}
+        />
       )}
     </View>
   );

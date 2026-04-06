@@ -1,6 +1,8 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { baseQueryWithRefresh } from "./baseApi";
-import { DeleteRoomFilesRequest, DeleteRoomFilesResponse, DownloadRoomFilesRequest, DownloadRoomFilesResponse, DownloadSharedFileRequest, DownloadSharedFileResponse, DownloadStorageFileRequest, DownloadStorageFileResponse, RoomUploadConfirmRequest, RoomUploadConfirmResponse, RoomUploadInitRequest, RoomUploadInitResponse, UpdateRoomFileRequest, UpdateRoomFileResponse, UploadSharedConfirmRequest, UploadSharedConfirmResponse, UploadSharedInitRequest, UploadSharedInitResponse, UploadStorageConfirmRequest, UploadStorageConfirmResponse, UploadStorageInitRequest, UploadStorageInitResponse } from "./types/file";
+import { roomApi } from "./roomApi";
+import { storageApi } from "./storageApi";
+import { DeleteRoomFilesRequest, DeleteRoomFilesResponse, DownloadRoomFilesRequest, DownloadRoomFilesResponse, DownloadSharedFileRequest, DownloadSharedFileResponse, DownloadStorageFileRequest, DownloadStorageFileResponse, ConvertFileResponse, ConvertRoomFileRequest, ConvertStorageFileRequest, FileUploadStatus, RoomUploadConfirmRequest, RoomUploadConfirmResponse, RoomUploadInitRequest, RoomUploadInitResponse, UpdateRoomFileRequest, UpdateRoomFileResponse, UploadSharedConfirmRequest, UploadSharedConfirmResponse, UploadSharedInitRequest, UploadSharedInitResponse, UploadStorageConfirmRequest, UploadStorageConfirmResponse, UploadStorageInitRequest, UploadStorageInitResponse } from "./types/file";
 
 export const fileApi = createApi({
     reducerPath: "fileApi",
@@ -61,6 +63,7 @@ export const fileApi = createApi({
                 method: "POST",
                 body,
             }),
+            keepUnusedDataFor: 0,
         }),
         uploadSharedInit: build.mutation<UploadSharedInitResponse, UploadSharedInitRequest>({
             query: (body) => ({
@@ -83,6 +86,62 @@ export const fileApi = createApi({
                 body,
             }),
         }),
+        convertRoomFile: build.mutation<ConvertFileResponse, ConvertRoomFileRequest>({
+            query: (body) => ({
+                url: `/file/convert-room`,
+                method: "POST",
+                body,
+            }),
+            async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+                try {
+                    const { data } = await queryFulfilled;
+                    const now = new Date().toISOString();
+                    dispatch(
+                        roomApi.util.updateQueryData("getRoomDetails", arg.roomId, (draft) => {
+                            if (!draft.files) draft.files = [];
+                            for (const f of data.createdFiles) {
+                                draft.files.push({
+                                    _id: f.fileId,
+                                    storedName: f.fileName,
+                                    originalName: f.fileName,
+                                    mimeType: f.mimeType,
+                                    size: f.size,
+                                    key: "",
+                                    uploadTime: now,
+                                    downloadCount: 0,
+                                    uploadedParts: 0,
+                                    expiresAt: null,
+                                    creatorId: 0,
+                                    uploadSession: { status: FileUploadStatus.COMPLETE },
+                                    createdAt: now,
+                                    updatedAt: now,
+                                    __v: 0,
+                                });
+                            }
+                        })
+                    );
+                } catch {
+                    /* handled by caller */
+                }
+            },
+        }),
+        convertStorageFile: build.mutation<ConvertFileResponse, ConvertStorageFileRequest>({
+            query: (body) => ({
+                url: `/file/convert-storage`,
+                method: "POST",
+                body,
+            }),
+            async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+                try {
+                    await queryFulfilled;
+                    dispatch(
+                        storageApi.util.invalidateTags([{ type: "Storage", id: arg.storageId }])
+                    );
+                } catch {
+                    /* handled by caller */
+                }
+            },
+        }),
     }),
 });
 
@@ -98,4 +157,6 @@ export const {
     useUploadSharedInitMutation,
     useUploadSharedConfirmMutation,
     useLazyDownloadSharedFileQuery,
+    useConvertRoomFileMutation,
+    useConvertStorageFileMutation,
 } = fileApi;

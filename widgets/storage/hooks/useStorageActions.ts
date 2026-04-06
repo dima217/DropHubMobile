@@ -22,6 +22,8 @@ interface UseStorageActionsProps {
   storageId: string;
   currentParentId: string | null;
   refetchStructure: () => void;
+  /** Открыть сценарий конвертации файла (модалка на уровне экрана). */
+  onConvertRequest?: (item: StorageItem) => void;
   setSelectedItem: (item: StorageItem | null) => void;
   setTagsModalVisible: (visible: boolean) => void;
   setGrantAccessModalVisible: (visible: boolean) => void;
@@ -36,6 +38,7 @@ export const useStorageActions = ({
   storageId,
   currentParentId,
   refetchStructure,
+  onConvertRequest,
   setSelectedItem,
   setTagsModalVisible,
   setGrantAccessModalVisible,
@@ -73,6 +76,13 @@ export const useStorageActions = ({
       }
     },
     [storageId, downloadStorageFile]
+  );
+
+  const handleConvert = useCallback(
+    (item: StorageItem) => {
+      onConvertRequest?.(item);
+    },
+    [onConvertRequest]
   );
 
   const handleRename = useCallback(
@@ -285,6 +295,7 @@ export const useStorageActions = ({
 
   return {
     handleDownloadFile,
+    handleConvert,
     handleRename,
     handleConfirmRename,
     handleCopy,
