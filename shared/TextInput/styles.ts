@@ -19,10 +19,23 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
   },
+  inputContainerMultiline: {
+    height: undefined,
+    minHeight: 100,
+    alignItems: "flex-start",
+    paddingVertical: 12,
+  },
   input: {
     width: "90%",
     color: Colors.text,
     fontSize: 16,
+  },
+  inputMultiline: {
+    minHeight: 88,
+    textAlignVertical: "top",
+    paddingTop: 4,
+    width: "100%",
+    flex: 1,
   },
   label: {
     fontSize: 12,

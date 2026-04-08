@@ -4,14 +4,14 @@ export class WebSocketService {
   private socket: Socket | null = null;
   private connectionTimeout: NodeJS.Timeout | null = null;
 
-  connect(url: string, token: string, delayMs: number = 1000): Socket {
+  connect(url: string, bearerToken?: string | null, delayMs: number = 1000): Socket {
     this.disconnect();
 
     const options: Partial<ManagerOptions & SocketOptions> = {
       transports: ["websocket"],
-      auth: {
-        token: `Bearer ${token}`,
-      },
+      auth: bearerToken
+        ? { token: `Bearer ${bearerToken}` }
+        : {},
       autoConnect: false,
     };
 

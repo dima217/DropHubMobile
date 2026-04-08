@@ -1,7 +1,7 @@
 import type { ChatChannelMessage } from "@/api/types/chatChannels";
 import { Colors } from "@/constants/design-tokens";
 import React, { useEffect, useRef } from "react";
-import { View, Text, FlatList, StyleSheet, Keyboard, Platform } from "react-native";
+import { FlatList, Keyboard, Platform, StyleSheet, Text, View } from "react-native";
 import { MessageItem } from "./MessageItem";
 import { TypingIndicator } from "./TypingIndicator";
 
@@ -122,6 +122,7 @@ export function MessageList({
         onContentSizeChange={onContentSizeChange}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="interactive"
+        showsVerticalScrollIndicator={false}
       />
       {typingUserIds.length > 0 && <TypingIndicator userIds={typingUserIds} />}
     </View>

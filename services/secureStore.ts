@@ -2,6 +2,9 @@ import * as SecureStore from "expo-secure-store";
 
 const ACCESS_KEY = "access_token";
 const REFRESH_KEY = "refresh_token";
+const ANON_SUPPORT_KEY = "support_anonymous";
+
+export type AnonymousSupportCredentials = { id: string; token: string };
 
 export const secureStore = {
   async getAccessToken(): Promise<string | null> {
@@ -52,6 +55,33 @@ export const secureStore = {
       await SecureStore.deleteItemAsync(REFRESH_KEY);
     } catch (e) {
       console.warn("secureStore.clearAll error", e);
+    }
+  },
+
+  async getAnonymousSupportCredentials(): Promise<AnonymousSupportCredentials | null> {
+    try {
+      const raw = await SecureStore.getItemAsync(ANON_SUPPORT_KEY);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw) as AnonymousSupportCredentials;
+      if (parsed?.id && parsed?.token) return parsed;
+      return null;
+    } catch (e) {
+      console.warn("secureStore.getAnonymousSupportCredentials error", e);
+      return null;
+    }
+  },
+
+  async setAnonymousSupportCredentials(creds: AnonymousSupportCredentials | null) {
+    try {
+      if (creds == null) {
+        await SecureStore.deleteItemAsync(ANON_SUPPORT_KEY);
+      } else {
+        await SecureStore.setItemAsync(ANON_SUPPORT_KEY, JSON.stringify(creds), {
+          keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
+        });
+      }
+    } catch (e) {
+      console.warn("secureStore.setAnonymousSupportCredentials error", e);
     }
   },
 };

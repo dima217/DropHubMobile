@@ -27,6 +27,7 @@ const TextInput = ({
   left,
   right,
   editable = true,
+  multiline,
   ...rest
 }: TextInputProps) => {
   const hasError = Boolean(errorMessage);
@@ -39,15 +40,17 @@ const TextInput = ({
       <View
         style={[
           styles.inputContainer,
+          multiline && styles.inputContainerMultiline,
           hasError && styles.errorInputContainer,
           !editable && styles.disabledInputContainer,
         ]}
       >
         {left && <View style={styles.leftContainer}>{left}</View>}
         <RNTextInput
-          style={[styles.input, inputStyle]}
+          style={[styles.input, multiline && styles.inputMultiline, inputStyle]}
           editable={editable}
           enablesReturnKeyAutomatically
+          multiline={multiline}
           {...rest}
         />
         {right && <View style={styles.rightContainer}>{right}</View>}

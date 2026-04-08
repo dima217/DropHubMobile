@@ -8,6 +8,7 @@ import { searchApi } from "@/api/searchApi";
 import { sharedApi } from "@/api/sharedApi";
 import { favoritesApi } from "@/api/favorites";
 import { storageApi } from "@/api/storageApi";
+import { supportApi } from "@/api/supportApi";
 import authReducer from "@/store/slices/authSlice";
 import tagColorsReducer from "@/store/slices/tagColorsSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -33,6 +34,7 @@ const rootReducer = combineReducers({
   [sharedApi.reducerPath]: sharedApi.reducer,
   [favoritesApi.reducerPath]: favoritesApi.reducer,
   [storageApi.reducerPath]: storageApi.reducer,
+  [supportApi.reducerPath]: supportApi.reducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
@@ -53,6 +55,7 @@ export const store = configureStore({
       .concat(sharedApi.middleware)
       .concat(favoritesApi.middleware)
       .concat(storageApi.middleware)
+      .concat(supportApi.middleware)
 });
 
 export const persistor = persistStore(store);

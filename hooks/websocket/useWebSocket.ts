@@ -2,7 +2,16 @@ import { WebSocketService } from "@/services/websocket/WebSocketService";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Socket } from "socket.io-client";
 
-export const useWebSocket = (url: string, token: string) => {
+type UseWebSocketOptions = {
+  /** Подключиться без Bearer (например, поддержка для анонима) */
+  allowConnectWithoutToken?: boolean;
+};
+
+export const useWebSocket = (
+  url: string,
+  token: string,
+  options?: UseWebSocketOptions
+) => {
   const serviceRef = useRef<WebSocketService | null>(null);
   const socketRef = useRef<Socket | null>(null);
 
@@ -10,14 +19,14 @@ export const useWebSocket = (url: string, token: string) => {
   const [socketId, setSocketId] = useState<string | undefined>();
 
   useEffect(() => {
-    if (!token) return;
+    if (!options?.allowConnectWithoutToken && !token) return;
 
     serviceRef.current?.disconnect();
 
     const service = new WebSocketService();
     serviceRef.current = service;
 
-    const socket = service.connect(url, token);
+    const socket = service.connect(url, token || undefined);
     socketRef.current = socket;
 
     const handleConnect = () => {
@@ -39,7 +48,7 @@ export const useWebSocket = (url: string, token: string) => {
       service.disconnect();
       socketRef.current = null;
     };
-  }, [url, token]);
+  }, [url, token, options?.allowConnectWithoutToken]);
 
   const emit = useCallback((event: string, data?: any) => {
     socketRef.current?.emit(event, data);

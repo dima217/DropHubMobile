@@ -5,7 +5,7 @@ import PasswordChangedModal from "@/shared/Modals/PasswordChangedModal";
 import AuthPrompt from "@/shared/ui/AuthPrompt";
 import View from "@/shared/View";
 import LoginForm from "@/widgets/login/LoginForm";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { Href, useLocalSearchParams, useRouter } from "expo-router";
 import { View as RNView, StyleSheet } from "react-native";
 
 const Login = () => {
@@ -31,6 +31,13 @@ const Login = () => {
             promptText="Don't have an account?"
             actionText="Sign Up"
             onPressAction={() => router.navigate("/(auth)/register")}
+          />
+          <AuthPrompt
+            promptText="Нет доступа к аккаунту?"
+            actionText="Поддержка без входа"
+            onPressAction={() =>
+              router.navigate("/(auth)/support-anonymous" as Href)
+            }
           />
         </RNView>
       </RNView>
