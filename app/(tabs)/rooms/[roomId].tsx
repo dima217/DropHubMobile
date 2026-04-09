@@ -217,6 +217,7 @@ const RoomDetailsScreen = () => {
 
       <ResourcesSection
         resources={resources}
+        roomId={roomId || undefined}
         showAuthorship
         fileMenuItems={fileMenuManager}
         folderMenuItems={folderMenuItems}

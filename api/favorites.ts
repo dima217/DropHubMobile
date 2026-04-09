@@ -50,8 +50,8 @@ export const favoritesApi = createApi({
       RemoveFavoriteFromStorageRequest
     >({
       query: (body) => ({
-        url: "/favorites/remove-from-storage",
-        method: "POST",
+        url: "/favorites/storage-item",
+        method: "DELETE",
         body,
         auth: true,
       }),

@@ -2,7 +2,8 @@ import { FileItem } from '@/api/types/file';
 import { Colors } from '@/constants/design-tokens';
 import { ThemedText } from '@/shared/core/ThemedText';
 import { ActionMenuItemData } from '@/shared/ui/ActionMenu/ActionMenuItem';
-import React from 'react';
+import PreviewToggleSwitch from '@/shared/ui/PreviewToggleSwitch';
+import React, { useState } from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
 import { FileMenuManager } from '../../menu/fileMenu';
 import FileCard from '../FileCard';
@@ -24,6 +25,8 @@ export interface ResourceItem {
 
 interface ResourcesSectionProps {
   resources: ResourceItem[];
+  /** Pass from room screen so file previews can resolve signed URLs when `file.key` is not a public URL */
+  roomId?: string;
   showAuthorship?: boolean;
   fileMenuItems?: FileMenuManager;
   folderMenuItems?: ActionMenuItemData[];
@@ -38,6 +41,7 @@ interface ResourcesSectionProps {
 
 const ResourcesSection: React.FC<ResourcesSectionProps> = ({
   resources,
+  roomId,
   showAuthorship = false,
   fileMenuItems,
   folderMenuItems = [],
@@ -49,6 +53,7 @@ const ResourcesSection: React.FC<ResourcesSectionProps> = ({
   onSelectionChange,
   isMultiSelectMode = false,
 }) => {
+  const [previewEnabled, setPreviewEnabled] = useState(false);
   const handleFilePress = (file: FileItem) => {
     if (onFilePress) {
       onFilePress(file);
@@ -94,7 +99,8 @@ const ResourcesSection: React.FC<ResourcesSectionProps> = ({
       return (
         <FileCard
           file={item.file}
-          showPreview
+          roomId={roomId}
+          showPreview={previewEnabled}
           showAuthorship={showAuthorship}
           authorAvatarUrl={item.authorAvatarUrl}
           authorFirstName={item.authorFirstName}
@@ -131,6 +137,10 @@ const ResourcesSection: React.FC<ResourcesSectionProps> = ({
     <View style={styles.container}>
       <View style={styles.header}>
         <ThemedText style={styles.title}>Resources</ThemedText>
+        <PreviewToggleSwitch
+          isEnabled={previewEnabled}
+          onToggle={setPreviewEnabled}
+        />
       </View>
 
       <FlatList
@@ -152,7 +162,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,

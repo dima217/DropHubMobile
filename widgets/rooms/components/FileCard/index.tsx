@@ -1,7 +1,8 @@
+import { useLazyDownloadRoomFilesQuery } from '@/api/fileApi';
 import { Colors } from '@/constants/design-tokens';
 import AuthorshipSection from '@/shared/ui/AuthorshipSection';
 import { Feather } from '@expo/vector-icons';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import PreviewModal from './modals/PreviewModal';
 import { styles } from './styles';
@@ -10,11 +11,12 @@ import Header from './ui/Header';
 import ImagePreview from './ui/ImagePreview';
 import InlineVideo from './ui/InlineVideo';
 import Progress from './ui/Progress';
-import { getRemoteMediaUri } from './utils';
 import { useFileCardThumbnail } from './useFileCardThumbnail';
+import { getRemoteMediaUri } from './utils';
 
 const FileCard: React.FC<FileCardProps> = ({
   file,
+  roomId,
   showPreview = false,
   showAuthorship = false,
   authorAvatarUrl,
@@ -31,14 +33,46 @@ const FileCard: React.FC<FileCardProps> = ({
   tagColors = {},
 }) => {
   const [showFullPreview, setShowFullPreview] = useState(false);
+  const [roomSignedUrl, setRoomSignedUrl] = useState<string | null>(null);
+  const [fetchRoomDownloadUrl] = useLazyDownloadRoomFilesQuery();
 
   const isImage = file.mimeType?.startsWith('image/');
   const isVideo = file.mimeType?.startsWith('video/');
   const canPreview = (isImage || isVideo) && showPreview;
   const remoteMediaUri = getRemoteMediaUri(file.key);
 
+  useEffect(() => {
+    if (!showPreview || !roomId) {
+      setRoomSignedUrl(null);
+      return;
+    }
+    if (remoteMediaUri) {
+      setRoomSignedUrl(null);
+      return;
+    }
+    if (file.key.startsWith('file://')) {
+      setRoomSignedUrl(null);
+      return;
+    }
+    let cancelled = false;
+    fetchRoomDownloadUrl({ fileIds: [file._id], roomId })
+      .unwrap()
+      .then((rows) => {
+        const url = rows.find((r) => r.fileId === file._id)?.url;
+        if (!cancelled) setRoomSignedUrl(url ?? null);
+      })
+      .catch(() => {
+        if (!cancelled) setRoomSignedUrl(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [showPreview, roomId, file._id, file.key, remoteMediaUri, fetchRoomDownloadUrl]);
+
+  const mediaUriForThumbnail = remoteMediaUri ?? roomSignedUrl ?? file.key;
+
   const thumbnailUri = useFileCardThumbnail(
-    file.key,
+    mediaUriForThumbnail,
     !!isVideo,
     !!isImage,
     showPreview
@@ -50,6 +84,8 @@ const FileCard: React.FC<FileCardProps> = ({
   const primaryTagColor = tags.length > 0
     ? tags.map((t) => tagColors[t]).find(Boolean) || undefined
     : undefined;
+
+  const streamOrImageUri = remoteMediaUri ?? roomSignedUrl;
 
   return (
     <Pressable
@@ -84,10 +120,10 @@ const FileCard: React.FC<FileCardProps> = ({
         {progress !== undefined && <Progress progress={progress} />}
 
         {canPreview &&
-          (isVideo ? remoteMediaUri : thumbnailUri) &&
-          (isVideo && remoteMediaUri ? (
+          (isVideo ? streamOrImageUri : thumbnailUri) &&
+          (isVideo && streamOrImageUri ? (
             <InlineVideo
-              uri={remoteMediaUri}
+              uri={streamOrImageUri}
               posterUri={thumbnailUri}
               overlayPaused={showFullPreview}
               onOpenFull={() => setShowFullPreview(true)}
@@ -112,7 +148,7 @@ const FileCard: React.FC<FileCardProps> = ({
         visible={showFullPreview}
         onClose={() => setShowFullPreview(false)}
         isVideo={!!isVideo}
-        remoteMediaUri={remoteMediaUri}
+        remoteMediaUri={streamOrImageUri}
         imageUri={thumbnailUri}
       />
     </Pressable>
