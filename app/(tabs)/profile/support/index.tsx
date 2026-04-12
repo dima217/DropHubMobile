@@ -92,7 +92,7 @@ export default function SupportListScreen() {
 }
 
 const styles = StyleSheet.create({
-  listContent: { paddingBottom: 32 },
+  listContent: { paddingBottom: 32, paddingVertical: 12 },
   listIntro: { paddingVertical: 16, gap: 6 },
   introTitle: {
     color: Colors.brightText,

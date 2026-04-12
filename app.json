@@ -5,14 +5,18 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/flash.png",
-    "scheme": "DropHub",
+    "scheme": [
+      "drophub"
+    ],
+    "extra": {
+      "googleWebClientId": "1093938188069-iv687vpc7vs2jenk07es4b23pj0jenkp.apps.googleusercontent.com"
+    },
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true
     },
     "android": {
-      "useCleartextTraffic": true,
       "adaptiveIcon": {
         "backgroundColor": "#0F0F0F",
         "backgroundImage": "./assets/images/flash.png"
@@ -39,7 +43,14 @@
           }
         }
       ],
-      "expo-video"
+      "expo-video",
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.YOUR_IOS_REVERSED_CLIENT_ID"
+        }
+      ],
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true,

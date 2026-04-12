@@ -8,6 +8,7 @@ import { StyleSheet, View } from "react-native";
 import { useDispatch } from "react-redux";
 
 import AuthPrompt from "@/shared/ui/AuthPrompt";
+import GoogleSignInButton from "@/shared/ui/GoogleSignInButton";
 import Button from "../../../shared/Button";
 import EmailInput from "../../../shared/EmailInput";
 import PasswordInput from "../../../shared/PasswordInput";
@@ -137,6 +138,12 @@ const LoginForm = () => {
         style={styles.button}
         onPress={handleSubmit(onSubmit)}
       />
+
+      <GoogleSignInButton
+        title="Sign in with Google"
+        style={styles.googleButton}
+        disabled={isLoading}
+      />
     </View>
   );
 };
@@ -159,6 +166,9 @@ const styles = StyleSheet.create({
   },
   button: {
     marginTop: 30,
+  },
+  googleButton: {
+    marginTop: 12,
   },
   errorText: {
     alignSelf: "flex-start",

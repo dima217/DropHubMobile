@@ -1,6 +1,7 @@
 import { Colors } from "@/constants/design-tokens";
 import Button from "@/shared/Button";
 import { ThemedText } from "@/shared/core/ThemedText";
+import GoogleSignInButton from "@/shared/ui/GoogleSignInButton";
 import RadialGradientBackground from "@/shared/ui/RadialGradientBackground";
 import View from "@/shared/View";
 import { useRouter } from "expo-router";
@@ -39,7 +40,7 @@ export default function OnboardingScreen() {
             </ThemedText>
           </RNView>
           <RNView style={styles.buttonWrapper}>
-            <Button title="Continue with Google" onPress={() => {}} />
+            <GoogleSignInButton />
             <Button title="Skip" style={styles.skipButton} onPress={() => router.replace("/(auth)/login")} />
           </RNView>
         </RNView>

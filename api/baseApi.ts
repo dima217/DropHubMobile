@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "@/constants/apiConfig";
 import { shouldRefreshToken } from "@/services/auth/TokenExpireChecker";
 import { secureStore } from "@/services/secureStore";
 import { clearAuth, setAccessToken } from "@/store/slices/authSlice";
@@ -9,7 +10,7 @@ import {
 import { FetchArgsWithAuth } from "./types/base";
 
 const rawBaseQuery = fetchBaseQuery({
-  baseUrl: "http://10.145.68.195:3000",
+  baseUrl: API_BASE_URL,
   credentials: "include",
   prepareHeaders: async (headers, { getState }) => {
     const token = await secureStore.getAccessToken();
@@ -29,7 +30,7 @@ const refreshTokens = async (api: any): Promise<boolean> => {
 
   try {
     const response = await fetch(
-      "http://10.145.68.195:3000/auth/new-access-token",
+      `${API_BASE_URL}/auth/new-access-token`,
       {
         method: "POST",
         headers: {

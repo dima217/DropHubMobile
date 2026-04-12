@@ -4,6 +4,7 @@ import {
   useSignUpVerifyCodeMutation,
   useUpdateProfileMutation,
 } from "@/api/authApi";
+import { useCreateStorageMutation } from "@/api/storageApi";
 import { secureStore } from "@/services/secureStore";
 import { createUploader, UploadProvider } from "@/services/upload/UploaderFactory";
 import { isDefaultImage } from "@/shared/MediaUploader/utils";
@@ -26,6 +27,7 @@ export const useSignUpCodeFlow = () => {
     useSignUpVerifyCodeMutation();
   const [signUp] = useSignUpMutation();
   const [updateProfile] = useUpdateProfileMutation();
+  const [createStorage] = useCreateStorageMutation();
 
   const [showCodeModal, setShowCodeModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
@@ -183,6 +185,8 @@ export const useSignUpCodeFlow = () => {
       await updateProfile({
         avatarUrl: avatarUrl ?? undefined,
       }).unwrap();
+
+      await createStorage().unwrap();
 
       router.navigate("/(tabs)/home");
       resetForm();

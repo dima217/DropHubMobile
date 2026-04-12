@@ -2,6 +2,8 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { baseQueryWithRefresh } from "./baseApi";
 import {
+  GoogleNativeAuthRequest,
+  GoogleNativeAuthResponse,
   MeResponse,
   ProfileResponse,
   ProfileUploadUrlResponse,
@@ -27,6 +29,22 @@ export const authApi = createApi({
     signIn: build.mutation<SignInResponse, SignInRequest>({
       query: (body) => ({
         url: "/auth/login",
+        method: "POST",
+        body,
+        auth: false,
+      }),
+    }),
+
+    /**
+     * Exchange Google ID token (from @react-native-google-signin/google-signin) for app tokens.
+     * Nest must verify idToken with Google and return the same shape as login (optional `user`; if omitted, client loads /profile).
+     */
+    googleNativeSignIn: build.mutation<
+      GoogleNativeAuthResponse,
+      GoogleNativeAuthRequest
+    >({
+      query: (body) => ({
+        url: "/auth/google/mobile",
         method: "POST",
         body,
         auth: false,
@@ -125,6 +143,7 @@ export const authApi = createApi({
 
 export const {
   useSignInMutation,
+  useGoogleNativeSignInMutation,
   useSignUpInitMutation,
   useSignUpMutation,
   useSignOutMutation,

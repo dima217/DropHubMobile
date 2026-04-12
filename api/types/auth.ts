@@ -15,6 +15,18 @@ export interface SignInResponse {
   };
 }
 
+/** Backend verifies Google ID token and issues app JWT (add Nest handler if missing). */
+export interface GoogleNativeAuthRequest {
+  idToken: string;
+}
+
+export interface GoogleNativeAuthResponse {
+  accessToken: string;
+  refreshToken: string;
+  user?: SignInResponse["user"];
+  existing: boolean;
+}
+
 export interface SignUpInitRequest {
   email: string;
 }
