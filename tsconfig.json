@@ -5,6 +5,9 @@
     "paths": {
       "@/*": [
         "./*"
+      ],
+      "@react-native-community/netinfo": [
+        "./node_modules/@react-native-community/netinfo/lib/typescript/src/index"
       ]
     }
   },

@@ -18,6 +18,7 @@ import {
   SignUpInitRequest,
   SignUpVerifyCodeRequest,
   SignUpVerifyCodeResponse,
+  SetFcmTokenRequest,
   UpdateProfileRequest,
   UpdateProfileResponse
 } from "./types/auth";
@@ -130,6 +131,17 @@ export const authApi = createApi({
       }),
     }),
 
+    setFcmToken: build.mutation<void, SetFcmTokenRequest>({
+      query: (body) => ({
+        url: "/profile/fcm-token",
+        method: "POST",
+        body,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }),
+    }),
+
     searchProfiles: build.query<ProfileResponse[], string>({
       query: (query) => ({
         url: "/profile/search",
@@ -153,6 +165,7 @@ export const {
   useResetPasswordConfirmMutation,
   useSignUpVerifyCodeMutation,
   useUpdateProfileMutation,
+  useSetFcmTokenMutation,
   useGetProfileUploadUrlQuery,
   useSearchProfilesQuery,
 } = authApi;

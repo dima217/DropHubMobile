@@ -1,5 +1,6 @@
 import { Colors } from "@/constants/design-tokens";
 import { NetworkProvider, useNetwork } from "@/providers/NetworkProvider";
+import { PushNotificationsController } from "@/providers/PushNotificationsController";
 import { persistor, store } from "@/store/store";
 import { NoInternetScreen } from "@/widgets/internet/NoInternetScreen";
 import { Stack } from "expo-router";
@@ -38,6 +39,7 @@ export default function RootLayout() {
       <NetworkProvider>
         <Provider store={store}>
           <PersistGate loading={null} persistor={persistor}>
+            <PushNotificationsController />
             <LayoutContent />
             <StatusBar style="auto" />
           </PersistGate>

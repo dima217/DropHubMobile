@@ -105,3 +105,8 @@ export interface ProfileUploadUrlResponse {
   uploadUrl: string;
   publicUrl: string;
 }
+
+/** Native FCM registration token (Android); not Expo Push token. */
+export interface SetFcmTokenRequest {
+  token: string | null;
+}

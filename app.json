@@ -23,7 +23,8 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.dima217.drophub"
+      "package": "com.dima217.drophub",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "output": "static",
@@ -50,7 +51,15 @@
           "iosUrlScheme": "com.googleusercontent.apps.YOUR_IOS_REVERSED_CLIENT_ID"
         }
       ],
-      "expo-font"
+      "expo-font",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/flash.png",
+          "color": "#0F0F0F",
+          "defaultChannel": "default"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

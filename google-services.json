@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "681000221407",
+    "project_id": "drophub-2ac8d",
+    "storage_bucket": "drophub-2ac8d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:681000221407:android:bf8faab1af382be324876a",
+        "android_client_info": {
+          "package_name": "com.dima217.drophub"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCUnnm-ydwf_NVrmEaaSea5mJVImoXksfc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

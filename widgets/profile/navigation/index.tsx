@@ -2,6 +2,7 @@ import Settings from "@/assets/images/Setting.svg";
 import SignOut from "@/assets/images/SignOut.svg";
 import Support from "@/assets/images/Support.svg";
 import { Colors } from "@/constants/design-tokens";
+import { syncFcmTokenToBackend } from "@/services/push/syncFcmTokenToBackend";
 import { secureStore } from "@/services/secureStore";
 import LogoutConfirmationModal from "@/shared/Modals/LogoutConfirmationModal";
 import { clearAuth } from "@/store/slices/authSlice";
@@ -35,10 +36,10 @@ export const useProfileMenuItems = (): {
   const handleLogoutConfirm = async () => {
     setShowLogoutModal(false);
     try {
-    } catch (error: any) {
-      await secureStore.clearAll();
+      await syncFcmTokenToBackend(null);
+    } catch {
+      /* токен на сервере мог не очиститься — всё равно выходим локально */
     }
-
     dispatch(clearAuth());
     await secureStore.clearAll();
   };
