@@ -64,6 +64,13 @@ export const useProfileMenuItems = (): {
       isNested: true,
     },
     {
+      id: "notifications",
+      title: "Notifications",
+      icon: <Feather name="bell" size={24} color={Colors.secondary} />,
+      href: "/(tabs)/profile/notifications",
+      isNested: true,
+    },
+    {
       id: "support",
       title: "Support",
       icon: <Support />,

@@ -7,3 +7,4 @@ export * from "./storageApi";
 export * from "./sharedApi";
 export * from "./favorites";
 export * from "./searchApi";
+export * from "./notificationsApi";

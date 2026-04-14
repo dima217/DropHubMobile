@@ -2,6 +2,7 @@ import { useConvertRoomFileMutation } from "@/api/fileApi";
 import { useGetRoomDetailsQuery } from "@/api/roomApi";
 import type { FileConversionType } from "@/api/types/file";
 import { Colors } from "@/constants/design-tokens";
+import { useAutoMarkRoomFileNotificationsRead } from "@/hooks/data/useAutoMarkNotificationsOnView";
 import { useRoomFilesUpdate } from "@/hooks/data/useRoomFilesUpdate";
 import { secureStore } from "@/services/secureStore";
 import Header from "@/shared/Header";
@@ -32,6 +33,7 @@ import RoomPlaceholder from "./room-placeholder";
 const RoomDetailsScreen = () => {
   const { roomId } = useLocalSearchParams<{ roomId: string }>();
   const router = useRouter();
+  useAutoMarkRoomFileNotificationsRead(roomId);
   const user = useSelector((state: RootState) => state.auth.user);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");

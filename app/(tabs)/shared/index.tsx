@@ -8,6 +8,7 @@ import { AccessRole } from "@/api/types/room";
 import { GetSharedResourcesResponse } from "@/api/types/shared";
 import { StorageItem } from "@/api/types/storage";
 import { Colors } from "@/constants/design-tokens";
+import { useAutoMarkSharedNotificationsRead } from "@/hooks/data/useAutoMarkNotificationsOnView";
 import { createUploader, UploadProvider } from "@/services/upload/UploaderFactory";
 import { ThemedText } from "@/shared/core/ThemedText";
 import Header from "@/shared/Header";
@@ -40,6 +41,7 @@ const menuOptions: StorageItemMenuOptions = {
 };
 
 const SharedScreen = () => {
+  useAutoMarkSharedNotificationsRead();
   const { data: sharedResources, isLoading } = useGetSharedResourcesQuery();
   const [downloadSharedFile] = useLazyDownloadSharedFileQuery();
   const [selectedItem, setSelectedItem] = useState<StorageItem | null>(null);

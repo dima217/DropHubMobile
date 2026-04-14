@@ -1,8 +1,9 @@
 import Bell from "@/assets/images/Bell.svg";
+import { useGetNotificationsQuery } from "@/api";
 import { RootState } from "@/store/store";
 import Avatar from "@/widgets/profile/components/ProfileCard/ui/Avatar";
 import { useRouter } from "expo-router";
-import { Alert, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { useSelector } from "react-redux";
 import { ThemedText } from "../core/ThemedText";
 import Circle from "../ui/Circle";
@@ -10,6 +11,9 @@ import Circle from "../ui/Circle";
 const AccountDetails = () => {
   const profile = useSelector((state: RootState) => state.auth.user);
   const router = useRouter();
+  const { data: notifications } = useGetNotificationsQuery({ limit: 100, offset: 0 });
+  const hasUnreadNotifications =
+    notifications?.some((notification) => !notification.isRead) ?? false;
 
   const getInitials = () => {
     if (!profile) return "?";
@@ -39,14 +43,17 @@ const AccountDetails = () => {
           <ThemedText type="small">{profile?.email || ""}</ThemedText>
         </View>
       </View>
-      <Circle
-        size={50}
-        onPress={() => {
-          Alert.alert("Notifications");
-        }}
-      >
-        <Bell />
-      </Circle>
+      <View style={styles.bellWrapper}>
+        <Circle
+          size={50}
+          onPress={() => {
+            router.push("/(tabs)/profile/notifications");
+          }}
+        >
+          <Bell />
+        </Circle>
+        {hasUnreadNotifications ? <View style={styles.unreadBadge} /> : null}
+      </View>
     </View>
   );
 };
@@ -68,5 +75,19 @@ const styles = StyleSheet.create({
   infoContainer: {
     flexDirection: "column",
     gap: 5,
+  },
+  bellWrapper: {
+    position: "relative",
+  },
+  unreadBadge: {
+    position: "absolute",
+    top: 3,
+    right: 4,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: "#FF4A75",
+    borderWidth: 1,
+    borderColor: "#060D18",
   },
 });

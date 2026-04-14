@@ -3,6 +3,7 @@ import { avatarApi } from "@/api/avatarApi";
 import { chatChannelsApi } from "@/api/chatChannelsApi";
 import { fileApi } from "@/api/fileApi";
 import { friendApi } from "@/api/friendApi";
+import { notificationsApi } from "@/api/notificationsApi";
 import { roomApi } from "@/api/roomApi";
 import { searchApi } from "@/api/searchApi";
 import { sharedApi } from "@/api/sharedApi";
@@ -35,6 +36,7 @@ const rootReducer = combineReducers({
   [favoritesApi.reducerPath]: favoritesApi.reducer,
   [storageApi.reducerPath]: storageApi.reducer,
   [supportApi.reducerPath]: supportApi.reducer,
+  [notificationsApi.reducerPath]: notificationsApi.reducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
@@ -56,6 +58,7 @@ export const store = configureStore({
       .concat(favoritesApi.middleware)
       .concat(storageApi.middleware)
       .concat(supportApi.middleware)
+      .concat(notificationsApi.middleware)
 });
 
 export const persistor = persistStore(store);

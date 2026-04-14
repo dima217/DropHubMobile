@@ -1,5 +1,6 @@
 import { useGetRoomDetailsQuery } from "@/api/roomApi";
 import { Colors } from "@/constants/design-tokens";
+import { useAutoMarkRoomFileNotificationsRead } from "@/hooks/data/useAutoMarkNotificationsOnView";
 import { getUserIdFromAccessToken } from "@/services/auth/getUserIdFromAccessToken";
 import Header from "@/shared/Header";
 import View from "@/shared/View";
@@ -23,6 +24,7 @@ import { useSelector } from "react-redux";
 
 const RoomChatScreen = () => {
   const { roomId } = useLocalSearchParams<{ roomId: string }>();
+  useAutoMarkRoomFileNotificationsRead(roomId);
   const user = useSelector((state: RootState) => state.auth.user);
   const accessToken = useSelector((state: RootState) => state.auth.accessToken);
   const [pinsOpen, setPinsOpen] = useState(false);

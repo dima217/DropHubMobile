@@ -7,7 +7,7 @@ import { syncFcmTokenToBackend } from "@/services/push/syncFcmTokenToBackend";
 import type { RootState } from "@/store/store";
 import { store } from "@/store/store";
 import * as Notifications from "expo-notifications";
-import { useRouter } from "expo-router";
+import { Href, useRouter } from "expo-router";
 import { useEffect, useRef } from "react";
 import { AppState, Platform } from "react-native";
 import { useSelector } from "react-redux";
@@ -42,7 +42,7 @@ function navigateFromPushData(
     type === PushNotificationDataType.SHARED_GRANT ||
     type === PushNotificationDataType.SHARED_UPLOAD
   ) {
-    router.push("/(tabs)/storage");
+    router.push("/(tabs)/shared" as Href);
   }
 }
 
