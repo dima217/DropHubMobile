@@ -35,7 +35,12 @@ import { useStorageNavigation } from "../../hooks/useStorageNavigation";
 import { useStoragePreviewUrls } from "../../hooks/useStoragePreviewUrls";
 import { useStorageScreenHandlers } from "../../hooks/useStorageScreenHandlers";
 import { useSelectedItemState } from "../../hooks/useTagsState";
+import {
+  getStorageQuotaAlertMessage,
+  isStorageQuotaExceededError,
+} from "../../utils/storageQuota";
 import { StorageBreadcrumbs } from "../Path";
+import { StorageQuotaBar } from "../StorageQuotaBar";
 import { StorageFAB } from "../StorageFAB";
 import { StorageItemList } from "../StorageItemList";
 import {
@@ -302,6 +307,17 @@ export const StorageSection: React.FC<StorageSectionProps> = (props) => {
       archiveMode.onComplete();
     } catch (e) {
       console.error("Archive room to storage failed:", e);
+      if (isStorageQuotaExceededError(e)) {
+        const detail = getStorageQuotaAlertMessage(e);
+        Alert.alert(
+          "Недостаточно места",
+          detail
+            ? `${detail}\n\nОсвободите место в хранилище или уменьшите объём архива.`
+            : "В хранилище не хватает места для архива. Освободите место и повторите попытку."
+        );
+      } else {
+        Alert.alert("Ошибка", "Не удалось архивировать комнату в хранилище.");
+      }
     }
   }, [archiveMode, storageId, currentParentId, archiveRoomToStorage]);
 
@@ -550,6 +566,13 @@ export const StorageSection: React.FC<StorageSectionProps> = (props) => {
             })}
           </View>
 
+          {storageInfo && storageInfo.maxBytes > 0 ? (
+            <StorageQuotaBar
+              usedBytes={storageInfo.usedBytes ?? 0}
+              maxBytes={storageInfo.maxBytes}
+            />
+          ) : null}
+
           <StorageItemList
             items={itemsInCurrentFolder}
             previewEnabled={previewEnabled}
@@ -612,10 +635,15 @@ export const StorageSection: React.FC<StorageSectionProps> = (props) => {
           uploadingFiles,
           isUploadPreviewModalVisible,
           clearUploads,
-          uploadFiles: async (files) => {
-            await uploadFiles(files);
-          },
+          uploadFiles,
           refetchStructure,
+          quota:
+            storageInfo && storageInfo.maxBytes > 0
+              ? {
+                  usedBytes: storageInfo.usedBytes ?? 0,
+                  maxBytes: storageInfo.maxBytes,
+                }
+              : null,
         }}
       />
     </View>

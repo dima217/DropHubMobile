@@ -104,6 +104,7 @@ export const storageApi = createApi({
       invalidatesTags: (result, error, arg) => [
         { type: "Storage" as const, id: arg.storageId },
         { type: "StorageTrash" as const, id: arg.storageId },
+        "StorageInfo",
       ],
     }),
     getTrashItems: build.query<
@@ -133,6 +134,7 @@ export const storageApi = createApi({
       invalidatesTags: (result, error, arg) => [
         { type: "StorageTrash" as const, id: arg.storageId },
         { type: "Storage" as const, id: arg.storageId },
+        "StorageInfo",
       ],
     }),
     copyStorageItem: build.mutation<
@@ -147,6 +149,7 @@ export const storageApi = createApi({
       }),
       invalidatesTags: (result, error, arg) => [
         { type: "Storage" as const, id: arg.storageId },
+        "StorageInfo",
       ],
     }),
     deleteStorageItem: build.mutation<
@@ -162,6 +165,7 @@ export const storageApi = createApi({
       invalidatesTags: (result, error, arg) => [
         { type: "StorageTrash" as const, id: arg.storageId },
         { type: "Storage" as const, id: arg.storageId },
+        "StorageInfo",
       ],
     }),
     updateStorageItemTags: build.mutation<
@@ -195,7 +199,7 @@ export const storageApi = createApi({
       ],
     }),
     getStorageInfo: build.query<GetStorageInfoResponse, void>({
-      query: () => ({ url: "/storage", method: "POST", auth: true }),
+      query: () => ({ url: "/storage", method: "GET", auth: true }),
       providesTags: ["StorageInfo"],
     }),
     archiveRoomToStorage: build.mutation<
@@ -210,6 +214,7 @@ export const storageApi = createApi({
       }),
       invalidatesTags: (result, error, arg) => [
         { type: "Storage" as const, id: arg.storageId },
+        "StorageInfo",
       ],
     }),
   }),

@@ -1,21 +1,34 @@
 import { Colors } from "@/constants/design-tokens";
 import { ThemedText } from "@/shared/core/ThemedText";
+import type { PendingUploadFile } from "@/shared/types/pendingUpload";
 import TextInput from "@/shared/TextInput";
-import { UploadingFile } from "@/widgets/rooms/hooks/useRoomFileUpload";
+import { StorageQuotaBar } from "@/widgets/storage/components/StorageQuotaBar";
+import {
+  formatBytes,
+  storageFreeBytes,
+} from "@/widgets/storage/utils/storageQuota";
 import React, { useEffect, useState } from "react";
 import {
+  ActivityIndicator,
+  Alert,
   FlatList,
   Modal,
   StyleSheet,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
+
+/** Алиас для превью загрузки (комната / хранилище / shared). */
+export type UploadPreviewFile = PendingUploadFile;
 
 type UploadPreviewModalProps = {
   visible: boolean;
-  files: UploadingFile[];
+  files: PendingUploadFile[];
   onClose: () => void;
-  onUpload: (files: UploadingFile[]) => void;
+  /** Возвращает `false` при ошибке; при `true` или `void` модалка закроется после успеха. */
+  onUpload: (files: PendingUploadFile[]) => Promise<boolean | void>;
+  /** Квота основного хранилища (GET /storage) — полоска до init upload. */
+  quota?: { usedBytes: number; maxBytes: number } | null;
 };
 
 const UploadPreviewModal: React.FC<UploadPreviewModalProps> = ({
@@ -23,22 +36,51 @@ const UploadPreviewModal: React.FC<UploadPreviewModalProps> = ({
   files,
   onClose,
   onUpload,
+  quota,
 }) => {
   const [singleFileName, setSingleFileName] = useState(
     files.length === 1 ? files[0].fileName : ""
   );
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (files.length === 1) setSingleFileName(files[0].fileName);
   }, [files, visible]);
 
-  const handleUpload = () => {
-    if (files.length === 1) {
-      onUpload([{ ...files[0], fileName: singleFileName.trim() || files[0].fileName }]);
-    } else {
-      onUpload(files);
+  const handleUpload = async () => {
+    const filesToUpload =
+      files.length === 1
+        ? [
+            {
+              ...files[0],
+              fileName: singleFileName.trim() || files[0].fileName,
+            },
+          ]
+        : files;
+
+    const totalBytes = filesToUpload.reduce((s, f) => s + f.fileSize, 0);
+    if (quota && quota.maxBytes > 0) {
+      const free = storageFreeBytes(quota.maxBytes, quota.usedBytes);
+      if (totalBytes > free) {
+        Alert.alert(
+          "Недостаточно места",
+          `Выбранные файлы (${formatBytes(
+            totalBytes
+          )}) не помещаются в свободное место (${formatBytes(
+            free
+          )}). Удалите часть файлов или освободите место в хранилище.`
+        );
+        return;
+      }
     }
-    onClose();
+
+    setSubmitting(true);
+    try {
+      const result = await onUpload(filesToUpload);
+      if (result !== false) onClose();
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -47,6 +89,10 @@ const UploadPreviewModal: React.FC<UploadPreviewModalProps> = ({
         <View style={styles.container}>
           <ThemedText style={styles.title}>Upload Preview</ThemedText>
 
+          {quota && quota.maxBytes > 0 ? (
+            <StorageQuotaBar usedBytes={quota.usedBytes} maxBytes={quota.maxBytes} />
+          ) : null}
+
           {files.length > 1 ? (
             <FlatList
               data={files}
@@ -54,6 +100,9 @@ const UploadPreviewModal: React.FC<UploadPreviewModalProps> = ({
               renderItem={({ item }) => (
                 <View style={styles.fileRow}>
                   <ThemedText style={styles.fileName}>{item.fileName}</ThemedText>
+                  <ThemedText style={styles.fileSize}>
+                    {formatBytes(item.fileSize)}
+                  </ThemedText>
                 </View>
               )}
               style={styles.fileList}
@@ -67,15 +116,32 @@ const UploadPreviewModal: React.FC<UploadPreviewModalProps> = ({
                 style={styles.input}
                 placeholder="Enter file name"
               />
+              {files[0] ? (
+                <ThemedText style={styles.fileSizeSingle}>
+                  {formatBytes(files[0].fileSize)}
+                </ThemedText>
+              ) : null}
             </View>
           )}
 
           <View style={styles.buttonsRow}>
-            <TouchableOpacity style={styles.buttonCancel} onPress={onClose}>
+            <TouchableOpacity
+              style={styles.buttonCancel}
+              onPress={onClose}
+              disabled={submitting}
+            >
               <ThemedText style={styles.buttonText}>Cancel</ThemedText>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.buttonUpload} onPress={handleUpload}>
-              <ThemedText style={styles.buttonText}>Upload</ThemedText>
+            <TouchableOpacity
+              style={[styles.buttonUpload, submitting && styles.buttonDisabled]}
+              onPress={() => void handleUpload()}
+              disabled={submitting}
+            >
+              {submitting ? (
+                <ActivityIndicator color={Colors.brightText} />
+              ) : (
+                <ThemedText style={styles.buttonText}>Upload</ThemedText>
+              )}
             </TouchableOpacity>
           </View>
         </View>
@@ -111,6 +177,8 @@ const styles = StyleSheet.create({
     borderBottomColor: Colors.border,
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "center",
+    gap: 8,
   },
   fileName: {
     fontSize: 14,
@@ -119,7 +187,6 @@ const styles = StyleSheet.create({
   fileSize: {
     fontSize: 12,
     color: Colors.secondary,
-    marginLeft: 8,
   },
   singleFileContainer: {
     marginBottom: 16,
@@ -152,10 +219,16 @@ const styles = StyleSheet.create({
     borderRadius: 30,
   },
   buttonUpload: {
+    minWidth: 100,
     paddingHorizontal: 16,
     paddingVertical: 10,
     backgroundColor: Colors.primary,
     borderRadius: 30,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  buttonDisabled: {
+    opacity: 0.7,
   },
   buttonText: {
     color: Colors.brightText,

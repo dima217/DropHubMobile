@@ -203,8 +203,13 @@ export interface GetStorageInfoResponse {
     tags: string[];
     createdAt: string;
     maxBytes: number;
+    /** Суммарный размер всех не удалённых файлов в storage (байты). */
+    usedBytes?: number;
     userRole: AccessRole;
 }
+
+/** Ответ GET /storage — квота и занятость (см. документацию API). */
+export type UserStorageQuotaInfo = GetStorageInfoResponse;
 
 export interface RemoveStorageTagsRequest {
     storageId: string;

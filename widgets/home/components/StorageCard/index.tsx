@@ -1,8 +1,13 @@
+import { useGetStorageInfoQuery } from "@/api/storageApi";
 import { Colors } from "@/constants/design-tokens";
 import { ThemedText } from "@/shared/core/ThemedText";
 import ProgressBar from "@/shared/ui/animated/ProgressBar";
-import React from "react";
-import { StyleSheet, TouchableOpacity } from "react-native";
+import {
+  formatBytes,
+  storageUsedFraction,
+} from "@/widgets/storage/utils/storageQuota";
+import React, { useMemo } from "react";
+import { ActivityIndicator, StyleSheet, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 import Animated, {
@@ -12,29 +17,21 @@ import Animated, {
     withTiming,
 } from "react-native-reanimated";
 
-// Helper function to format bytes
-const formatBytes = (bytes: number): string => {
-  if (bytes === 0) return "0 B";
-  const k = 1024;
-  const sizes = ["B", "KB", "MB", "GB", "TB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
-};
-
 interface StorageCardProps {
-  used?: number;
-  total?: number;
   activeRoomsCount?: number;
 }
 
-const StorageCard = React.memo(({ 
-  used = 2.5 * 1024 * 1024 * 1024, // Mock: 2.5GB
-  total = 10 * 1024 * 1024 * 1024, // Mock: 10GB
-  activeRoomsCount = 0,
-}: StorageCardProps) => {
+const StorageCard = React.memo(({ activeRoomsCount = 0 }: StorageCardProps) => {
   const router = useRouter();
-  // Static progress value for now (API not ready)
-  const progress = 25; // 25% usage
+  const { data: storageInfo, isLoading, isError } = useGetStorageInfoQuery();
+
+  const usedBytes = storageInfo?.usedBytes ?? 0;
+  const maxBytes = storageInfo?.maxBytes ?? 0;
+
+  const progress = useMemo(() => {
+    if (!maxBytes || maxBytes <= 0) return 0;
+    return Math.round(storageUsedFraction(usedBytes, maxBytes) * 1000) / 10;
+  }, [usedBytes, maxBytes]);
   const opacity = useSharedValue(0);
   const translateY = useSharedValue(20);
 
@@ -54,13 +51,39 @@ const StorageCard = React.memo(({
       <ThemedText type="subtitle" style={styles.storageCardTitle}>
         Хранилище
       </ThemedText>
-      <ThemedText type="megaTitle" style={styles.storageCardValue}>
-        {formatBytes(used)}
-      </ThemedText>
-      <ThemedText type="small" style={styles.storageCardSubtitle}>
-        из {formatBytes(total)} использовано
-      </ThemedText>
-      <ProgressBar progress={progress} />
+      {isLoading ? (
+        <>
+          <ActivityIndicator
+            size="small"
+            color={Colors.primary}
+            style={styles.storageLoading}
+          />
+          <ThemedText type="small" style={styles.storageCardSubtitle}>
+            Загрузка…
+          </ThemedText>
+          <ProgressBar progress={0} />
+        </>
+      ) : isError || !storageInfo?.id ? (
+        <>
+          <ThemedText type="megaTitle" style={styles.storageCardValue}>
+            —
+          </ThemedText>
+          <ThemedText type="small" style={styles.storageCardSubtitle}>
+            Не удалось загрузить данные хранилища
+          </ThemedText>
+          <ProgressBar progress={0} />
+        </>
+      ) : (
+        <>
+          <ThemedText type="megaTitle" style={styles.storageCardValue}>
+            {formatBytes(usedBytes)}
+          </ThemedText>
+          <ThemedText type="small" style={styles.storageCardSubtitle}>
+            из {formatBytes(maxBytes)} занято
+          </ThemedText>
+          <ProgressBar progress={progress} />
+        </>
+      )}
       
       <Animated.View style={styles.roomsSection}>
         <ThemedText type="subtitle" style={styles.roomsTitle}>
@@ -104,6 +127,10 @@ const styles = StyleSheet.create({
   storageCardSubtitle: {
     color: Colors.secondary,
     marginBottom: 16,
+  },
+  storageLoading: {
+    marginVertical: 20,
+    alignSelf: "flex-start",
   },
   roomsSection: {
     marginTop: 24,

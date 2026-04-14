@@ -8,6 +8,7 @@ import PermissionsModal from "@/shared/Modals/StorageModals/PermissionsModal";
 import RenameItemModal from "@/shared/Modals/StorageModals/RenameItemModal";
 import TagsModal from "@/shared/Modals/StorageModals/TagsModal";
 import UploadPreviewModal from "@/shared/Modals/UploadPreviewModal";
+import type { PendingUploadFile } from "@/shared/types/pendingUpload";
 import React from "react";
 import { UploadingFile } from "../../hooks/useStorageFileUpload";
 
@@ -63,8 +64,9 @@ export interface StorageSectionModalsProps {
     uploadingFiles: UploadingFile[];
     isUploadPreviewModalVisible: boolean;
     clearUploads: () => void;
-    uploadFiles: (files: UploadingFile[]) => Promise<void>;
+    uploadFiles: (files: PendingUploadFile[]) => Promise<boolean>;
     refetchStructure: () => void;
+    quota?: { usedBytes: number; maxBytes: number } | null;
   };
 }
 
@@ -183,9 +185,11 @@ export const StorageSectionModals: React.FC<StorageSectionModalsProps> = ({
         visible={uploadPreviewModalVisible}
         files={upload.uploadingFiles}
         onClose={upload.clearUploads}
+        quota={upload.quota}
         onUpload={async (files) => {
-          await upload.uploadFiles(files);
-          upload.refetchStructure();
+          const ok = await upload.uploadFiles(files);
+          if (ok) upload.refetchStructure();
+          return ok;
         }}
       />
 

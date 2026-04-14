@@ -56,6 +56,14 @@ export const fileApi = createApi({
                 method: "POST",
                 body,
             }),
+            async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+                try {
+                    await queryFulfilled;
+                    dispatch(storageApi.util.invalidateTags(["StorageInfo"]));
+                } catch {
+                    /* ошибку показывает вызывающий код */
+                }
+            },
         }),
         downloadStorageFile: build.query<DownloadStorageFileResponse[], DownloadStorageFileRequest>({
             query: (body) => ({
@@ -78,6 +86,14 @@ export const fileApi = createApi({
                 method: "POST",
                 body,
             }),
+            async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+                try {
+                    await queryFulfilled;
+                    dispatch(storageApi.util.invalidateTags(["StorageInfo"]));
+                } catch {
+                    /* см. вызывающий код */
+                }
+            },
         }),
         downloadSharedFile: build.query<DownloadSharedFileResponse[], DownloadSharedFileRequest>({
             query: (body) => ({

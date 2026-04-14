@@ -251,7 +251,11 @@ const RoomDetailsScreen = () => {
           clearUploads();
           setIsUploadPreviewModalVisible(false);
         }}
-        onUpload={uploadFiles}
+        onUpload={async (files) => {
+          const ok = await uploadFiles(files);
+          if (ok) refetch();
+          return ok;
+        }}
       />
       <UpdateFileModal
         visible={isEditModalVisible}

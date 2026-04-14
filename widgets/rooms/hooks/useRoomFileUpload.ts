@@ -3,7 +3,9 @@ import { FileItem, FileUploadStatus } from '@/api/types/file';
 import { UploadProgress } from '@/services/upload/AbstractUploader';
 import { createUploader, UploadProvider } from '@/services/upload/UploaderFactory';
 import { useResourcePicker } from '@/shared/MediaUploader/hooks/useMediaPicker';
+import type { PendingUploadFile } from '@/shared/types/pendingUpload';
 import { useCallback, useState } from 'react';
+import { Alert } from 'react-native';
 
 export interface UploadingFile {
   id: string;
@@ -55,11 +57,15 @@ export const useRoomFileUpload = (roomId: string, currentUserId?: number) => {
   }, [pickResource]);
 
   // ================= Step 2: Upload files =================
-  const uploadFiles = useCallback(async (files: UploadingFile[]) => {
+  const uploadFiles = useCallback(async (files: PendingUploadFile[]): Promise<boolean> => {
+    const batch: UploadingFile[] = files.map((f) => ({
+      ...f,
+      status: f.status as UploadingFile['status'],
+    }));
     try {
       const initResponse = await uploadRoomFile({
         roomId,
-        files: files.map(file => ({
+        files: batch.map(file => ({
           originalName: file.fileName,
           fileSize: file.fileSize,
           storedName: file.fileName,
@@ -73,7 +79,7 @@ export const useRoomFileUpload = (roomId: string, currentUserId?: number) => {
       const uploader = createUploader(UploadProvider.MINIO);
 
       await Promise.all(initResponse.result.map(async (res, index) => {
-        const file = files[index];
+        const file = batch[index];
 
         const onProgress = (progress: UploadProgress) => {
           setUploadingFiles(prev => {
@@ -126,10 +132,11 @@ export const useRoomFileUpload = (roomId: string, currentUserId?: number) => {
         setUploadingFiles(prev => prev.filter(f => f.status !== 'completed'));
       }, 100);
 
-      return files.map(f => f.fileItem?._id);
-    } catch (error) {
+      return true;
+    } catch {
       setUploadingFiles(prev => prev.map(f => ({ ...f, status: 'failed' })));
-      throw error;
+      Alert.alert("Ошибка", "Не удалось загрузить файлы.");
+      return false;
     }
   }, [roomId, currentUserId, uploadRoomFile, uploadRoomConfirm]);
 

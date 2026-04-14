@@ -15,6 +15,10 @@ import { AccessRole } from "@/api/types/room";
 import { ResourceType } from "@/api/types/shared";
 import { StorageItem } from "@/api/types/storage";
 import { createUploader, UploadProvider } from "@/services/upload/UploaderFactory";
+import {
+  getStorageQuotaAlertMessage,
+  isStorageQuotaExceededError,
+} from "@/widgets/storage/utils/storageQuota";
 import { useCallback } from "react";
 import { Alert } from "react-native";
 
@@ -122,8 +126,18 @@ export const useStorageActions = ({
         }).unwrap();
         refetchStructure();
         Alert.alert("Успешно", "Копия создана");
-      } catch {
-        Alert.alert("Ошибка", "Не удалось создать копию");
+      } catch (e) {
+        if (isStorageQuotaExceededError(e)) {
+          const detail = getStorageQuotaAlertMessage(e);
+          Alert.alert(
+            "Недостаточно места",
+            detail
+              ? `${detail}\n\nУдалите лишние файлы или обратитесь за увеличением квоты.`
+              : "В хранилище не хватает места для копии."
+          );
+        } else {
+          Alert.alert("Ошибка", "Не удалось создать копию");
+        }
       }
     },
     [storageId, copyItem, currentParentId, refetchStructure]

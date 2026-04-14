@@ -3,7 +3,13 @@ import { FileItem, FileUploadStatus } from "@/api/types/file";
 import { UploadProgress } from "@/services/upload/AbstractUploader";
 import { createUploader, UploadProvider } from "@/services/upload/UploaderFactory";
 import { useResourcePicker } from "@/shared/MediaUploader/hooks/useMediaPicker";
+import type { PendingUploadFile } from "@/shared/types/pendingUpload";
+import {
+  getStorageQuotaAlertMessage,
+  isStorageQuotaExceededError,
+} from "@/widgets/storage/utils/storageQuota";
 import { useCallback, useState } from "react";
+import { Alert } from "react-native";
 
 export interface UploadingFile {
   id: string;
@@ -73,11 +79,15 @@ export const useSharedFileUpload = (
   }, [pickResource]);
 
   const uploadFiles = useCallback(
-    async (files: UploadingFile[]) => {
+    async (files: PendingUploadFile[]): Promise<boolean> => {
+      const batch: UploadingFile[] = files.map((f) => ({
+        ...f,
+        status: f.status as UploadingFile["status"],
+      }));
       try {
         const initResponse = await uploadSharedInit({
           sharedId: storageId,
-          files: files.map((file) => ({
+          files: batch.map((file) => ({
             originalName: file.fileName,
             fileSize: file.fileSize,
             mimeType: file.mimeType,
@@ -93,7 +103,7 @@ export const useSharedFileUpload = (
 
         await Promise.all(
           initResponse.result.map(async (res, index) => {
-            const file = files[index];
+            const file = batch[index];
 
             const onProgress = (progress: UploadProgress) => {
               setUploadingFiles((prev) => {
@@ -161,10 +171,21 @@ export const useSharedFileUpload = (
           setUploadingFiles((prev) => prev.filter((f) => f.status !== "completed"));
         }, 100);
 
-        return files.map((f) => f.fileItem?._id);
+        return true;
       } catch (error) {
         setUploadingFiles((prev) => prev.map((f) => ({ ...f, status: "failed" })));
-        throw error;
+        if (isStorageQuotaExceededError(error)) {
+          const detail = getStorageQuotaAlertMessage(error);
+          Alert.alert(
+            "Недостаточно места",
+            detail
+              ? `${detail}\n\nУдалите ненужные файлы из хранилища или обратитесь за увеличением квоты.`
+              : "Удалите ненужные файлы из хранилища или обратитесь за увеличением квоты."
+          );
+        } else {
+          Alert.alert("Ошибка", "Не удалось загрузить файлы.");
+        }
+        return false;
       }
     },
     [

@@ -1,4 +1,5 @@
 import { useLazyDownloadSharedFileQuery } from "@/api/fileApi";
+import { useGetStorageInfoQuery } from "@/api/storageApi";
 import {
   useCreateSharedItemMutation,
   useGetSharedResourcesQuery,
@@ -52,6 +53,9 @@ const SharedScreen = () => {
     useFolderPathNavigation("Shared");
 
   const storageId = sharedResources?.[0]?.storageId ?? "";
+  const { data: storageQuotaInfo } = useGetStorageInfoQuery(undefined, {
+    skip: !storageId,
+  });
   const rootResourceId = path[1]?.id ?? currentParentId ?? "";
   const currentResource =
     sharedResources?.find((r) => r.id === rootResourceId) ??
@@ -264,9 +268,18 @@ const SharedScreen = () => {
             visible={isUploadPreviewModalVisible}
             files={uploadingFiles}
             onClose={clearUploads}
+            quota={
+              storageQuotaInfo && storageQuotaInfo.maxBytes > 0
+                ? {
+                    usedBytes: storageQuotaInfo.usedBytes ?? 0,
+                    maxBytes: storageQuotaInfo.maxBytes,
+                  }
+                : null
+            }
             onUpload={async (files) => {
-              await uploadFiles(files);
-              refetch();
+              const ok = await uploadFiles(files);
+              if (ok) refetch();
+              return ok;
             }}
           />
         </>

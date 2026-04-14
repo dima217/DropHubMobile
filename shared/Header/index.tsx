@@ -47,13 +47,17 @@ const Header = ({ title, confirmOnExit = false, onBackPress, rightAction }: Head
   };
 
   return (
-    <View style={styles.container}>
+    <View style={styles.container} pointerEvents="box-none">
       <Pressable onPress={handleBackPress}>
         <ThemedText type="link">Back</ThemedText>
       </Pressable>
 
       {title && (
-        <ThemedText type="subtitle" style={styles.title}>
+        <ThemedText
+          type="subtitle"
+          style={styles.title}
+          pointerEvents="none"
+        >
           {title}
         </ThemedText>
       )}
@@ -87,9 +91,6 @@ const styles = StyleSheet.create({
   },
   title: {
     color: "#fff",
-    position: "absolute",
-    left: 0,
-    right: 0,
     textAlign: "center",
   },
 });
