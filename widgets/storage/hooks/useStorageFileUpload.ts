@@ -4,6 +4,7 @@ import { UploadProgress } from "@/services/upload/AbstractUploader";
 import { createUploader, UploadProvider } from "@/services/upload/UploaderFactory";
 import { useResourcePicker } from "@/shared/MediaUploader/hooks/useMediaPicker";
 import type { PendingUploadFile } from "@/shared/types/pendingUpload";
+import { ensureUniqueUploadNames } from "@/shared/utils/uploadFileNames";
 import {
   getStorageQuotaAlertMessage,
   isStorageQuotaExceededError,
@@ -25,7 +26,8 @@ export interface UploadingFile {
 export const useStorageFileUpload = (
   storageId: string,
   parentId: string | undefined,
-  currentUserId?: number
+  currentUserId?: number,
+  existingFileNames: string[] = []
 ) => {
   const [uploadStorageInit] = useUploadStorageInitMutation();
   const [uploadStorageConfirm] = useUploadStorageConfirmMutation();
@@ -59,11 +61,16 @@ export const useStorageFileUpload = (
       })
     );
 
-    setUploadingFiles(filesToUpload);
+    const filesPrepared =
+      filesToUpload.length > 1
+        ? ensureUniqueUploadNames(filesToUpload, existingFileNames)
+        : filesToUpload;
+
+    setUploadingFiles(filesPrepared);
     setIsUploadPreviewModalVisible(true);
 
-    return filesToUpload;
-  }, [pickResource]);
+    return filesPrepared;
+  }, [pickResource, existingFileNames]);
 
   const uploadFiles = useCallback(
     async (files: PendingUploadFile[]): Promise<boolean> => {

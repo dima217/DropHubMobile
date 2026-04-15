@@ -36,7 +36,8 @@ const StorageScreen = () => {
       onCancel: () => router.replace("/(tabs)/storage"),
       onComplete: () => {
         dispatch(roomApi.util.invalidateTags(["Room"]));
-        router.back();
+        // Clear archive params to prevent sticky bottom archive bar.
+        router.replace("/(tabs)/storage");
       },
     };
   }, [archiveRoomId, archiveFileIds, router, dispatch]);

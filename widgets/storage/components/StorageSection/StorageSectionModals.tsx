@@ -65,6 +65,7 @@ export interface StorageSectionModalsProps {
     isUploadPreviewModalVisible: boolean;
     clearUploads: () => void;
     uploadFiles: (files: PendingUploadFile[]) => Promise<boolean>;
+    existingNames?: string[];
     refetchStructure: () => void;
     quota?: { usedBytes: number; maxBytes: number } | null;
   };
@@ -184,6 +185,7 @@ export const StorageSectionModals: React.FC<StorageSectionModalsProps> = ({
       <UploadPreviewModal
         visible={uploadPreviewModalVisible}
         files={upload.uploadingFiles}
+        existingNames={upload.existingNames}
         onClose={upload.clearUploads}
         quota={upload.quota}
         onUpload={async (files) => {

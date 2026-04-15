@@ -4,6 +4,7 @@ import { UploadProgress } from '@/services/upload/AbstractUploader';
 import { createUploader, UploadProvider } from '@/services/upload/UploaderFactory';
 import { useResourcePicker } from '@/shared/MediaUploader/hooks/useMediaPicker';
 import type { PendingUploadFile } from '@/shared/types/pendingUpload';
+import { ensureUniqueUploadNames } from '@/shared/utils/uploadFileNames';
 import { useCallback, useState } from 'react';
 import { Alert } from 'react-native';
 
@@ -18,7 +19,11 @@ export interface UploadingFile {
   fileItem?: FileItem;
 }
 
-export const useRoomFileUpload = (roomId: string, currentUserId?: number) => {
+export const useRoomFileUpload = (
+  roomId: string,
+  currentUserId?: number,
+  existingFileNames: string[] = []
+) => {
   const [uploadRoomFile] = useUploadRoomFileMutation();
   const [uploadRoomConfirm] = useUploadRoomConfirmMutation();
   const { pickResource } = useResourcePicker();
@@ -49,12 +54,17 @@ export const useRoomFileUpload = (roomId: string, currentUserId?: number) => {
       })
     );
 
+    const filesPrepared =
+      filesToUpload.length > 1
+        ? ensureUniqueUploadNames(filesToUpload, existingFileNames)
+        : filesToUpload;
+
     // Показываем модалку после выбора
-    setUploadingFiles(filesToUpload);
+    setUploadingFiles(filesPrepared);
     setIsUploadPreviewModalVisible(true);
 
-    return filesToUpload;
-  }, [pickResource]);
+    return filesPrepared;
+  }, [pickResource, existingFileNames]);
 
   // ================= Step 2: Upload files =================
   const uploadFiles = useCallback(async (files: PendingUploadFile[]): Promise<boolean> => {

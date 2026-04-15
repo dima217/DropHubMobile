@@ -382,13 +382,26 @@ export const StorageSection: React.FC<StorageSectionProps> = (props) => {
     }));
   }, [itemsInCurrentFolderRaw, getItemTags]);
 
+  const currentFolderFileNames = useMemo(
+    () =>
+      itemsInCurrentFolderRaw
+        .filter((item) => !item.isDirectory)
+        .map((item) => item.name),
+    [itemsInCurrentFolderRaw]
+  );
+
   const {
     uploadingFiles,
     isUploadPreviewModalVisible,
     pickFiles,
     uploadFiles,
     clearUploads,
-  } = useStorageFileUpload(storageId, currentParentId || undefined, undefined);
+  } = useStorageFileUpload(
+    storageId,
+    currentParentId || undefined,
+    undefined,
+    currentFolderFileNames
+  );
 
   const actions = useStorageActions({
     storageId,
@@ -636,6 +649,7 @@ export const StorageSection: React.FC<StorageSectionProps> = (props) => {
           isUploadPreviewModalVisible,
           clearUploads,
           uploadFiles,
+          existingNames: currentFolderFileNames,
           refetchStructure,
           quota:
             storageInfo && storageInfo.maxBytes > 0

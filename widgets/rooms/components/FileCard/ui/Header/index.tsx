@@ -40,7 +40,7 @@ const Header = ({
       <View style={styles.infoContainer}>
         <View style={styles.nameRow}>
           <ThemedText style={styles.fileName} numberOfLines={1}>
-            {file.storedName}
+            {file.originalName}
           </ThemedText>
           {isFavorite && !isSelected && (
             <View style={styles.favoriteIndicator}>

@@ -89,6 +89,14 @@ const RoomDetailsScreen = () => {
     skip: !roomId,
   });
 
+  const roomExistingOriginalNames = useMemo(
+    () =>
+      (roomDetails?.files ?? []).map(
+        (f) => f.originalName || f.storedName || ""
+      ),
+    [roomDetails?.files]
+  );
+
   React.useEffect(() => {
     secureStore.getAccessToken().then(setAccessToken);
   }, []);
@@ -100,7 +108,11 @@ const RoomDetailsScreen = () => {
     isUploadPreviewModalVisible,
     setIsUploadPreviewModalVisible,
     clearUploads,
-  } = useRoomFileUpload(roomId || '', user?.id ? parseInt(user.id) : undefined);
+  } = useRoomFileUpload(
+    roomId || '',
+    user?.id ? parseInt(user.id) : undefined,
+    roomExistingOriginalNames
+  );
 
   const {
     selectedIds,
@@ -247,6 +259,7 @@ const RoomDetailsScreen = () => {
       <UploadPreviewModal
         visible={isUploadPreviewModalVisible}
         files={uploadingFiles}
+        existingNames={roomExistingOriginalNames}
         onClose={() => {
           clearUploads();
           setIsUploadPreviewModalVisible(false);

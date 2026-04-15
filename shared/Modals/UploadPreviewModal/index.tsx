@@ -2,12 +2,13 @@ import { Colors } from "@/constants/design-tokens";
 import { ThemedText } from "@/shared/core/ThemedText";
 import type { PendingUploadFile } from "@/shared/types/pendingUpload";
 import TextInput from "@/shared/TextInput";
+import { normalizeFileName } from "@/shared/utils/uploadFileNames";
 import { StorageQuotaBar } from "@/widgets/storage/components/StorageQuotaBar";
 import {
   formatBytes,
   storageFreeBytes,
 } from "@/widgets/storage/utils/storageQuota";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -27,6 +28,8 @@ type UploadPreviewModalProps = {
   onClose: () => void;
   /** Возвращает `false` при ошибке; при `true` или `void` модалка закроется после успеха. */
   onUpload: (files: PendingUploadFile[]) => Promise<boolean | void>;
+  /** Имена уже существующих файлов в текущем контексте (комната/папка storage). */
+  existingNames?: string[];
   /** Квота основного хранилища (GET /storage) — полоска до init upload. */
   quota?: { usedBytes: number; maxBytes: number } | null;
 };
@@ -36,6 +39,7 @@ const UploadPreviewModal: React.FC<UploadPreviewModalProps> = ({
   files,
   onClose,
   onUpload,
+  existingNames = [],
   quota,
 }) => {
   const [singleFileName, setSingleFileName] = useState(
@@ -46,6 +50,20 @@ const UploadPreviewModal: React.FC<UploadPreviewModalProps> = ({
   useEffect(() => {
     if (files.length === 1) setSingleFileName(files[0].fileName);
   }, [files, visible]);
+
+  const singleNameTrimmed = singleFileName.trim();
+  const existingNamesNormalized = useMemo(
+    () => new Set(existingNames.map(normalizeFileName)),
+    [existingNames]
+  );
+  const hasSingleNameConflict =
+    files.length === 1 &&
+    !!singleNameTrimmed &&
+    existingNamesNormalized.has(normalizeFileName(singleNameTrimmed));
+  const isUploadDisabled =
+    submitting ||
+    (files.length === 1 &&
+      (!singleNameTrimmed || hasSingleNameConflict));
 
   const handleUpload = async () => {
     const filesToUpload =
@@ -121,6 +139,11 @@ const UploadPreviewModal: React.FC<UploadPreviewModalProps> = ({
                   {formatBytes(files[0].fileSize)}
                 </ThemedText>
               ) : null}
+              {hasSingleNameConflict ? (
+                <ThemedText style={styles.conflictText}>
+                  Файл с таким именем уже существует
+                </ThemedText>
+              ) : null}
             </View>
           )}
 
@@ -133,9 +156,9 @@ const UploadPreviewModal: React.FC<UploadPreviewModalProps> = ({
               <ThemedText style={styles.buttonText}>Cancel</ThemedText>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.buttonUpload, submitting && styles.buttonDisabled]}
+              style={[styles.buttonUpload, isUploadDisabled && styles.buttonDisabled]}
               onPress={() => void handleUpload()}
-              disabled={submitting}
+              disabled={isUploadDisabled}
             >
               {submitting ? (
                 <ActivityIndicator color={Colors.brightText} />
@@ -206,6 +229,11 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: Colors.secondary,
     marginTop: 4,
+  },
+  conflictText: {
+    fontSize: 12,
+    color: Colors.reject,
+    marginTop: 6,
   },
   buttonsRow: {
     flexDirection: "row",
