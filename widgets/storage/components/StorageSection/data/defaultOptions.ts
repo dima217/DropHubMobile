@@ -1,5 +1,5 @@
 import { StorageItemMenuOptions } from "@/widgets/storageList/menu/storageItemMenu";
-import { ResolvedStorageSectionOptions } from "..";
+import type { ResolvedStorageSectionOptions } from "../types";
 
 export const defaultOptions: ResolvedStorageSectionOptions = {
   showBreadcrumbs: true,
@@ -9,6 +9,11 @@ export const defaultOptions: ResolvedStorageSectionOptions = {
   targetParentId: undefined,
   rootLabel: "Root",
   initialItems: undefined,
+  enableMultiSelect: true,
+  favoritesBrowseMode: false,
+  menuOptionsAtVirtualRoot: undefined,
+  redirectMoveToStorageTab: false,
+  consumePendingMoveOnTabFocus: false,
 };
   
 export const menuOptions: StorageItemMenuOptions =

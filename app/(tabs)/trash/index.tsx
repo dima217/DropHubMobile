@@ -1,32 +1,57 @@
 import {
+  useBatchPermanentDeleteStorageItemsMutation,
+  useBatchRestoreStorageItemsMutation,
   useDeleteStorageItemMutation,
   useGetStorageInfoQuery,
   useGetTrashItemsQuery,
   useRestoreTrashItemMutation,
 } from "@/api/storageApi";
-import { StorageItem } from "@/api/types/storage";
+import { StorageBatchResponse, StorageItem } from "@/api/types/storage";
 import { Colors } from "@/constants/design-tokens";
 import Header from "@/shared/Header";
 import View from "@/shared/View";
 import { ThemedText } from "@/shared/core/ThemedText";
+import MultiSelectBar from "@/shared/ui/MultiSelectBar";
+import { ActionMenuItemData } from "@/shared/ui/ActionMenu/ActionMenuItem";
 import { StorageBreadcrumbs } from "@/widgets/storage/components/Path";
 import { StorageItemList } from "@/widgets/storage/components/StorageItemList";
+import { showStorageBatchResultAlert } from "@/widgets/storage/utils/storageBatchAlert";
 import { useHierarchicalBrowser } from "@/widgets/storageList/hooks/useHierarchicalBrowser";
 import {
   createStorageItemMenuItems,
   StorageItemMenuOptions,
 } from "@/widgets/storageList/menu/storageItemMenu";
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
   View as RNView,
   ScrollView,
   StyleSheet,
+  TouchableOpacity,
 } from "react-native";
+
+const STORAGE_BATCH_MAX = 100;
 
 const hasParentInTrash = (item: StorageItem, ids: Set<string>) =>
   !!(item.parentId && ids.has(item.parentId));
+
+function mergeBatchResponses(parts: StorageBatchResponse[]): StorageBatchResponse {
+  return parts.reduce(
+    (acc, r) => ({
+      total: acc.total + r.total,
+      succeeded: acc.succeeded + r.succeeded,
+      failed: acc.failed + r.failed,
+      results: [...acc.results, ...r.results],
+    }),
+    {
+      total: 0,
+      succeeded: 0,
+      failed: 0,
+      results: [] as StorageBatchResponse["results"],
+    }
+  );
+}
 
 const TrashScreen = () => {
   const { data: storageInfo } = useGetStorageInfoQuery();
@@ -39,6 +64,21 @@ const TrashScreen = () => {
 
   const [restoreItem] = useRestoreTrashItemMutation();
   const [deletePermanently] = useDeleteStorageItemMutation();
+  const [batchRestore] = useBatchRestoreStorageItemsMutation();
+  const [batchPermanentDelete] = useBatchPermanentDeleteStorageItemsMutation();
+
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
+
+  const toggleSelection = useCallback((item: StorageItem) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(item.id)) next.delete(item.id);
+      else next.add(item.id);
+      return next;
+    });
+  }, []);
+
+  const resetSelection = useCallback(() => setSelectedIds(new Set()), []);
 
   const handleRestore = useCallback(async (item: StorageItem) => {
     if (!storageId) return;
@@ -105,7 +145,6 @@ const TrashScreen = () => {
   } = useHierarchicalBrowser<StorageItem>({
     items: (trashItems ?? []) as any as StorageItem[],
     rootLabel: "Корзина",
-    // Orphans (parent not in trash list) should be shown at root.
     getParentId: (item, { ids }) =>
       item.parentId && ids.has(item.parentId) ? item.parentId : null,
   });
@@ -154,6 +193,170 @@ const TrashScreen = () => {
     [ids, menuOptions, handleDeletePermanently, handleRestore]
   );
 
+  const runPermanentDeleteChunks = useCallback(
+    async (itemIds: string[]) => {
+      const parts: StorageBatchResponse[] = [];
+      for (let i = 0; i < itemIds.length; i += STORAGE_BATCH_MAX) {
+        const chunk = itemIds.slice(i, i + STORAGE_BATCH_MAX);
+        const r = await batchPermanentDelete({ storageId, itemIds: chunk }).unwrap();
+        parts.push(r);
+      }
+      return mergeBatchResponses(parts);
+    },
+    [batchPermanentDelete, storageId]
+  );
+
+  const handleClearEntireTrash = useCallback(() => {
+    const allIds = (trashItems ?? []).map((i) => i.id);
+    if (allIds.length === 0 || !storageId) return;
+    Alert.alert(
+      "Очистить корзину?",
+      `Безвозвратно удалить все элементы (${allIds.length})?`,
+      [
+        { text: "Отмена", style: "cancel" },
+        {
+          text: "Удалить всё",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              const merged = await runPermanentDeleteChunks(allIds);
+              showStorageBatchResultAlert(merged, "Удаление");
+              resetSelection();
+              refetch();
+            } catch (e: unknown) {
+              const err = e as { data?: { message?: string }; message?: string };
+              Alert.alert(
+                "Ошибка",
+                String(err?.data?.message ?? err?.message ?? "Запрос не выполнен")
+              );
+            }
+          },
+        },
+      ]
+    );
+  }, [trashItems, storageId, runPermanentDeleteChunks, resetSelection, refetch]);
+
+  const handleBatchRestore = useCallback(() => {
+    const chosen = [...selectedIds];
+    if (chosen.length === 0 || !storageId) return;
+    const restorable = chosen.filter((id) => {
+      const item = (trashItems ?? []).find((i) => i.id === id);
+      if (!item) return false;
+      if (!item.isDirectory) return true;
+      return !hasParentInTrash(item, ids);
+    });
+    if (restorable.length === 0) {
+      Alert.alert(
+        "Нельзя восстановить",
+        "Для выбранных папок сначала восстановите родителя в корзине."
+      );
+      return;
+    }
+    const skipped = chosen.length - restorable.length;
+    const run = async () => {
+      try {
+        const parts: StorageBatchResponse[] = [];
+        for (let i = 0; i < restorable.length; i += STORAGE_BATCH_MAX) {
+          const chunk = restorable.slice(i, i + STORAGE_BATCH_MAX);
+          const r = await batchRestore({ storageId, itemIds: chunk }).unwrap();
+          parts.push(r);
+        }
+        const merged = mergeBatchResponses(parts);
+        showStorageBatchResultAlert(
+          merged,
+          skipped > 0 ? `Восстановление (пропущено: ${skipped})` : "Восстановление"
+        );
+        resetSelection();
+        refetch();
+      } catch (e: unknown) {
+        const err = e as { data?: { message?: string }; message?: string };
+        Alert.alert(
+          "Ошибка",
+          String(err?.data?.message ?? err?.message ?? "Запрос не выполнен")
+        );
+      }
+    };
+    if (skipped > 0) {
+      Alert.alert(
+        "Восстановить доступные?",
+        `Будут восстановлены ${restorable.length} из ${chosen.length} (остальные требуют родителя).`,
+        [
+          { text: "Отмена", style: "cancel" },
+          { text: "Восстановить", onPress: () => void run() },
+        ]
+      );
+      return;
+    }
+    void run();
+  }, [
+    selectedIds,
+    storageId,
+    trashItems,
+    ids,
+    batchRestore,
+    resetSelection,
+    refetch,
+  ]);
+
+  const handleBatchPermanent = useCallback(() => {
+    const chosen = [...selectedIds];
+    if (chosen.length === 0 || !storageId) return;
+    Alert.alert(
+      "Удалить навсегда?",
+      `Элементов: ${chosen.length}. Это действие нельзя отменить.`,
+      [
+        { text: "Отмена", style: "cancel" },
+        {
+          text: "Удалить",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              const merged = await runPermanentDeleteChunks(chosen);
+              showStorageBatchResultAlert(merged, "Удаление");
+              resetSelection();
+              refetch();
+            } catch (e: unknown) {
+              const err = e as { data?: { message?: string }; message?: string };
+              Alert.alert(
+                "Ошибка",
+                String(err?.data?.message ?? err?.message ?? "Запрос не выполнен")
+              );
+            }
+          },
+        },
+      ]
+    );
+  }, [selectedIds, storageId, runPermanentDeleteChunks, resetSelection, refetch]);
+
+  const multiSelectMenuItems: ActionMenuItemData[] = useMemo(
+    () => [
+      {
+        id: "batch-restore",
+        icon: "rotate-ccw",
+        label: "Восстановить",
+        disabled: selectedIds.size === 0,
+        onPress: handleBatchRestore,
+      },
+      {
+        id: "batch-perm",
+        icon: "trash-2",
+        label: "Удалить навсегда",
+        destructive: true,
+        disabled: selectedIds.size === 0,
+        onPress: handleBatchPermanent,
+      },
+      {
+        id: "batch-cancel",
+        icon: "x",
+        label: "Отмена",
+        onPress: resetSelection,
+      },
+    ],
+    [selectedIds.size, handleBatchRestore, handleBatchPermanent, resetSelection]
+  );
+
+  const multiSelectActive = selectedIds.size > 0;
+
   return (
     <View>
       <Header title="Корзина" />
@@ -164,6 +367,13 @@ const TrashScreen = () => {
         </RNView>
       ) : (
         <>
+          {multiSelectActive && (
+            <MultiSelectBar
+              selectedCount={selectedIds.size}
+              menuItems={multiSelectMenuItems}
+            />
+          )}
+
           <RNView style={styles.headerRow}>
             <ScrollView
               horizontal
@@ -172,6 +382,15 @@ const TrashScreen = () => {
             >
               <StorageBreadcrumbs path={path} onNavigate={navigateTo} />
             </ScrollView>
+            {(trashItems?.length ?? 0) > 0 && (
+              <TouchableOpacity
+                onPress={handleClearEntireTrash}
+                disabled={multiSelectActive}
+                style={multiSelectActive ? styles.clearTrashBtnDisabled : undefined}
+              >
+                <ThemedText style={styles.clearTrashText}>Очистить всё</ThemedText>
+              </TouchableOpacity>
+            )}
           </RNView>
 
           <StorageItemList
@@ -180,6 +399,12 @@ const TrashScreen = () => {
             previewUrls={{}}
             onFolderPress={openFolder}
             getMenuItems={getMenuItems}
+            multiSelect={{
+              active: selectedIds.size > 0,
+              selectedIds,
+              onToggle: toggleSelection,
+            }}
+            suppressMenus={multiSelectActive}
           />
 
           {(!trashItems || trashItems.length === 0) && (
@@ -206,11 +431,22 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 16,
     marginBottom: 8,
+    gap: 8,
+    paddingHorizontal: 4,
   },
   breadcrumbContainer: {
     flexDirection: "row",
     alignItems: "center",
     paddingRight: 8,
+    flexGrow: 1,
+  },
+  clearTrashText: {
+    color: Colors.reject,
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  clearTrashBtnDisabled: {
+    opacity: 0.4,
   },
   emptyContainer: {
     padding: 40,
@@ -223,4 +459,3 @@ const styles = StyleSheet.create({
 });
 
 export default TrashScreen;
-

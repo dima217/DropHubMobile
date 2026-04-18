@@ -69,6 +69,8 @@ export interface StorageSectionModalsProps {
     refetchStructure: () => void;
     quota?: { usedBytes: number; maxBytes: number } | null;
   };
+  /** Модалка перемещения: нельзя подтвердить, если папка назначения — сама перемещаемая папка */
+  moveIntoSelfBlocked?: boolean;
 }
 
 export const StorageSectionModals: React.FC<StorageSectionModalsProps> = ({
@@ -85,6 +87,7 @@ export const StorageSectionModals: React.FC<StorageSectionModalsProps> = ({
   archiveModeDescription,
   isArchivingRoom = false,
   upload,
+  moveIntoSelfBlocked = false,
 }) => {
   const {
     tagsModalVisible,
@@ -180,6 +183,7 @@ export const StorageSectionModals: React.FC<StorageSectionModalsProps> = ({
           setSelectedItem(null);
         }}
         onConfirm={handlers.handleConfirmMove}
+        moveIntoSelfBlocked={moveIntoSelfBlocked}
       />
 
       <UploadPreviewModal

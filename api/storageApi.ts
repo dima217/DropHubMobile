@@ -3,6 +3,12 @@ import { baseQueryWithRefresh } from "./baseApi";
 import {
   ArchiveRoomToStorageRequest,
   ArchiveRoomToStorageResponse,
+  BatchCopyStorageItemsRequest,
+  BatchMoveStorageItemsRequest,
+  BatchPermanentDeleteStorageItemsRequest,
+  BatchRestoreStorageItemsRequest,
+  BatchSoftDeleteStorageItemsRequest,
+  BatchUpdateStorageItemTagsRequest,
   CopyStorageItemRequest,
   CopyStorageItemResponse,
   CreateStorageFolderRequest,
@@ -22,6 +28,7 @@ import {
   RemoveStorageTagsResponse,
   RestoreTrashItemRequest,
   RestoreTrashItemResponse,
+  StorageBatchResponse,
   StorageItem,
   UpdateStorageItemRequest,
   UpdateStorageItemResponse,
@@ -217,6 +224,99 @@ export const storageApi = createApi({
         "StorageInfo",
       ],
     }),
+    batchMoveStorageItems: build.mutation<
+      StorageBatchResponse,
+      BatchMoveStorageItemsRequest
+    >({
+      query: (body) => ({
+        url: "/storage/batch-move-item",
+        method: "POST",
+        body,
+        auth: true,
+      }),
+      invalidatesTags: (result, error, arg) => [
+        { type: "Storage" as const, id: arg.storageId },
+        "StorageInfo",
+      ],
+    }),
+    batchCopyStorageItems: build.mutation<
+      StorageBatchResponse,
+      BatchCopyStorageItemsRequest
+    >({
+      query: (body) => ({
+        url: "/storage/batch-copy-item",
+        method: "POST",
+        body,
+        auth: true,
+      }),
+      invalidatesTags: (result, error, arg) => [
+        { type: "Storage" as const, id: arg.storageId },
+        "StorageInfo",
+      ],
+    }),
+    batchSoftDeleteStorageItems: build.mutation<
+      StorageBatchResponse,
+      BatchSoftDeleteStorageItemsRequest
+    >({
+      query: (body) => ({
+        url: "/storage/batch-delete-item",
+        method: "POST",
+        body,
+        auth: true,
+      }),
+      invalidatesTags: (result, error, arg) => [
+        { type: "Storage" as const, id: arg.storageId },
+        { type: "StorageTrash" as const, id: arg.storageId },
+        "StorageInfo",
+      ],
+    }),
+    batchRestoreStorageItems: build.mutation<
+      StorageBatchResponse,
+      BatchRestoreStorageItemsRequest
+    >({
+      query: (body) => ({
+        url: "/storage/batch-restore-item",
+        method: "POST",
+        body,
+        auth: true,
+      }),
+      invalidatesTags: (result, error, arg) => [
+        { type: "Storage" as const, id: arg.storageId },
+        { type: "StorageTrash" as const, id: arg.storageId },
+        "StorageInfo",
+      ],
+    }),
+    batchPermanentDeleteStorageItems: build.mutation<
+      StorageBatchResponse,
+      BatchPermanentDeleteStorageItemsRequest
+    >({
+      query: (body) => ({
+        url: "/storage/batch-delete-item-permanent",
+        method: "POST",
+        body,
+        auth: true,
+      }),
+      invalidatesTags: (result, error, arg) => [
+        { type: "Storage" as const, id: arg.storageId },
+        { type: "StorageTrash" as const, id: arg.storageId },
+        "StorageInfo",
+      ],
+    }),
+    batchUpdateStorageItemTags: build.mutation<
+      StorageBatchResponse,
+      BatchUpdateStorageItemTagsRequest
+    >({
+      query: (body) => ({
+        url: "/storage/batch-update-item-tags",
+        method: "POST",
+        body,
+        auth: true,
+      }),
+      invalidatesTags: (result, error, arg) => [
+        { type: "Storage" as const, id: arg.storageId },
+        "StorageInfo",
+      ],
+    }),
   }),
 });
 
@@ -235,4 +335,10 @@ export const {
   useRemoveStorageTagsMutation,
   useGetStorageInfoQuery,
   useArchiveRoomToStorageMutation,
+  useBatchMoveStorageItemsMutation,
+  useBatchCopyStorageItemsMutation,
+  useBatchSoftDeleteStorageItemsMutation,
+  useBatchRestoreStorageItemsMutation,
+  useBatchPermanentDeleteStorageItemsMutation,
+  useBatchUpdateStorageItemTagsMutation,
 } = storageApi;

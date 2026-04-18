@@ -24,9 +24,9 @@ export interface UploadingFile {
 
 /**
  * Shared upload pipeline:
- * - init: /upload/auth/init-shared
+ * - init: /upload/auth/storage/init-shared
  * - upload: PUT to returned uploadUrl(s)
- * - confirm: /upload/auth/confirm-shared
+ * - confirm: /upload/auth/storage/confirm-shared
  *
  * Note: backend expects `sharedId` in init/confirm and `resourceId` in confirm.
  * In this app, we pass:
@@ -86,7 +86,7 @@ export const useSharedFileUpload = (
       }));
       try {
         const initResponse = await uploadSharedInit({
-          sharedId: storageId,
+          storageId: storageId,
           files: batch.map((file) => ({
             originalName: file.fileName,
             fileSize: file.fileSize,
@@ -130,7 +130,7 @@ export const useSharedFileUpload = (
 
             const confirmResp = await uploadSharedConfirm({
               uploadId: res.uploadId,
-              sharedId: storageId,
+              storageId: storageId,
               resourceId: sharedResourceId,
               parentId,
             }).unwrap();
@@ -212,5 +212,3 @@ export const useSharedFileUpload = (
     clearUploads,
   };
 };
-
-

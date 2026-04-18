@@ -9,6 +9,8 @@ interface MoveItemModalProps {
   currentParentId: string | null;
   onClose: () => void;
   onConfirm: (newParentId: string | null) => void;
+  /** Текущая папка назначения совпадает с перемещаемой папкой — в эту папку нельзя */
+  moveIntoSelfBlocked?: boolean;
 }
 
 const MoveItemModal: React.FC<MoveItemModalProps> = ({
@@ -16,8 +18,10 @@ const MoveItemModal: React.FC<MoveItemModalProps> = ({
   currentParentId,
   onClose,
   onConfirm,
+  moveIntoSelfBlocked = false,
 }) => {
   const handleConfirm = () => {
+    if (moveIntoSelfBlocked) return;
     onConfirm(currentParentId);
     onClose();
   };
@@ -37,6 +41,13 @@ const MoveItemModal: React.FC<MoveItemModalProps> = ({
             <ThemedText style={styles.description}>
               Выберите нужную папку в хранилище, затем нажмите «Переместить».
             </ThemedText>
+            {moveIntoSelfBlocked ? (
+              <ThemedText style={styles.warningText}>
+                Сейчас выбрана папка назначения, в которую нельзя переместить этот
+                элемент (например, сама перемещаемая папка). Откройте другую папку
+                в хлебных крошках.
+              </ThemedText>
+            ) : null}
 
             <View style={styles.footer}>
               <TouchableOpacity
@@ -47,9 +58,19 @@ const MoveItemModal: React.FC<MoveItemModalProps> = ({
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={handleConfirm}
-                style={[styles.button, styles.confirmButton]}
+                disabled={moveIntoSelfBlocked}
+                style={[
+                  styles.button,
+                  styles.confirmButton,
+                  moveIntoSelfBlocked && styles.confirmButtonDisabled,
+                ]}
               >
-                <ThemedText style={styles.confirmButtonText}>
+                <ThemedText
+                  style={[
+                    styles.confirmButtonText,
+                    moveIntoSelfBlocked && styles.confirmButtonTextDisabled,
+                  ]}
+                >
                   Переместить
                 </ThemedText>
               </TouchableOpacity>
@@ -93,6 +114,12 @@ const styles = StyleSheet.create({
     color: Colors.secondary,
     marginBottom: 16,
   },
+  warningText: {
+    fontSize: 13,
+    color: Colors.reject,
+    marginBottom: 12,
+    lineHeight: 18,
+  },
   footer: {
     flexDirection: "row",
     gap: 12,
@@ -111,6 +138,12 @@ const styles = StyleSheet.create({
   },
   confirmButton: {
     backgroundColor: Colors.primary,
+  },
+  confirmButtonDisabled: {
+    opacity: 0.45,
+  },
+  confirmButtonTextDisabled: {
+    opacity: 0.9,
   },
   cancelButtonText: {
     color: Colors.brightText,

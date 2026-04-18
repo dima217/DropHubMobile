@@ -59,6 +59,7 @@ const StorageScreen = () => {
           showPreviewToggle: true,
           showFAB: !archiveMode,
           showGlobalTagsButton: true,
+          consumePendingMoveOnTabFocus: true,
         }}
         menuOptions={menuOptions}
         renderHeaderActions={({ onOpenGlobalTags }) => (

@@ -1,4 +1,5 @@
 import { ResourceType } from "./shared";
+import type { StorageBatchResponse } from "./storage";
 import { StorageItem } from "./storage";
 
 export interface FavoriteItem extends StorageItem {
@@ -54,4 +55,22 @@ export interface RemoveFavoriteFromSharedRequest {
 
 export interface RemoveFavoriteFromSharedResponse {
     success: boolean;
+}
+
+export interface BatchAddFavoritesStorageRequest {
+    storageId: string;
+    itemIds: string[];
+}
+
+export interface BatchAddFavoritesSharedRequest {
+    storageId: string;
+    itemIds: string[];
+}
+
+export interface BatchRemoveFavoritesRequest {
+    itemIds: string[];
+}
+
+export interface BatchFavoritesAddResponse extends StorageBatchResponse {
+    skippedDuplicate?: number;
 }

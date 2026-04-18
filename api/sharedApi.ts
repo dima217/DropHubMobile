@@ -23,7 +23,7 @@ export const sharedApi = createApi({
       GrantPermissionsRequest
     >({
       query: (body) => ({
-        url: "/shared/grant-permission",
+        url: "/storage/shared/grant-permission",
         method: "POST",
         body,
         auth: true,
@@ -35,7 +35,7 @@ export const sharedApi = createApi({
     }),
     getSharedResources: build.query<GetSharedResourcesResponse[], void>({
       query: () => ({
-        url: "/shared/get-items",
+        url: "/storage/shared/get-items",
         method: "POST",
         auth: true,
       }),
@@ -43,7 +43,7 @@ export const sharedApi = createApi({
     }),
     revokePermissions: build.mutation<void, RevokePermissionsRequest>({
       query: (body) => ({
-        url: "/shared/revoke-permission",
+        url: "/storage/shared/revoke-permission",
         method: "POST",
         body,
         auth: true,
@@ -55,7 +55,7 @@ export const sharedApi = createApi({
     }),
     getSharedStructure: build.query<StorageItem[], GetSharedStructureRequest>({
       query: (body) => ({
-        url: "/shared/get-item-structure",
+        url: "/storage/structure",
         method: "POST",
         body,
         auth: true,
@@ -69,7 +69,7 @@ export const sharedApi = createApi({
       GetSharedItemParticipantsRequest
     >({
       query: (body) => ({
-        url: "/shared/get-item-participants",
+        url: "/storage/shared/get-item-participants",
         method: "POST",
         body,
         auth: true,
@@ -83,7 +83,7 @@ export const sharedApi = createApi({
       CreateSharedItemRequest
     >({
       query: (body) => ({
-        url: "/shared/create-item",
+        url: "/storage/create-item",
         method: "POST",
         body,
         auth: true,

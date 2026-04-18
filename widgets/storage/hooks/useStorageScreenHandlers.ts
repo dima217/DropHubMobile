@@ -24,6 +24,8 @@ interface UseStorageScreenHandlersProps {
   refetchStructure: () => void;
   selectedItem: StorageItem | null;
   actions: StorageActions;
+  /** Для unified `/storage/create-item` в shared-ветке */
+  createFolderResourceId?: string;
 }
 
 export const useStorageScreenHandlers = ({
@@ -34,6 +36,7 @@ export const useStorageScreenHandlers = ({
   refetchStructure,
   selectedItem,
   actions,
+  createFolderResourceId,
 }: UseStorageScreenHandlersProps) => {
   const handleCreateFolder = useCallback(
     async (name: string) => {
@@ -45,6 +48,9 @@ export const useStorageScreenHandlers = ({
           name: name.trim(),
           parentId: currentParentId ?? undefined,
           isDirectory: true,
+          ...(createFolderResourceId
+            ? { resourceId: createFolderResourceId }
+            : {}),
         });
   
         refetchStructure();
@@ -52,7 +58,7 @@ export const useStorageScreenHandlers = ({
         Alert.alert("Ошибка", "Не удалось создать папку");
       }
     },
-    [storageId, currentParentId, createFolder, refetchStructure]
+    [storageId, currentParentId, createFolder, refetchStructure, createFolderResourceId]
   );  
 
   const handleRemoveGlobalTag = useCallback(

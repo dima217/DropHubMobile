@@ -33,6 +33,13 @@ const mapStorageItemToFile = (
   };
 };
 
+/** Как в комнате: длинное нажатие включает выбор, в режиме выбора — тап переключает. */
+export interface StorageItemListMultiSelect {
+  active: boolean;
+  selectedIds: Set<string>;
+  onToggle: (item: StorageItem) => void;
+}
+
 interface StorageItemListProps {
   items: StorageItem[];
   previewEnabled?: boolean;
@@ -55,6 +62,10 @@ interface StorageItemListProps {
     firstName?: string;
     userId?: number;
   } | null;
+  /** Режим множественного выбора (как `ResourcesSection` в комнате). */
+  multiSelect?: StorageItemListMultiSelect;
+  /** Не показывать меню по элементу (режим выбора папки назначения и т.п.). */
+  suppressMenus?: boolean;
 }
 
 export const StorageItemList: React.FC<StorageItemListProps> = ({
@@ -67,6 +78,8 @@ export const StorageItemList: React.FC<StorageItemListProps> = ({
   getMenuItems,
   showAuthorship = false,
   getItemAuthor,
+  multiSelect,
+  suppressMenus = false,
 }) => {
   const tagColors = useSelector(
     (state: RootState) => (state.tagColors as { colors: TagColorMap }).colors
@@ -76,13 +89,18 @@ export const StorageItemList: React.FC<StorageItemListProps> = ({
     const isFavorite = favoriteItemIds?.has(item.id) ?? false;
     const itemTags = item.tags || [];
     const author = getItemAuthor ? getItemAuthor(item) : null;
+    const ms = multiSelect;
+    const isSelected = ms?.selectedIds.has(item.id) ?? false;
+    const menusOff = suppressMenus || ms?.active;
 
     if (item.isDirectory) {
       const isDisabled = disabledFolderIds?.has(item.id) ?? false;
       const itemCount =
         item.childrenCount ??
         (item.filesCount || 0) + (item.foldersCount || 0);
-      const menuItems = getMenuItems?.(item, { isFavorite }) ?? [];
+      const menuItems = menusOff
+        ? []
+        : (getMenuItems?.(item, { isFavorite }) ?? []);
 
       return (
         <FolderCard
@@ -95,10 +113,16 @@ export const StorageItemList: React.FC<StorageItemListProps> = ({
           authorUserId={author?.userId}
           menuItems={menuItems}
           disabled={isDisabled}
+          isSelected={isSelected}
           onPress={() => {
             if (isDisabled) return;
+            if (ms?.active) {
+              ms.onToggle(item);
+              return;
+            }
             onFolderPress?.(item);
           }}
+          onLongPress={ms ? () => ms.onToggle(item) : undefined}
           tags={itemTags}
           tagColors={tagColors}
           isFavorite={isFavorite}
@@ -109,7 +133,9 @@ export const StorageItemList: React.FC<StorageItemListProps> = ({
     const fileId = item.fileId || item.id;
     const url = previewUrls[fileId];
     const file = mapStorageItemToFile(item, url);
-    const menuItems = getMenuItems?.(item, { isFavorite }) ?? [];
+    const menuItems = menusOff
+      ? []
+      : (getMenuItems?.(item, { isFavorite }) ?? []);
 
     return (
       <FileCard
@@ -129,6 +155,9 @@ export const StorageItemList: React.FC<StorageItemListProps> = ({
         tags={itemTags}
         tagColors={tagColors}
         isFavorite={isFavorite}
+        isSelected={isSelected}
+        onPress={ms?.active ? () => ms.onToggle(item) : undefined}
+        onLongPress={ms ? () => ms.onToggle(item) : undefined}
       />
     );
   };

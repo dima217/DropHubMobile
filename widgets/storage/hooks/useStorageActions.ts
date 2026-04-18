@@ -1,8 +1,13 @@
 import {
+  useAddFavoriteFromSharedMutation,
   useAddFavoriteFromStorageMutation,
+  useRemoveFavoriteFromSharedMutation,
   useRemoveFavoriteFromStorageMutation,
 } from "@/api/favorites";
-import { useLazyDownloadStorageFileQuery } from "@/api/fileApi";
+import {
+  useLazyDownloadSharedFileQuery,
+  useLazyDownloadStorageFileQuery,
+} from "@/api/fileApi";
 import { useGrantPermissionsMutation } from "@/api/sharedApi";
 import {
   useCopyStorageItemMutation,
@@ -25,6 +30,8 @@ import { Alert } from "react-native";
 interface UseStorageActionsProps {
   storageId: string;
   currentParentId: string | null;
+  resourceId?: string;
+  resourceType?: ResourceType;
   refetchStructure: () => void;
   /** Открыть сценарий конвертации файла (модалка на уровне экрана). */
   onConvertRequest?: (item: StorageItem) => void;
@@ -41,6 +48,8 @@ interface UseStorageActionsProps {
 export const useStorageActions = ({
   storageId,
   currentParentId,
+  resourceId,
+  resourceType,
   refetchStructure,
   onConvertRequest,
   setSelectedItem,
@@ -50,26 +59,35 @@ export const useStorageActions = ({
   setRenameModalVisible,
   setInfoModalVisible,
   setMoveModalVisible,
-  setCreateFolderModalVisible,
 }: UseStorageActionsProps) => {
+  const effectiveResourceType = resourceType ?? ResourceType.STORAGE;
   const [updateItem] = useUpdateStorageItemMutation();
   const [copyItem] = useCopyStorageItemMutation();
   const [moveItem] = useMoveStorageItemMutation();
   const [updateItemTags] = useUpdateStorageItemTagsMutation();
   const [moveToTrash] = useMoveStorageItemToTrashMutation();
   const [addFavorite] = useAddFavoriteFromStorageMutation();
+  const [addFavoriteFromShared] = useAddFavoriteFromSharedMutation();
   const [removeFavorite] = useRemoveFavoriteFromStorageMutation();
+  const [removeFavoriteFromShared] = useRemoveFavoriteFromSharedMutation();
   const [grantPermissions] = useGrantPermissionsMutation();
   const [downloadStorageFile] = useLazyDownloadStorageFileQuery();
+  const [downloadSharedFile] = useLazyDownloadSharedFileQuery();
 
   const handleDownloadFile = useCallback(
     async (item: StorageItem) => {
       if (!storageId || !item.fileId) return;
       try {
-        const response = await downloadStorageFile({
-          storageId,
-          fileIds: [item.fileId],
-        }).unwrap();
+        const response =
+          effectiveResourceType === ResourceType.SHARED && resourceId
+            ? await downloadSharedFile({
+                resourceId,
+                fileIds: [item.fileId],
+              }).unwrap()
+            : await downloadStorageFile({
+                storageId,
+                fileIds: [item.fileId],
+              }).unwrap();
         const uploader = createUploader(UploadProvider.MINIO);
         for (const { url } of response) {
           await uploader.download(url);
@@ -79,7 +97,7 @@ export const useStorageActions = ({
         Alert.alert("Ошибка", "Не удалось скачать файл");
       }
     },
-    [storageId, downloadStorageFile]
+    [storageId, effectiveResourceType, resourceId, downloadSharedFile, downloadStorageFile]
   );
 
   const handleConvert = useCallback(
@@ -103,6 +121,7 @@ export const useStorageActions = ({
       try {
         await updateItem({
           storageId,
+          resourceId,
           itemId: selectedItem.id,
           newName,
         }).unwrap();
@@ -112,7 +131,7 @@ export const useStorageActions = ({
         Alert.alert("Ошибка", "Не удалось переименовать");
       }
     },
-    [storageId, updateItem, refetchStructure, setSelectedItem]
+    [storageId, resourceId, updateItem, refetchStructure, setSelectedItem]
   );
 
   const handleCopy = useCallback(
@@ -121,6 +140,7 @@ export const useStorageActions = ({
       try {
         await copyItem({
           storageId,
+          resourceId,
           itemId: item.id,
           targetParentId: currentParentId || undefined,
         }).unwrap();
@@ -140,7 +160,7 @@ export const useStorageActions = ({
         }
       }
     },
-    [storageId, copyItem, currentParentId, refetchStructure]
+    [storageId, resourceId, copyItem, currentParentId, refetchStructure]
   );
 
   const handleMove = useCallback(
@@ -154,11 +174,24 @@ export const useStorageActions = ({
   const handleConfirmMove = useCallback(
     async (newParentId: string | null, selectedItem: StorageItem | null) => {
       if (!selectedItem || !storageId) return;
+      if (
+        selectedItem.isDirectory &&
+        newParentId !== null &&
+        newParentId !== undefined &&
+        newParentId === selectedItem.id
+      ) {
+        Alert.alert(
+          "Нельзя",
+          "Нельзя переместить папку в саму себя. Выберите другую папку назначения."
+        );
+        return;
+      }
       try {
         await moveItem({
           storageId,
+          resourceId,
           itemId: selectedItem.id,
-          newParentId: newParentId || "",
+          newParentId,
         }).unwrap();
         refetchStructure();
         setSelectedItem(null);
@@ -166,37 +199,53 @@ export const useStorageActions = ({
         Alert.alert("Ошибка", "Не удалось переместить");
       }
     },
-    [storageId, moveItem, refetchStructure, setSelectedItem]
+    [storageId, resourceId, moveItem, refetchStructure, setSelectedItem]
   );
 
   const handleAddToFavorites = useCallback(
     async (item: StorageItem) => {
       if (!storageId) return;
       try {
-        await addFavorite({
-          storageId,
-          itemId: item.id,
-        }).unwrap();
+        if (effectiveResourceType === ResourceType.SHARED) {
+          console.log("addFavoriteFromShared", storageId, item.id);
+          await addFavoriteFromShared({
+            storageId,
+            itemId: item.id,
+          }).unwrap();
+        } else {
+          await addFavorite({
+            storageId,
+            itemId: item.id,
+          }).unwrap();
+        }
       } catch {
         Alert.alert("Ошибка", "Не удалось добавить в избранное");
       }
     },
-    [storageId, addFavorite]
+    [storageId, effectiveResourceType, addFavorite, addFavoriteFromShared]
   );
 
   const handleRemoveFromFavorites = useCallback(
     async (item: StorageItem) => {
       if (!storageId) return;
       try {
-        await removeFavorite({
-          storageId,
-          itemId: item.id,
-        }).unwrap();
+        if (effectiveResourceType === ResourceType.SHARED) {
+          console.log("removeFavoriteFromShared", storageId, item.id);
+          await removeFavoriteFromShared({
+            storageId,
+            itemId: item.id,
+          }).unwrap();
+        } else {
+          await removeFavorite({
+            storageId,
+            itemId: item.id,
+          }).unwrap();
+        }
       } catch {
         Alert.alert("Ошибка", "Не удалось удалить из избранного");
       }
     },
-    [storageId, removeFavorite]
+    [storageId, effectiveResourceType, removeFavorite, removeFavoriteFromShared]
   );
 
   const handleAddTag = useCallback(
@@ -218,6 +267,7 @@ export const useStorageActions = ({
         }
         await updateItemTags({
           storageId,
+          resourceId,
           itemId: selectedItem.id,
           tags: [...currentTags, tag],
         }).unwrap();
@@ -226,7 +276,7 @@ export const useStorageActions = ({
         Alert.alert("Ошибка", "Не удалось добавить тег");
       }
     },
-    [storageId, updateItemTags, refetchStructure]
+    [storageId, resourceId, updateItemTags, refetchStructure]
   );
 
   const handleRemoveItemTag = useCallback(
@@ -236,6 +286,7 @@ export const useStorageActions = ({
         const currentTags = selectedItem.tags || [];
         await updateItemTags({
           storageId,
+          resourceId,
           itemId: selectedItem.id,
           tags: currentTags.filter((t) => t !== tag),
         }).unwrap();
@@ -244,7 +295,7 @@ export const useStorageActions = ({
         Alert.alert("Ошибка", "Не удалось удалить тег");
       }
     },
-    [storageId, updateItemTags, refetchStructure]
+    [storageId, resourceId, updateItemTags, refetchStructure]
   );
 
   const handleShare = useCallback(
@@ -262,7 +313,7 @@ export const useStorageActions = ({
         await grantPermissions({
           storageId,
           resourceId: selectedItem.id,
-          resourceType: ResourceType.STORAGE,
+          resourceType: effectiveResourceType,
           targetUserId: friendId,
           role: AccessRole.WRITE,
         }).unwrap();
@@ -272,7 +323,7 @@ export const useStorageActions = ({
         Alert.alert("Ошибка", "Не удалось предоставить доступ");
       }
     },
-    [storageId, grantPermissions, setSelectedItem]
+    [storageId, effectiveResourceType, grantPermissions, setSelectedItem]
   );
 
   const handleViewPermissions = useCallback(
@@ -297,6 +348,7 @@ export const useStorageActions = ({
       try {
         await moveToTrash({
           storageId,
+          resourceId,
           itemId: item.id,
         }).unwrap();
         refetchStructure();
@@ -304,7 +356,7 @@ export const useStorageActions = ({
         Alert.alert("Ошибка", "Не удалось переместить в корзину");
       }
     },
-    [storageId, moveToTrash, refetchStructure]
+    [storageId, resourceId, moveToTrash, refetchStructure]
   );
 
   return {

@@ -24,6 +24,7 @@ export interface CreateStorageResponse {
 
 export interface GetStorageStructureRequest {
     storageId: string;
+    resourceId?: string;
     parentId?: string;
 }
 
@@ -61,6 +62,7 @@ export interface StorageItemResponse {
 
 export interface CreateStorageFolderRequest {
     storageId: string;
+    resourceId?: string;
     name: string;
     parentId?: string;
     isDirectory: boolean;
@@ -73,6 +75,7 @@ export interface CreateStorageFolderResponse {
 
 export interface UpdateStorageItemRequest {
     storageId: string;
+    resourceId?: string;
     itemId: string;
     newName: string;
 }
@@ -92,8 +95,9 @@ export interface UpdateStorageItemResponse {
 
 export interface MoveStorageItemRequest {
     storageId: string;
+    resourceId?: string;
     itemId: string;
-    newParentId: string;
+    newParentId: string | null;
 }
 
 export interface MoveStorageItemResponse {
@@ -111,6 +115,7 @@ export interface MoveStorageItemResponse {
 
 export interface MoveStorageItemToTrashRequest {
     storageId: string;
+    resourceId?: string;
     itemId: string;
 }
 
@@ -121,6 +126,7 @@ export interface MoveStorageItemToTrashResponse {
 
 export interface GetTrashItemsRequest {
     storageId: string;
+    resourceId?: string;
 }
 
 export interface GetTrashItemsResponse {
@@ -138,6 +144,7 @@ export interface GetTrashItemsResponse {
 
 export interface RestoreTrashItemRequest {
     storageId: string;
+    resourceId?: string;
     itemId: string;
     newParentId?: string;
 }
@@ -149,6 +156,7 @@ export interface RestoreTrashItemResponse {
 
 export interface CopyStorageItemRequest {
     storageId: string;
+    resourceId?: string;
     itemId: string;
     targetParentId?: string;
 }
@@ -168,6 +176,7 @@ export interface CopyStorageItemResponse {
 
 export interface DeleteStorageItemRequest {
     storageId: string;
+    resourceId?: string;
     itemId: string;
 }
 
@@ -178,6 +187,7 @@ export interface DeleteStorageItemResponse {
 
 export interface UpdateStorageItemTagsRequest {
     storageId: string;
+    resourceId?: string;
     itemId: string;
     tags: string[];
 }
@@ -233,5 +243,46 @@ export interface ArchiveRoomToStorageResponse {
     roomId: string;
     folderId: string;
     archivedFilesCount: number;
+}
+
+/** Результат по одному элементу в batch-операциях storage */
+export interface StorageBatchResultRow {
+    itemId: string;
+    success: boolean;
+    item?: StorageItem;
+    error?: string;
+}
+
+export interface StorageBatchResponse {
+    total: number;
+    succeeded: number;
+    failed: number;
+    results: StorageBatchResultRow[];
+}
+
+export interface StorageBatchBaseBody {
+    storageId: string;
+    itemIds: string[];
+    resourceId?: string;
+}
+
+export interface BatchMoveStorageItemsRequest extends StorageBatchBaseBody {
+    newParentId: string | null;
+}
+
+export interface BatchCopyStorageItemsRequest extends StorageBatchBaseBody {
+    targetParentId: string | null;
+}
+
+export type BatchSoftDeleteStorageItemsRequest = StorageBatchBaseBody;
+
+export interface BatchRestoreStorageItemsRequest extends StorageBatchBaseBody {
+    newParentId?: string | null;
+}
+
+export type BatchPermanentDeleteStorageItemsRequest = StorageBatchBaseBody;
+
+export interface BatchUpdateStorageItemTagsRequest extends StorageBatchBaseBody {
+    tags: string[];
 }
 

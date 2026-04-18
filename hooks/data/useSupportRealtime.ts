@@ -4,6 +4,8 @@ import { useWebSocket } from "../websocket/useWebSocket";
 
 type TicketUpdatedPayload = { ticketId?: string };
 
+const SUPPORT_TICKET_EVENTS = ["support.ticket.updated", "support.ticket.created"] as const;
+
 export function useSupportAuthRealtime(
   accessToken: string | null | undefined,
   enabled: boolean,
@@ -25,11 +27,11 @@ export function useSupportAuthRealtime(
     const handler = (payload: TicketUpdatedPayload) => {
       if (payload?.ticketId) onUpdatedRef.current();
     };
-    on("support.ticket.updated", handler);
+    SUPPORT_TICKET_EVENTS.forEach((eventName) => on(eventName, handler));
 
     return () => {
       emit("support.unsubscribeUser");
-      off("support.ticket.updated", handler);
+      SUPPORT_TICKET_EVENTS.forEach((eventName) => off(eventName, handler));
     };
   }, [enabled, accessToken, isConnected, emit, on, off]);
 }
@@ -56,10 +58,10 @@ export function useSupportTicketRealtime(
     const handler = (payload: TicketUpdatedPayload) => {
       if (payload?.ticketId === ticketId) onUpdatedRef.current();
     };
-    on("support.ticket.updated", handler);
+    SUPPORT_TICKET_EVENTS.forEach((eventName) => on(eventName, handler));
 
     return () => {
-      off("support.ticket.updated", handler);
+      SUPPORT_TICKET_EVENTS.forEach((eventName) => off(eventName, handler));
     };
   }, [enabled, accessToken, isConnected, ticketId, emit, on, off]);
 }
@@ -84,10 +86,10 @@ export function useSupportAnonymousTicketRealtime(
     const handler = (payload: TicketUpdatedPayload) => {
       if (payload?.ticketId === ticketId) onUpdatedRef.current();
     };
-    on("support.ticket.updated", handler);
+    SUPPORT_TICKET_EVENTS.forEach((eventName) => on(eventName, handler));
 
     return () => {
-      off("support.ticket.updated", handler);
+      SUPPORT_TICKET_EVENTS.forEach((eventName) => off(eventName, handler));
     };
   }, [enabled, isConnected, ticketId, token, emit, on, off]);
 }

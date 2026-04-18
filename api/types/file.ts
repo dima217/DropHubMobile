@@ -124,7 +124,7 @@ export interface DownloadStorageFileResponse {
 }
 
 export interface UploadSharedInitRequest {
-    sharedId: string;
+    storageId: string;
     files: {
         originalName: string;
         fileSize: number;
@@ -143,7 +143,7 @@ export interface UploadSharedInitResponse {
 
 export interface UploadSharedConfirmRequest {
     uploadId: string;
-    sharedId: string;
+    storageId: string;
     resourceId: string;
     parentId: string;
 }
@@ -182,6 +182,7 @@ export interface ConvertRoomFileRequest {
 
 export interface ConvertStorageFileRequest {
     storageId: string;
+    resourceId?: string;
     fileId: string;
     conversion: FileConversionType;
     parentId?: string;
