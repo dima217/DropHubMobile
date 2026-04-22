@@ -8,22 +8,23 @@ const MAX_LINES = 8;
  */
 export function showStorageBatchResultAlert(
   result: StorageBatchResponse,
-  titleOk: string
+  titleOk: string,
+  tl: (s: string) => string = (s) => s
 ): void {
   const { total, succeeded, failed, results } = result;
   const lines: string[] = [];
   if (failed > 0) {
     const errs = results.filter((r) => !r.success && r.error);
     for (const r of errs.slice(0, MAX_LINES)) {
-      lines.push(`• ${r.itemId}: ${r.error ?? "ошибка"}`);
+      lines.push(`• ${r.itemId}: ${r.error ?? tl("ошибка")}`);
     }
     if (errs.length > MAX_LINES) {
-      lines.push(`… и ещё ${errs.length - MAX_LINES}`);
+      lines.push(`${tl("… и ещё")} ${errs.length - MAX_LINES}`);
     }
   }
   const summary =
     failed === 0
-      ? `${titleOk}\n\nОбработано: ${succeeded} из ${total}.`
-      : `Готово: ${succeeded} из ${total}, ошибок: ${failed}.${lines.length ? `\n\n${lines.join("\n")}` : ""}`;
-  Alert.alert(failed === 0 ? "Готово" : "Частично выполнено", summary);
+      ? `${titleOk}\n\n${tl("Обработано")}: ${succeeded} ${tl("из")} ${total}.`
+      : `${tl("Готово")}: ${succeeded} ${tl("из")} ${total}, ${tl("ошибок")}: ${failed}.${lines.length ? `\n\n${lines.join("\n")}` : ""}`;
+  Alert.alert(failed === 0 ? tl("Готово") : tl("Частично выполнено"), summary);
 }

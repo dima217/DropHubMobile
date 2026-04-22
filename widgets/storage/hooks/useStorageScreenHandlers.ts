@@ -1,5 +1,6 @@
 import { StorageItem } from "@/api/types/storage";
 import { AccessRole } from "@/api/types/room";
+import { useI18n } from "@/shared/localization";
 import { useCallback } from "react";
 import { Alert } from "react-native";
 
@@ -40,6 +41,7 @@ export const useStorageScreenHandlers = ({
   actions,
   createFolderResourceId,
 }: UseStorageScreenHandlersProps) => {
+  const { tl } = useI18n();
   const handleCreateFolder = useCallback(
     async (name: string) => {
       if (!storageId) return;
@@ -57,7 +59,7 @@ export const useStorageScreenHandlers = ({
   
         refetchStructure();
       } catch {
-        Alert.alert("Ошибка", "Не удалось создать папку");
+        Alert.alert(tl("Ошибка"), tl("Не удалось создать папку"));
       }
     },
     [storageId, currentParentId, createFolder, refetchStructure, createFolderResourceId]
@@ -72,7 +74,7 @@ export const useStorageScreenHandlers = ({
           tags: [tag],
         });
       } catch {
-        Alert.alert("Ошибка", "Не удалось удалить тег");
+        Alert.alert(tl("Ошибка"), tl("Не удалось удалить тег"));
       }
     },
     [storageId, removeStorageTags]

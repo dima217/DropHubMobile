@@ -2,6 +2,7 @@ import { useConvertRoomFileMutation } from "@/api/fileApi";
 import { useGetRoomDetailsQuery } from "@/api/roomApi";
 import type { FileConversionType } from "@/api/types/file";
 import { Colors } from "@/constants/design-tokens";
+import { useI18n } from "@/shared/localization";
 import { useAutoMarkRoomFileNotificationsRead } from "@/hooks/data/useAutoMarkNotificationsOnView";
 import { useRoomFilesUpdate } from "@/hooks/data/useRoomFilesUpdate";
 import { secureStore } from "@/services/secureStore";
@@ -31,6 +32,7 @@ import { useSelector } from "react-redux";
 import RoomPlaceholder from "./room-placeholder";
 
 const RoomDetailsScreen = () => {
+  const { tl } = useI18n();
   const { roomId } = useLocalSearchParams<{ roomId: string }>();
   const router = useRouter();
   useAutoMarkRoomFileNotificationsRead(roomId);
@@ -66,16 +68,16 @@ const RoomDetailsScreen = () => {
         }).unwrap();
         const n = result.createdFiles?.length ?? 0;
         Alert.alert(
-          "Готово",
-          n > 1 ? `Создано файлов: ${n}` : "Файл сконвертирован и сохранён"
+          tl("Готово"),
+          n > 1 ? `${tl("Создано файлов:")} ${n}` : tl("Файл сконвертирован и сохранён")
         );
         setConvertTarget(null);
       } catch (e: unknown) {
         const err = e as { data?: { message?: string }; message?: string };
         Alert.alert(
-          "Ошибка",
+          tl("Ошибка"),
           String(
-            err?.data?.message ?? err?.message ?? "Не удалось конвертировать"
+            err?.data?.message ?? err?.message ?? tl("Не удалось конвертировать")
           )
         );
       } finally {

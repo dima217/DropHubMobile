@@ -3,6 +3,7 @@ import { useArchiveRoomToStorageMutation } from "@/api/storageApi";
 import type { FileConversionType } from "@/api/types/file";
 import { StorageItem } from "@/api/types/storage";
 import { getConversionOptions } from "@/shared/fileConversion/getConversionOptions";
+import { useI18n } from "@/shared/localization";
 import { useCallback, useMemo } from "react";
 import { Alert } from "react-native";
 import {
@@ -34,6 +35,7 @@ export function useStorageSectionConversionAndArchive(params: Params) {
     setConvertSubmitting,
   } = params;
 
+  const { tl } = useI18n();
   const [archiveRoomToStorage, { isLoading: isArchivingRoom }] =
     useArchiveRoomToStorageMutation();
   const [convertStorageFile] = useConvertStorageFileMutation();
@@ -83,16 +85,16 @@ export function useStorageSectionConversionAndArchive(params: Params) {
         const n = result.createdFiles?.length ?? 0;
 
         Alert.alert(
-          "Готово",
-          n > 1 ? `Создано файлов: ${n}` : "Файл сконвертирован и сохранён"
+          tl("Готово"),
+          n > 1 ? `${tl("Создано файлов:")} ${n}` : tl("Файл сконвертирован и сохранён")
         );
         setConvertItem(null);
       } catch (e: unknown) {
         const err = e as { data?: { message?: string }; message?: string };
         Alert.alert(
-          "Ошибка",
+          tl("Ошибка"),
           String(
-            err?.data?.message ?? err?.message ?? "Не удалось конвертировать"
+            err?.data?.message ?? err?.message ?? tl("Не удалось конвертировать")
           )
         );
       } finally {
@@ -122,16 +124,16 @@ export function useStorageSectionConversionAndArchive(params: Params) {
       archiveMode.onComplete();
     } catch (e) {
       console.error("Archive room to storage failed:", e);
-      if (isStorageQuotaExceededError(e)) {
+        if (isStorageQuotaExceededError(e)) {
         const detail = getStorageQuotaAlertMessage(e);
         Alert.alert(
-          "Недостаточно места",
+          tl("Недостаточно места"),
           detail
-            ? `${detail}\n\nОсвободите место в хранилище или уменьшите объём архива.`
-            : "В хранилище не хватает места для архива. Освободите место и повторите попытку."
+            ? `${detail}\n\n${tl("Освободите место в хранилище или уменьшите объём архива.")}`
+            : tl("В хранилище не хватает места для архива. Освободите место и повторите попытку.")
         );
       } else {
-        Alert.alert("Ошибка", "Не удалось архивировать комнату в хранилище.");
+        Alert.alert(tl("Ошибка"), tl("Не удалось архивировать комнату в хранилище."));
       }
     }
   }, [archiveMode, storageId, navigationParentId, archiveRoomToStorage]);

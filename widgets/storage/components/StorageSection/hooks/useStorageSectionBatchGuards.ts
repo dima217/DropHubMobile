@@ -1,11 +1,10 @@
 import type { StorageItem } from "@/api/types/storage";
+import { useI18n } from "@/shared/localization";
 import { useCallback, useMemo } from "react";
 import { Alert } from "react-native";
 import type { StorageSectionProps } from "../types";
 
 type BatchDest = { kind: "move" | "copy"; itemIds: string[] };
-
-const BLOCK_MSG = "Нельзя переместить элементы в выбранную папку";
 
 export function useStorageSectionBatchGuards(params: {
   batchDestination: BatchDest | null;
@@ -21,6 +20,8 @@ export function useStorageSectionBatchGuards(params: {
     navigateTo,
     openFolder,
   } = params;
+
+  const { tl } = useI18n();
 
   const batchMoveForbiddenIds = useMemo(() => {
     if (!batchDestination || batchDestination.kind !== "move") return null;
@@ -41,23 +42,23 @@ export function useStorageSectionBatchGuards(params: {
         segmentId !== null &&
         batchMoveForbiddenIds.has(segmentId)
       ) {
-        Alert.alert("Нельзя", BLOCK_MSG);
+        Alert.alert(tl("Нельзя"), tl("Нельзя переместить элементы в выбранную папку"));
         return;
       }
       (externalData?.onNavigate ?? navigateTo)(segmentId, index);
     },
-    [batchMoveForbiddenIds, externalData?.onNavigate, navigateTo]
+    [batchMoveForbiddenIds, externalData?.onNavigate, navigateTo, tl]
   );
 
   const handleFolderPressWithBatchGuard = useCallback(
     (folder: StorageItem) => {
       if (batchMoveForbiddenIds?.has(folder.id)) {
-        Alert.alert("Нельзя", BLOCK_MSG);
+        Alert.alert(tl("Нельзя"), tl("Нельзя переместить элементы в выбранную папку"));
         return;
       }
       (externalData?.onFolderPress ?? openFolder)(folder);
     },
-    [batchMoveForbiddenIds, externalData?.onFolderPress, openFolder]
+    [batchMoveForbiddenIds, externalData?.onFolderPress, openFolder, tl]
   );
 
   return {

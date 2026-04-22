@@ -16,6 +16,7 @@ export async function runFavoritesSelectionToTrash(params: {
   deleteStorageBatch: (itemIds: string[]) => Promise<StorageBatchResponse>;
   deleteSharedOne: (itemId: string) => Promise<unknown>;
   dispatch: AppDispatch;
+  tl?: (s: string) => string;
 }): Promise<void> {
   const {
     storageId,
@@ -24,6 +25,7 @@ export async function runFavoritesSelectionToTrash(params: {
     deleteStorageBatch,
     deleteSharedOne,
     dispatch,
+    tl = (s: string) => s,
   } = params;
 
   const storageIds: string[] = [];
@@ -38,13 +40,13 @@ export async function runFavoritesSelectionToTrash(params: {
   }
   if (storageIds.length > 0) {
     const result = await deleteStorageBatch(storageIds);
-    showStorageBatchResultAlert(result, "В корзину");
+    showStorageBatchResultAlert(result, tl("В корзину"), tl);
   }
   for (const itemId of sharedIds) {
     await deleteSharedOne(itemId);
   }
   if (sharedIds.length > 0 && storageIds.length === 0) {
-    Alert.alert("Готово", `В корзину: ${sharedIds.length} эл.`);
+    Alert.alert(tl("Готово"), `${tl("В корзину")}: ${sharedIds.length} ${tl("эл.")}`);
   }
   dispatch(favoritesApi.util.invalidateTags(["Favorites"]));
 }

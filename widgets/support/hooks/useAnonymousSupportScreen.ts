@@ -5,10 +5,12 @@ import {
 import { useSupportAnonymousTicketRealtime } from "@/hooks/data/useSupportRealtime";
 import { secureStore } from "@/services/secureStore";
 import type { CreateSupportTicketPayload } from "@/shared/Modals/SupportModals/CreateSupportTicketModal";
+import { useI18n } from "@/shared/localization";
 import { useCallback, useEffect, useState } from "react";
 import { Alert } from "react-native";
 
 export function useAnonymousSupportScreen() {
+  const { tl } = useI18n();
   const [stored, setStored] = useState<{ id: string; token: string } | null>(
     null
   );
@@ -47,7 +49,7 @@ export function useAnonymousSupportScreen() {
   const onSubmitForm = async (payload: CreateSupportTicketPayload) => {
     const email = payload.contactEmail?.trim();
     if (!email) {
-      Alert.alert("Форма", "Укажите email.");
+      Alert.alert(tl("Форма"), tl("Укажите email."));
       return;
     }
     try {
@@ -61,7 +63,7 @@ export function useAnonymousSupportScreen() {
       setStored(creds);
       setFormOpen(false);
     } catch {
-      Alert.alert("Ошибка", "Не удалось создать обращение. Попробуйте позже.");
+      Alert.alert(tl("Ошибка"), tl("Не удалось создать обращение. Попробуйте позже."));
     }
   };
 

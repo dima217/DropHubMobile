@@ -1,5 +1,6 @@
 import Button from "@/shared/Button";
 import { ThemedText } from "@/shared/core/ThemedText";
+import { useI18n } from "@/shared/localization";
 import GradientView from "@/shared/Gradient";
 import PatternBackground from "@/shared/ui/PatternBackground";
 import RadialGradientBackground from "@/shared/ui/RadialGradientBackground";
@@ -11,6 +12,7 @@ import { useSelector } from "react-redux";
 import Avatar from "./ui/Avatar";
 
 const ProfileCard = () => {
+  const { tl } = useI18n();
   const profile = useSelector((state: RootState) => state.auth.user);
   const router = useRouter();
 
@@ -62,7 +64,7 @@ const ProfileCard = () => {
 
         <TouchableOpacity onPress={handleConnectionsPress}>
           <ThemedText type="link" style={styles.connectionsText}>
-            {connectionsCount} connections
+            {connectionsCount} {tl("connections")}
           </ThemedText>
         </TouchableOpacity>
       </View>

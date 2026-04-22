@@ -8,6 +8,7 @@ import {
   getStorageQuotaAlertMessage,
   isStorageQuotaExceededError,
 } from "@/widgets/storage/utils/storageQuota";
+import { useI18n } from "@/shared/localization";
 import { useCallback, useState } from "react";
 import { Alert } from "react-native";
 
@@ -40,6 +41,7 @@ export const useSharedFileUpload = (
   parentId: string,
   currentUserId?: number
 ) => {
+  const { tl } = useI18n();
   const [uploadSharedInit] = useUploadSharedInitMutation();
   const [uploadSharedConfirm] = useUploadSharedConfirmMutation();
   const { pickResource } = useResourcePicker();
@@ -177,13 +179,13 @@ export const useSharedFileUpload = (
         if (isStorageQuotaExceededError(error)) {
           const detail = getStorageQuotaAlertMessage(error);
           Alert.alert(
-            "Недостаточно места",
+            tl("Недостаточно места"),
             detail
-              ? `${detail}\n\nУдалите ненужные файлы из хранилища или обратитесь за увеличением квоты.`
-              : "Удалите ненужные файлы из хранилища или обратитесь за увеличением квоты."
+              ? `${detail}\n\n${tl("Удалите ненужные файлы из хранилища или обратитесь за увеличением квоты.")}`
+              : tl("Удалите ненужные файлы из хранилища или обратитесь за увеличением квоты.")
           );
         } else {
-          Alert.alert("Ошибка", "Не удалось загрузить файлы.");
+          Alert.alert(tl("Ошибка"), tl("Не удалось загрузить файлы."));
         }
         return false;
       }

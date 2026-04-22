@@ -7,6 +7,7 @@ import { StorageItem } from "@/api/types/storage";
 import type { AppDispatch } from "@/store/store";
 import { createStorageMultiSelectMenuItems } from "@/widgets/storage/menu/createStorageMultiSelectMenu";
 import { showStorageBatchResultAlert } from "@/widgets/storage/utils/storageBatchAlert";
+import { useI18n } from "@/shared/localization";
 import { useRouter } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
 import { Alert } from "react-native";
@@ -52,6 +53,7 @@ export function useStorageSectionBatch(params: {
     buildBatchBody,
   } = params;
 
+  const { tl } = useI18n();
   const router = useRouter();
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
   const [batchDestination, setBatchDestination] = useState<BatchDest | null>(
@@ -81,13 +83,13 @@ export function useStorageSectionBatch(params: {
 
   const ensureBatchSize = useCallback((ids: string[]) => {
     if (ids.length === 0) {
-      Alert.alert("Выбор", "Отметьте хотя бы один элемент");
+      Alert.alert(tl("Выбор"), tl("Отметьте хотя бы один элемент"));
       return false;
     }
     if (ids.length > STORAGE_BATCH_MAX) {
       Alert.alert(
-        "Слишком много",
-        `Не более ${STORAGE_BATCH_MAX} элементов за один запрос`
+        tl("Слишком много"),
+        `${tl("Не более")} ${STORAGE_BATCH_MAX} ${tl("элементов за один запрос")}`
       );
       return false;
     }
@@ -152,8 +154,8 @@ export function useStorageSectionBatch(params: {
       itemIds.includes(parent)
     ) {
       Alert.alert(
-        "Нельзя",
-        "Нельзя переместить элементы в выбранную папку"
+        tl("Нельзя"),
+        tl("Нельзя переместить элементы в выбранную папку")
       );
       return;
     }
@@ -163,21 +165,21 @@ export function useStorageSectionBatch(params: {
           ...buildBatchBody(itemIds),
           newParentId: parent,
         }).unwrap();
-        showStorageBatchResultAlert(result, "Перемещение");
+        showStorageBatchResultAlert(result, tl("Перемещение"), tl);
       } else {
         const result = await batchCopyItems({
           ...buildBatchBody(itemIds),
           targetParentId: parent,
         }).unwrap();
-        showStorageBatchResultAlert(result, "Копирование");
+        showStorageBatchResultAlert(result, tl("Копирование"), tl);
       }
       resetMultiSelect();
       refetchStructure();
     } catch (e: unknown) {
       const err = e as { data?: { message?: string }; message?: string };
       Alert.alert(
-        "Ошибка",
-        String(err?.data?.message ?? err?.message ?? "Запрос не выполнен")
+        tl("Ошибка"),
+        String(err?.data?.message ?? err?.message ?? tl("Запрос не выполнен"))
       );
     }
   }, [

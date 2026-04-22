@@ -66,7 +66,7 @@ export const useStorageActions = ({
   setMoveModalVisible,
 }: UseStorageActionsProps) => {
   const dispatch = useDispatch<AppDispatch>();
-  const { t } = useI18n();
+  const { t, tl } = useI18n();
   const effectiveResourceType = resourceType ?? ResourceType.STORAGE;
   const [updateItem] = useUpdateStorageItemMutation();
   const [copyItem] = useCopyStorageItemMutation();
@@ -194,7 +194,7 @@ export const useStorageActions = ({
         refetchStructure();
         setSelectedItem(null);
       } catch {
-        Alert.alert("Ошибка", "Не удалось переименовать");
+        Alert.alert(tl("Ошибка"), tl("Не удалось переименовать"));
       }
     },
     [storageId, resourceId, updateItem, refetchStructure, setSelectedItem]
@@ -211,18 +211,18 @@ export const useStorageActions = ({
           targetParentId: currentParentId || undefined,
         }).unwrap();
         refetchStructure();
-        Alert.alert("Успешно", "Копия создана");
+        Alert.alert(tl("Успешно"), tl("Копия создана"));
       } catch (e) {
         if (isStorageQuotaExceededError(e)) {
           const detail = getStorageQuotaAlertMessage(e);
           Alert.alert(
-            "Недостаточно места",
+            tl("Недостаточно места"),
             detail
-              ? `${detail}\n\nУдалите лишние файлы или обратитесь за увеличением квоты.`
-              : "В хранилище не хватает места для копии."
+              ? `${detail}\n\n${tl("Удалите лишние файлы или обратитесь за увеличением квоты.")}`
+              : tl("В хранилище не хватает места для копии.")
           );
         } else {
-          Alert.alert("Ошибка", "Не удалось создать копию");
+          Alert.alert(tl("Ошибка"), tl("Не удалось создать копию"));
         }
       }
     },
@@ -247,8 +247,8 @@ export const useStorageActions = ({
         newParentId === selectedItem.id
       ) {
         Alert.alert(
-          "Нельзя",
-          "Нельзя переместить папку в саму себя. Выберите другую папку назначения."
+          tl("Нельзя"),
+          tl("Нельзя переместить папку в саму себя. Выберите другую папку назначения.")
         );
         return;
       }
@@ -270,7 +270,7 @@ export const useStorageActions = ({
         refetchStructure();
         setSelectedItem(null);
       } catch {
-        Alert.alert("Ошибка", "Не удалось переместить");
+        Alert.alert(tl("Ошибка"), tl("Не удалось переместить"));
       }
     },
     [
@@ -301,7 +301,7 @@ export const useStorageActions = ({
           }).unwrap();
         }
       } catch {
-        Alert.alert("Ошибка", "Не удалось добавить в избранное");
+        Alert.alert(tl("Ошибка"), tl("Не удалось добавить в избранное"));
       }
     },
     [storageId, effectiveResourceType, addFavorite, addFavoriteFromShared]
@@ -324,7 +324,7 @@ export const useStorageActions = ({
           }).unwrap();
         }
       } catch {
-        Alert.alert("Ошибка", "Не удалось удалить из избранного");
+        Alert.alert(tl("Ошибка"), tl("Не удалось удалить из избранного"));
       }
     },
     [storageId, effectiveResourceType, removeFavorite, removeFavoriteFromShared]
@@ -344,7 +344,7 @@ export const useStorageActions = ({
       try {
         const currentTags = selectedItem.tags || [];
         if (currentTags.includes(tag)) {
-          Alert.alert("Ошибка", "Тег уже существует");
+          Alert.alert(tl("Ошибка"), tl("Тег уже существует"));
           return;
         }
         await updateItemTags({
@@ -355,7 +355,7 @@ export const useStorageActions = ({
         }).unwrap();
         refetchStructure();
       } catch {
-        Alert.alert("Ошибка", "Не удалось добавить тег");
+        Alert.alert(tl("Ошибка"), tl("Не удалось добавить тег"));
       }
     },
     [storageId, resourceId, updateItemTags, refetchStructure]
@@ -374,7 +374,7 @@ export const useStorageActions = ({
         }).unwrap();
         refetchStructure();
       } catch {
-        Alert.alert("Ошибка", "Не удалось удалить тег");
+        Alert.alert(tl("Ошибка"), tl("Не удалось удалить тег"));
       }
     },
     [storageId, resourceId, updateItemTags, refetchStructure]
@@ -405,10 +405,10 @@ export const useStorageActions = ({
         }).unwrap();
         refetchStructure();
         setGrantAccessModalVisible(false);
-        Alert.alert("Успешно", "Доступ предоставлен");
+        Alert.alert(tl("Успешно"), tl("Доступ предоставлен"));
         setSelectedItem(null);
       } catch {
-        Alert.alert("Ошибка", "Не удалось предоставить доступ");
+        Alert.alert(tl("Ошибка"), tl("Не удалось предоставить доступ"));
       }
     },
     [
@@ -448,7 +448,7 @@ export const useStorageActions = ({
         }).unwrap();
         refetchStructure();
       } catch {
-        Alert.alert("Ошибка", "Не удалось переместить в корзину");
+        Alert.alert(tl("Ошибка"), tl("Не удалось переместить в корзину"));
       }
     },
     [storageId, resourceId, moveToTrash, refetchStructure]

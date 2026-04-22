@@ -1,5 +1,6 @@
 import { useAddUsersToRoomMutation, useDeleteRoomMutation, useRemoveUsersFromRoomMutation, useUpdateRoomMutation } from "@/api/roomApi";
 import { AccessRole, RoomItem } from "@/api/types/room";
+import { useI18n } from "@/shared/localization";
 import { ActionMenuItemData } from "@/shared/ui/ActionMenu/ActionMenuItem";
 import { useState } from "react";
 
@@ -16,6 +17,7 @@ export const useRoomActionMenu = ({ room, onRefresh, onNavigateToArchive }: UseR
   const [addUsers, { isLoading: isAddingUsers }] = useAddUsersToRoomMutation();
   const [updateRoom, { isLoading: isUpdatingRoom }] = useUpdateRoomMutation();
 
+  const { tl } = useI18n();
   const [openManageUsersModal, setOpenManageUsersModal] = useState(false);
   const [manageUsersMode, setManageUsersMode] = useState<"add" | "remove">("add");
   const [openEditRoomModal, setOpenEditRoomModal] = useState(false);
@@ -65,21 +67,21 @@ export const useRoomActionMenu = ({ room, onRefresh, onNavigateToArchive }: UseR
     {
       id: "add-users",
       icon: "user-plus",
-      label: "Add Users",
+      label: tl("Add Users"),
       onPress: handleAddUsers,
       disabled: isDeleting || isRemovingUsers,
     },
     {
       id: "remove-users",
       icon: "user-minus",
-      label: "Remove Users",
+      label: tl("Remove Users"),
       onPress: handleRemoveUsers,
       disabled: isDeleting || isRemovingUsers,
     },
     {
       id: "edit",
       icon: "edit",
-      label: "Edit Room",
+      label: tl("Edit Room"),
       onPress: handleEditRoom,
       disabled: isDeleting || isRemovingUsers,
     },
@@ -89,7 +91,7 @@ export const useRoomActionMenu = ({ room, onRefresh, onNavigateToArchive }: UseR
           {
             id: "archive",
             icon: "archive" as const,
-            label: "Архивировать",
+            label: tl("Архивировать"),
             onPress: handleArchiveRoom,
             disabled: isDeleting || isRemovingUsers,
           },
@@ -97,7 +99,7 @@ export const useRoomActionMenu = ({ room, onRefresh, onNavigateToArchive }: UseR
     {
       id: "delete",
       icon: "trash-2" as const,
-      label: "Delete Room",
+      label: tl("Delete Room"),
       onPress: handleDeleteRoom,
       destructive: true,
       disabled: isDeleting || isRemovingUsers,

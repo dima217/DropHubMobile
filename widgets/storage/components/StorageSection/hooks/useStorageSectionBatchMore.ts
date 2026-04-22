@@ -10,6 +10,7 @@ import {
 } from "@/api/storageApi";
 import type { AppDispatch } from "@/store/store";
 import { showStorageBatchResultAlert } from "@/widgets/storage/utils/storageBatchAlert";
+import { useI18n } from "@/shared/localization";
 import { useCallback } from "react";
 import { Alert } from "react-native";
 import { runFavoritesSelectionToTrash } from "../favoriteBatchTrash";
@@ -52,6 +53,7 @@ export function useStorageSectionBatchMore(params: {
     setBatchTagsInput,
   } = params;
 
+  const { tl } = useI18n();
   const [batchSoftDeleteItems] = useBatchSoftDeleteStorageItemsMutation();
   const [moveItemToTrashOne] = useMoveStorageItemToTrashMutation();
   const [batchUpdateTags] = useBatchUpdateStorageItemTagsMutation();
@@ -62,12 +64,12 @@ export function useStorageSectionBatchMore(params: {
     const ids = [...selectedIds];
     if (!ensureBatchSize(ids) || !storageId) return;
     Alert.alert(
-      "В корзину",
-      `Переместить в корзину элементов: ${ids.length}?`,
+      tl("В корзину"),
+      `${tl("Переместить в корзину элементов:")} ${ids.length}?`,
       [
-        { text: "Отмена", style: "cancel" },
+        { text: tl("Отмена"), style: "cancel" },
         {
-          text: "В корзину",
+          text: tl("В корзину"),
           style: "destructive",
           onPress: async () => {
             try {
@@ -81,20 +83,21 @@ export function useStorageSectionBatchMore(params: {
                   deleteSharedOne: (itemId) =>
                     moveItemToTrashOne({ storageId, itemId }).unwrap(),
                   dispatch,
+                  tl,
                 });
               } else {
                 const result = await batchSoftDeleteItems(
                   buildBatchBody(ids)
                 ).unwrap();
-                showStorageBatchResultAlert(result, "В корзину");
+                showStorageBatchResultAlert(result, tl("В корзину"), tl);
               }
               resetMultiSelect();
               refetchStructure();
             } catch (e: unknown) {
               const err = e as { data?: { message?: string }; message?: string };
               Alert.alert(
-                "Ошибка",
-                String(err?.data?.message ?? err?.message ?? "Запрос не выполнен")
+                tl("Ошибка"),
+                String(err?.data?.message ?? err?.message ?? tl("Запрос не выполнен"))
               );
             }
           },
@@ -127,15 +130,16 @@ export function useStorageSectionBatchMore(params: {
       showStorageBatchResultAlert(
         result,
         skipped != null
-          ? `В избранное (пропущено дубликатов: ${skipped})`
-          : "В избранное"
+          ? `${tl("В избранное")} (${tl("пропущено дубликатов:")}: ${skipped})`
+          : tl("В избранное"),
+        tl
       );
       resetMultiSelect();
     } catch (e: unknown) {
       const err = e as { data?: { message?: string }; message?: string };
       Alert.alert(
-        "Ошибка",
-        String(err?.data?.message ?? err?.message ?? "Запрос не выполнен")
+        tl("Ошибка"),
+        String(err?.data?.message ?? err?.message ?? tl("Запрос не выполнен"))
       );
     }
   }, [
@@ -160,7 +164,7 @@ export function useStorageSectionBatchMore(params: {
         ...buildBatchBody(ids),
         tags,
       }).unwrap();
-      showStorageBatchResultAlert(result, "Теги обновлены");
+      showStorageBatchResultAlert(result, tl("Теги обновлены"), tl);
       setBatchTagsModalVisible(false);
       setBatchTagsInput("");
       resetMultiSelect();
@@ -168,8 +172,8 @@ export function useStorageSectionBatchMore(params: {
     } catch (e: unknown) {
       const err = e as { data?: { message?: string }; message?: string };
       Alert.alert(
-        "Ошибка",
-        String(err?.data?.message ?? err?.message ?? "Запрос не выполнен")
+        tl("Ошибка"),
+        String(err?.data?.message ?? err?.message ?? tl("Запрос не выполнен"))
       );
     }
   }, [

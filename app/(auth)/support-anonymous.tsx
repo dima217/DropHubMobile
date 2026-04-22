@@ -1,6 +1,7 @@
 import { Colors } from "@/constants/design-tokens";
 import { ThemedText } from "@/shared/core/ThemedText";
 import Header from "@/shared/Header";
+import { useI18n } from "@/shared/localization";
 import CreateSupportTicketModal from "@/shared/Modals/SupportModals/CreateSupportTicketModal";
 import View from "@/shared/View";
 import SupportAnonymousEmptyCTA from "@/widgets/support/components/SupportAnonymousEmptyCTA";
@@ -18,6 +19,7 @@ import {
 } from "react-native";
 
 export default function SupportAnonymousScreen() {
+  const { tl } = useI18n();
   const router = useRouter();
   const {
     stored,
@@ -35,12 +37,12 @@ export default function SupportAnonymousScreen() {
 
   const onForget = () => {
     Alert.alert(
-      "Сбросить доступ?",
-      "Без сохранённого токена вы не сможете открыть это обращение с этого устройства.",
+      tl("Сбросить доступ?"),
+      tl("Без сохранённого токена вы не сможете открыть это обращение с этого устройства."),
       [
-        { text: "Отмена", style: "cancel" },
+        { text: tl("Отмена"), style: "cancel" },
         {
-          text: "Сбросить",
+          text: tl("Сбросить"),
           style: "destructive",
           onPress: () => {
             void forgetTicket();

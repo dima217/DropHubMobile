@@ -5,10 +5,12 @@ import {
 import { useSupportAuthRealtime } from "@/hooks/data/useSupportRealtime";
 import { secureStore } from "@/services/secureStore";
 import type { CreateSupportTicketPayload } from "@/shared/Modals/SupportModals/CreateSupportTicketModal";
+import { useI18n } from "@/shared/localization";
 import { useCallback, useEffect, useState } from "react";
 import { Alert } from "react-native";
 
 export function useProfileSupportScreen() {
+  const { tl } = useI18n();
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [formOpen, setFormOpen] = useState(false);
 
@@ -39,7 +41,7 @@ export function useProfileSupportScreen() {
       }).unwrap();
       setFormOpen(false);
     } catch {
-      Alert.alert("Ошибка", "Не удалось создать обращение.");
+      Alert.alert(tl("Ошибка"), tl("Не удалось создать обращение."));
     }
   };
 

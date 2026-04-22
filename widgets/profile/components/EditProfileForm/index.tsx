@@ -9,6 +9,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { createUploader, UploadProvider } from "@/services/upload/UploaderFactory";
 import Button from "@/shared/Button";
 import { ThemedText } from "@/shared/core/ThemedText";
+import { useI18n } from "@/shared/localization";
 import MediaUploader from "@/shared/MediaUploader/components/MediaUploader";
 import TextInput from "@/shared/TextInput";
 import { RootState } from "@/store/store";
@@ -19,6 +20,7 @@ interface EditProfileData {
 }
 
 const EditProfileForm = () => {
+  const { tl } = useI18n();
   const { data: urlData } = useGetProfileUploadUrlQuery();
   const profile = useSelector((state: RootState) => state.auth.user);
   const { handleSubmit, control } = useForm<EditProfileData>({
@@ -38,7 +40,7 @@ const EditProfileForm = () => {
     setApiError(null);
 
     if (!urlData) {
-      setApiError("Failed to get upload URL");
+      setApiError(tl("Failed to get upload URL"));
       return;
     }
 
@@ -64,7 +66,7 @@ const EditProfileForm = () => {
 
       router.replace("/(tabs)/profile?showModal=profileUpdated");
     } catch (error: any) {
-      let errorMessage = "Profile update failed!";
+      let errorMessage = tl("Profile update failed!");
 
       if (error?.data?.message) {
         errorMessage = error.data.message;
@@ -91,15 +93,15 @@ const EditProfileForm = () => {
     <Controller
         control={control}
         name="username"
-        rules={{
-          required: "Username is required",
+          rules={{
+          required: tl("Username is required"),
         }}
         render={({ field: { value, onChange }, fieldState }) => (
           <TextInput
             value={value}
             onChangeText={onChange}
             errorMessage={fieldState.error?.message}
-            placeholder="Username"
+            placeholder={tl("Username")}
           />
         )}
       />

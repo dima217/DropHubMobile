@@ -5,6 +5,7 @@ import { createUploader, UploadProvider } from '@/services/upload/UploaderFactor
 import { useResourcePicker } from '@/shared/MediaUploader/hooks/useMediaPicker';
 import type { PendingUploadFile } from '@/shared/types/pendingUpload';
 import { ensureUniqueUploadNames } from '@/shared/utils/uploadFileNames';
+import { useI18n } from '@/shared/localization';
 import { useCallback, useState } from 'react';
 import { Alert } from 'react-native';
 
@@ -24,6 +25,7 @@ export const useRoomFileUpload = (
   currentUserId?: number,
   existingFileNames: string[] = []
 ) => {
+  const { tl } = useI18n();
   const [uploadRoomFile] = useUploadRoomFileMutation();
   const [uploadRoomConfirm] = useUploadRoomConfirmMutation();
   const { pickResource } = useResourcePicker();
@@ -145,7 +147,7 @@ export const useRoomFileUpload = (
       return true;
     } catch {
       setUploadingFiles(prev => prev.map(f => ({ ...f, status: 'failed' })));
-      Alert.alert("Ошибка", "Не удалось загрузить файлы.");
+      Alert.alert(tl("Ошибка"), tl("Не удалось загрузить файлы."));
       return false;
     }
   }, [roomId, currentUserId, uploadRoomFile, uploadRoomConfirm]);
