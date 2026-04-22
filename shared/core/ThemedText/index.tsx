@@ -1,4 +1,5 @@
 import { Colors, Fonts } from "@/constants/design-tokens";
+import { useI18n } from "@/shared/localization";
 import { StyleSheet, Text, type TextProps } from "react-native";
 
 export type ThemedTextProps = TextProps & {
@@ -24,8 +25,11 @@ export function ThemedText({
   children,
   ...rest
 }: ThemedTextProps) {
+  const { tl } = useI18n();
+  const localizedChildren = typeof children === "string" ? tl(children) : children;
+
   if (highlightLastWord && typeof children === "string") {
-    const words = children.trim().split(" ");
+    const words = tl(children).trim().split(" ");
     const lastWord = words.pop();
     const restText = words.join(" ");
 
@@ -53,7 +57,7 @@ export function ThemedText({
       ]}
       {...rest}
     >
-      {children}
+      {localizedChildren}
     </Text>
   );
 }

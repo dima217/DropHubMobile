@@ -1,7 +1,9 @@
 import { Colors } from '@/constants/design-tokens';
 import { ThemedText } from '@/shared/core/ThemedText';
+import SharedUsersPreview from '@/shared/ui/SharedUsersPreview';
 import ActionMenu from '@/shared/ui/ActionMenu';
 import { ActionMenuItemData } from '@/shared/ui/ActionMenu/ActionMenuItem';
+import type { StorageSharedWithUser } from '@/api/types/storage';
 import AuthorshipSection from '@/shared/ui/AuthorshipSection';
 import { Feather } from '@expo/vector-icons';
 import React from 'react';
@@ -24,6 +26,7 @@ interface FolderCardProps {
   onLongPress?: () => void;
   tags?: string[];
   tagColors?: Record<string, string>;
+  sharedWith?: StorageSharedWithUser[];
 }
 
 const FolderCard: React.FC<FolderCardProps> = ({
@@ -42,6 +45,7 @@ const FolderCard: React.FC<FolderCardProps> = ({
   onLongPress,
   tags = [],
   tagColors = {},
+  sharedWith = [],
 }) => {
   const primaryTagColor = tags.length > 0
     ? tags.map((t) => tagColors[t]).find(Boolean) || undefined
@@ -120,6 +124,7 @@ const FolderCard: React.FC<FolderCardProps> = ({
                 ))}
               </ScrollView>
             )}
+            <SharedUsersPreview users={sharedWith} />
             <ThemedText style={styles.folderMeta}>
               {itemCount} {itemCount === 1 ? 'item' : 'items'}
             </ThemedText>

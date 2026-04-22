@@ -1,4 +1,5 @@
 import D from "@/assets/images/D.svg";
+import { useI18n } from "@/shared/localization";
 import { useRouter } from "expo-router";
 import { ReactNode, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
@@ -13,6 +14,7 @@ type HeaderProps = {
 };
 
 const Header = ({ title, confirmOnExit = false, onBackPress, rightAction }: HeaderProps) => {
+  const { tl } = useI18n();
   const router = useRouter();
   const [isModalVisible, setIsModalVisible] = useState(false);
 
@@ -58,7 +60,7 @@ const Header = ({ title, confirmOnExit = false, onBackPress, rightAction }: Head
           style={styles.title}
           pointerEvents="none"
         >
-          {title}
+          {tl(title)}
         </ThemedText>
       )}
 

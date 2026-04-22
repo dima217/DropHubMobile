@@ -14,14 +14,16 @@ const mapStorageItemToFile = (
   previewUrl?: string
 ): FileItem => {
   const meta = item.fileMeta;
+  const resolvedSize = item.size ?? meta?.size ?? 0;
+  const resolvedDownloadCount = item.downloadCount ?? meta?.downloadCount ?? 0;
   return {
     _id: meta?._id || item.id,
     originalName: meta?.originalName || item.name,
-    storedName: meta?.storedName || item.name,
-    size: meta?.size || 0,
+    storedName: item.name || meta?.storedName || meta?.originalName || "",
+    size: resolvedSize,
     mimeType: meta?.mimeType || "application/octet-stream",
     uploadTime: meta?.uploadTime || new Date().toISOString(),
-    downloadCount: meta?.downloadCount || 0,
+    downloadCount: resolvedDownloadCount,
     key: previewUrl || "",
     uploadedParts: 0,
     expiresAt: null,
@@ -126,6 +128,7 @@ export const StorageItemList: React.FC<StorageItemListProps> = ({
           tags={itemTags}
           tagColors={tagColors}
           isFavorite={isFavorite}
+          sharedWith={item.sharedWith ?? []}
         />
       );
     }
@@ -155,6 +158,7 @@ export const StorageItemList: React.FC<StorageItemListProps> = ({
         tags={itemTags}
         tagColors={tagColors}
         isFavorite={isFavorite}
+        sharedWith={item.sharedWith ?? []}
         isSelected={isSelected}
         onPress={ms?.active ? () => ms.onToggle(item) : undefined}
         onLongPress={ms ? () => ms.onToggle(item) : undefined}

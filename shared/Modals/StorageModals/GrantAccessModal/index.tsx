@@ -1,7 +1,10 @@
 import { useGetFriendsQuery } from "@/api/friendApi";
+import { AccessRole } from "@/api/types/room";
 import { Colors } from "@/constants/design-tokens";
 import { ThemedText } from "@/shared/core/ThemedText";
 import ActivityIndicator from "@/shared/ui/ActivityIndicator";
+import { Feather } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import React, { useState } from "react";
 import {
   FlatList,
@@ -10,13 +13,11 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { Feather } from "@expo/vector-icons";
-import { Image } from "expo-image";
 
 interface GrantAccessModalProps {
   visible: boolean;
   onClose: () => void;
-  onSelectFriend: (friendId: number) => void;
+  onSelectFriend: (friendId: number, role: AccessRole) => void;
 }
 
 const GrantAccessModal: React.FC<GrantAccessModalProps> = ({
@@ -28,6 +29,7 @@ const GrantAccessModal: React.FC<GrantAccessModalProps> = ({
   const [selectedFriendId, setSelectedFriendId] = useState<number | null>(
     null
   );
+  const [selectedRole, setSelectedRole] = useState<AccessRole>(AccessRole.WRITE);
 
   const handleSelectFriend = (friendId: number) => {
     setSelectedFriendId(friendId);
@@ -35,8 +37,9 @@ const GrantAccessModal: React.FC<GrantAccessModalProps> = ({
 
   const handleConfirm = () => {
     if (selectedFriendId) {
-      onSelectFriend(selectedFriendId);
+      onSelectFriend(selectedFriendId, selectedRole);
       setSelectedFriendId(null);
+      setSelectedRole(AccessRole.WRITE);
     }
   };
 
@@ -45,9 +48,67 @@ const GrantAccessModal: React.FC<GrantAccessModalProps> = ({
       <View style={styles.overlay}>
         <View style={styles.container}>
           <View style={styles.header}>
-            <ThemedText style={styles.title}>Выберите друга</ThemedText>
+            <View style={styles.headerLeft}>
+              <ThemedText style={styles.title}>Выдать доступ</ThemedText>
+              <ThemedText style={styles.subtitle}>
+                Выберите пользователя и уровень прав
+              </ThemedText>
+            </View>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
               <Feather name="x" size={24} color={Colors.brightText} />
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.roleRow}>
+            <TouchableOpacity
+              style={[
+                styles.roleChip,
+                selectedRole === AccessRole.READ && styles.roleChipActive,
+              ]}
+              onPress={() => setSelectedRole(AccessRole.READ)}
+            >
+              <Feather
+                name="eye"
+                size={14}
+                color={
+                  selectedRole === AccessRole.READ
+                    ? Colors.brightText
+                    : Colors.secondary
+                }
+              />
+              <ThemedText
+                style={[
+                  styles.roleChipText,
+                  selectedRole === AccessRole.READ && styles.roleChipTextActive,
+                ]}
+              >
+                Только чтение
+              </ThemedText>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.roleChip,
+                selectedRole === AccessRole.WRITE && styles.roleChipActive,
+              ]}
+              onPress={() => setSelectedRole(AccessRole.WRITE)}
+            >
+              <Feather
+                name="edit-3"
+                size={14}
+                color={
+                  selectedRole === AccessRole.WRITE
+                    ? Colors.brightText
+                    : Colors.secondary
+                }
+              />
+              <ThemedText
+                style={[
+                  styles.roleChipText,
+                  selectedRole === AccessRole.WRITE && styles.roleChipTextActive,
+                ]}
+              >
+                Чтение и запись
+              </ThemedText>
             </TouchableOpacity>
           </View>
 
@@ -74,9 +135,11 @@ const GrantAccessModal: React.FC<GrantAccessModalProps> = ({
                       style={styles.avatar}
                       contentFit="cover"
                     />
-                    <ThemedText style={styles.friendName}>
-                      {item.friendProfile.firstName}
-                    </ThemedText>
+                    <View style={styles.friendMeta}>
+                      <ThemedText style={styles.friendName}>
+                        {item.friendProfile.firstName}
+                      </ThemedText>
+                    </View>
                     {isSelected && (
                       <Feather
                         name="check-circle"
@@ -115,7 +178,7 @@ const GrantAccessModal: React.FC<GrantAccessModalProps> = ({
               disabled={!selectedFriendId}
             >
               <ThemedText style={styles.confirmButtonText}>
-                Предоставить доступ
+                Предоставить
               </ThemedText>
             </TouchableOpacity>
           </View>
@@ -142,16 +205,55 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 20,
+    alignItems: "flex-start",
+    marginBottom: 16,
+    gap: 8,
+  },
+  headerLeft: {
+    flex: 1,
   },
   title: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "600",
     color: Colors.brightText,
   },
+  subtitle: {
+    fontSize: 13,
+    color: Colors.secondary,
+    marginTop: 4,
+  },
   closeButton: {
     padding: 4,
+  },
+  roleRow: {
+    flexDirection: "row",
+    gap: 8,
+    marginBottom: 14,
+  },
+  roleChip: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    backgroundColor: Colors.cardBackground,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+  },
+  roleChipActive: {
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
+  },
+  roleChipText: {
+    fontSize: 12,
+    color: Colors.secondary,
+    fontWeight: "600",
+  },
+  roleChipTextActive: {
+    color: Colors.brightText,
   },
   center: {
     padding: 40,
@@ -179,9 +281,13 @@ const styles = StyleSheet.create({
     borderRadius: 24,
   },
   friendName: {
-    flex: 1,
     fontSize: 16,
     color: Colors.brightText,
+    fontWeight: "600",
+  },
+  friendMeta: {
+    flex: 1,
+    gap: 2,
   },
   emptyContainer: {
     padding: 40,
@@ -194,13 +300,13 @@ const styles = StyleSheet.create({
   footer: {
     flexDirection: "row",
     gap: 12,
-    marginTop: 20,
   },
   button: {
     flex: 1,
-    paddingVertical: 14,
+    paddingVertical: 12,
     borderRadius: 12,
     alignItems: "center",
+    justifyContent: "center",
   },
   cancelButton: {
     backgroundColor: Colors.cardBackground,

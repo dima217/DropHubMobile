@@ -1,7 +1,10 @@
 import { FileItem } from '@/api/types/file';
+import type { StorageSharedWithUser } from '@/api/types/storage';
 import { Colors } from '@/constants/design-tokens';
 import { ThemedText } from '@/shared/core/ThemedText';
+import { useI18n } from '@/shared/localization';
 import ActionMenu from '@/shared/ui/ActionMenu';
+import SharedUsersPreview from '@/shared/ui/SharedUsersPreview';
 import { Feather } from '@expo/vector-icons';
 import React from 'react';
 import { ScrollView, View } from 'react-native';
@@ -18,6 +21,7 @@ interface HeaderProps {
   menuItems?: FileMenuManager;
   tags: string[];
   tagColors: Record<string, string>;
+  sharedWith?: StorageSharedWithUser[];
 }
 
 const Header = ({
@@ -29,7 +33,9 @@ const Header = ({
   menuItems,
   tags,
   tagColors,
+  sharedWith = [],
 }: HeaderProps) => {
+  const { t } = useI18n();
   const iconName = getFileIconName(file.mimeType, isImage, isVideo);
 
   return (
@@ -40,7 +46,7 @@ const Header = ({
       <View style={styles.infoContainer}>
         <View style={styles.nameRow}>
           <ThemedText style={styles.fileName} numberOfLines={1}>
-            {file.originalName}
+            {file.storedName}
           </ThemedText>
           {isFavorite && !isSelected && (
             <View style={styles.favoriteIndicator}>
@@ -79,8 +85,9 @@ const Header = ({
             ))}
           </ScrollView>
         )}
+        <SharedUsersPreview users={sharedWith} />
         <ThemedText style={styles.fileMeta}>
-          {formatFileSize(file.size)} • {file.downloadCount || 0} downloads
+          {formatFileSize(file.size)} · {file.downloadCount ?? 0} {t("storage.file.downloadsShort")}
         </ThemedText>
       </View>
       {menuItems && (

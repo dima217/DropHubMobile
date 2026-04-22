@@ -11,6 +11,7 @@ import { Colors } from "@/constants/design-tokens";
 import Header from "@/shared/Header";
 import View from "@/shared/View";
 import { ThemedText } from "@/shared/core/ThemedText";
+import { useI18n } from "@/shared/localization";
 import MultiSelectBar from "@/shared/ui/MultiSelectBar";
 import { ActionMenuItemData } from "@/shared/ui/ActionMenu/ActionMenuItem";
 import { StorageBreadcrumbs } from "@/widgets/storage/components/Path";
@@ -54,6 +55,7 @@ function mergeBatchResponses(parts: StorageBatchResponse[]): StorageBatchRespons
 }
 
 const TrashScreen = () => {
+  const { tl } = useI18n();
   const { data: storageInfo } = useGetStorageInfoQuery();
   const storageId = storageInfo?.id || "";
 
@@ -88,21 +90,21 @@ const TrashScreen = () => {
         itemId: item.id,
       }).unwrap();
       refetch();
-      Alert.alert("Успешно", "Элемент восстановлен");
+      Alert.alert(tl("Успешно"), tl("Элемент восстановлен"));
     } catch {
-      Alert.alert("Ошибка", "Не удалось восстановить элемент");
+      Alert.alert(tl("Ошибка"), tl("Не удалось восстановить элемент"));
     }
   }, [storageId, restoreItem, refetch]);
 
   const handleDeletePermanently = useCallback(async (item: StorageItem) => {
     if (!storageId) return;
     Alert.alert(
-      "Удалить навсегда?",
-      "Это действие нельзя отменить",
+      tl("Удалить навсегда?"),
+      tl("Это действие нельзя отменить"),
       [
-        { text: "Отмена", style: "cancel" },
+        { text: tl("Отмена"), style: "cancel" },
         {
-          text: "Удалить",
+          text: tl("Удалить"),
           style: "destructive",
           onPress: async () => {
             try {
@@ -111,15 +113,15 @@ const TrashScreen = () => {
                 itemId: item.id,
               }).unwrap();
               refetch();
-              Alert.alert("Успешно", "Элемент удален навсегда");
+              Alert.alert(tl("Успешно"), tl("Элемент удален навсегда"));
             } catch {
-              Alert.alert("Ошибка", "Не удалось удалить элемент");
+              Alert.alert(tl("Ошибка"), tl("Не удалось удалить элемент"));
             }
           },
         },
       ]
     );
-  }, [storageId, deletePermanently, refetch]);
+  }, [storageId, deletePermanently, refetch, tl]);
 
   const ids = useMemo(() => new Set((trashItems ?? []).map((i) => i.id)), [trashItems]);
   const normalizedParentId = useCallback(
@@ -144,7 +146,7 @@ const TrashScreen = () => {
     navigateTo,
   } = useHierarchicalBrowser<StorageItem>({
     items: (trashItems ?? []) as any as StorageItem[],
-    rootLabel: "Корзина",
+    rootLabel: tl("Корзина"),
     getParentId: (item, { ids }) =>
       item.parentId && ids.has(item.parentId) ? item.parentId : null,
   });
@@ -179,8 +181,8 @@ const TrashScreen = () => {
           onRestore: (i) => {
             if (i.isDirectory && hasParentInTrash(i, ids)) {
               Alert.alert(
-                "Нельзя восстановить",
-                "Сначала восстановите родительскую папку из корзины."
+                tl("Нельзя восстановить"),
+                tl("Сначала восстановите родительскую папку из корзины.")
               );
               return;
             }
@@ -210,31 +212,31 @@ const TrashScreen = () => {
     const allIds = (trashItems ?? []).map((i) => i.id);
     if (allIds.length === 0 || !storageId) return;
     Alert.alert(
-      "Очистить корзину?",
-      `Безвозвратно удалить все элементы (${allIds.length})?`,
+      tl("Очистить корзину?"),
+      tl(`Безвозвратно удалить все элементы (${allIds.length})?`),
       [
-        { text: "Отмена", style: "cancel" },
+        { text: tl("Отмена"), style: "cancel" },
         {
-          text: "Удалить всё",
+          text: tl("Удалить всё"),
           style: "destructive",
           onPress: async () => {
             try {
               const merged = await runPermanentDeleteChunks(allIds);
-              showStorageBatchResultAlert(merged, "Удаление");
+              showStorageBatchResultAlert(merged, tl("Удаление"));
               resetSelection();
               refetch();
             } catch (e: unknown) {
               const err = e as { data?: { message?: string }; message?: string };
               Alert.alert(
-                "Ошибка",
-                String(err?.data?.message ?? err?.message ?? "Запрос не выполнен")
+                tl("Ошибка"),
+                String(err?.data?.message ?? err?.message ?? tl("Запрос не выполнен"))
               );
             }
           },
         },
       ]
     );
-  }, [trashItems, storageId, runPermanentDeleteChunks, resetSelection, refetch]);
+  }, [trashItems, storageId, runPermanentDeleteChunks, resetSelection, refetch, tl]);
 
   const handleBatchRestore = useCallback(() => {
     const chosen = [...selectedIds];
@@ -247,8 +249,8 @@ const TrashScreen = () => {
     });
     if (restorable.length === 0) {
       Alert.alert(
-        "Нельзя восстановить",
-        "Для выбранных папок сначала восстановите родителя в корзине."
+        tl("Нельзя восстановить"),
+        tl("Для выбранных папок сначала восстановите родителя в корзине.")
       );
       return;
     }
@@ -264,25 +266,27 @@ const TrashScreen = () => {
         const merged = mergeBatchResponses(parts);
         showStorageBatchResultAlert(
           merged,
-          skipped > 0 ? `Восстановление (пропущено: ${skipped})` : "Восстановление"
+          skipped > 0 ? `Восстановление (пропущено: ${skipped})` : tl("Восстановление")
         );
         resetSelection();
         refetch();
       } catch (e: unknown) {
         const err = e as { data?: { message?: string }; message?: string };
         Alert.alert(
-          "Ошибка",
-          String(err?.data?.message ?? err?.message ?? "Запрос не выполнен")
+          tl("Ошибка"),
+          String(err?.data?.message ?? err?.message ?? tl("Запрос не выполнен"))
         );
       }
     };
     if (skipped > 0) {
       Alert.alert(
-        "Восстановить доступные?",
-        `Будут восстановлены ${restorable.length} из ${chosen.length} (остальные требуют родителя).`,
+        tl("Восстановить доступные?"),
+        tl(
+          `Будут восстановлены ${restorable.length} из ${chosen.length} (остальные требуют родителя).`
+        ),
         [
-          { text: "Отмена", style: "cancel" },
-          { text: "Восстановить", onPress: () => void run() },
+          { text: tl("Отмена"), style: "cancel" },
+          { text: tl("Восстановить"), onPress: () => void run() },
         ]
       );
       return;
@@ -302,45 +306,45 @@ const TrashScreen = () => {
     const chosen = [...selectedIds];
     if (chosen.length === 0 || !storageId) return;
     Alert.alert(
-      "Удалить навсегда?",
-      `Элементов: ${chosen.length}. Это действие нельзя отменить.`,
+      tl("Удалить навсегда?"),
+      tl(`Элементов: ${chosen.length}. Это действие нельзя отменить.`),
       [
-        { text: "Отмена", style: "cancel" },
+        { text: tl("Отмена"), style: "cancel" },
         {
-          text: "Удалить",
+          text: tl("Удалить"),
           style: "destructive",
           onPress: async () => {
             try {
               const merged = await runPermanentDeleteChunks(chosen);
-              showStorageBatchResultAlert(merged, "Удаление");
+              showStorageBatchResultAlert(merged, tl("Удаление"));
               resetSelection();
               refetch();
             } catch (e: unknown) {
               const err = e as { data?: { message?: string }; message?: string };
               Alert.alert(
-                "Ошибка",
-                String(err?.data?.message ?? err?.message ?? "Запрос не выполнен")
+                tl("Ошибка"),
+                String(err?.data?.message ?? err?.message ?? tl("Запрос не выполнен"))
               );
             }
           },
         },
       ]
     );
-  }, [selectedIds, storageId, runPermanentDeleteChunks, resetSelection, refetch]);
+  }, [selectedIds, storageId, runPermanentDeleteChunks, resetSelection, refetch, tl]);
 
   const multiSelectMenuItems: ActionMenuItemData[] = useMemo(
     () => [
       {
         id: "batch-restore",
         icon: "rotate-ccw",
-        label: "Восстановить",
+        label: tl("Восстановить"),
         disabled: selectedIds.size === 0,
         onPress: handleBatchRestore,
       },
       {
         id: "batch-perm",
         icon: "trash-2",
-        label: "Удалить навсегда",
+        label: tl("Удалить навсегда"),
         destructive: true,
         disabled: selectedIds.size === 0,
         onPress: handleBatchPermanent,
@@ -348,7 +352,7 @@ const TrashScreen = () => {
       {
         id: "batch-cancel",
         icon: "x",
-        label: "Отмена",
+        label: tl("Отмена"),
         onPress: resetSelection,
       },
     ],
@@ -359,7 +363,7 @@ const TrashScreen = () => {
 
   return (
     <View>
-      <Header title="Корзина" />
+      <Header title={tl("Корзина")} />
 
       {isLoading ? (
         <RNView style={styles.center}>
@@ -388,7 +392,7 @@ const TrashScreen = () => {
                 disabled={multiSelectActive}
                 style={multiSelectActive ? styles.clearTrashBtnDisabled : undefined}
               >
-                <ThemedText style={styles.clearTrashText}>Очистить всё</ThemedText>
+                <ThemedText style={styles.clearTrashText}>{tl("Очистить всё")}</ThemedText>
               </TouchableOpacity>
             )}
           </RNView>
@@ -409,7 +413,7 @@ const TrashScreen = () => {
 
           {(!trashItems || trashItems.length === 0) && (
             <RNView style={styles.emptyContainer}>
-              <ThemedText style={styles.emptyText}>Корзина пуста</ThemedText>
+              <ThemedText style={styles.emptyText}>{tl("Корзина пуста")}</ThemedText>
             </RNView>
           )}
         </>

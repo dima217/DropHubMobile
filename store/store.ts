@@ -11,6 +11,7 @@ import { favoritesApi } from "@/api/favorites";
 import { storageApi } from "@/api/storageApi";
 import { supportApi } from "@/api/supportApi";
 import authReducer from "@/store/slices/authSlice";
+import localizationReducer from "@/store/slices/localizationSlice";
 import tagColorsReducer from "@/store/slices/tagColorsSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
@@ -19,11 +20,12 @@ import { persistReducer, persistStore } from "redux-persist";
 const persistConfig = {
   key: "root",
   storage: AsyncStorage,
-  whitelist: ["auth", "tagColors"],
+  whitelist: ["auth", "tagColors", "localization"],
 };
 
 const rootReducer = combineReducers({
   auth: authReducer,
+  localization: localizationReducer,
   tagColors: tagColorsReducer,
   [authApi.reducerPath]: authApi.reducer,
   [avatarApi.reducerPath]: avatarApi.reducer,

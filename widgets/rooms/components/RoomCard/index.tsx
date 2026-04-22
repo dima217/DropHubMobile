@@ -3,6 +3,7 @@ import { AccessRole, RoomItem } from "@/api/types/room";
 import { Colors } from "@/constants/design-tokens";
 import { ThemedText } from "@/shared/core/ThemedText";
 import GradientView from "@/shared/Gradient";
+import { useI18n } from "@/shared/localization";
 import ManageUsersModal from "@/shared/Modals/RoomModals/ManageUsersModal";
 import UpdateRoomModal from "@/shared/Modals/RoomModals/UpdateRoomModal";
 import ActionMenu from "@/shared/ui/ActionMenu";
@@ -30,6 +31,7 @@ const formatBytes = (bytes: number): string => {
 };
 
 const RoomCard = ({ room, friends, onPress, notificationCount = 0, onRefresh }: RoomCardProps) => {
+  const { tl } = useI18n();
   const router = useRouter();
   const participants = room.participantsDetails || [];
   const fileCount = room.files?.length || 0;
@@ -54,7 +56,7 @@ const RoomCard = ({ room, friends, onPress, notificationCount = 0, onRefresh }: 
   });
 
 
-  const description = "Please wait a moment while we prepare your experience";
+  const description = tl("Please wait a moment while we prepare your experience");
   const managedUsers = getManagedUsers(friends, participants, manageUsersMode as 'add' | 'remove');
 
   return (
@@ -67,7 +69,7 @@ const RoomCard = ({ room, friends, onPress, notificationCount = 0, onRefresh }: 
       {notificationCount > 0 && !room.archived && (
         <View style={styles.notificationBadge}>
           <ThemedText style={styles.notificationText}>
-            +{notificationCount} new File{notificationCount > 1 ? "s" : ""}
+            +{notificationCount} {notificationCount > 1 ? tl("new Files") : tl("new File")}
           </ThemedText>
         </View>
       )}
@@ -88,7 +90,7 @@ const RoomCard = ({ room, friends, onPress, notificationCount = 0, onRefresh }: 
             )}
             {room.userRole === AccessRole.ADMIN && (
               <View pointerEvents="box-none">
-                <ActionMenu items={items} title="Room Actions" />
+                <ActionMenu items={items} title={tl("Room Actions")} />
               </View>
             )}
           </View>
@@ -121,7 +123,7 @@ const RoomCard = ({ room, friends, onPress, notificationCount = 0, onRefresh }: 
 
         <View style={styles.infoContainer}>
           <ThemedText style={styles.fileInfo}>
-            Files {fileCount} • {formatBytes(totalSize)}
+            {tl("Files")} {fileCount} • {formatBytes(totalSize)}
           </ThemedText>
         </View>
 

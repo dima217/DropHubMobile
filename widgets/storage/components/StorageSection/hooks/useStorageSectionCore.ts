@@ -9,7 +9,8 @@ import { ResourceType } from "@/api/types/shared";
 import { StorageItem } from "@/api/types/storage";
 import { useFolderPathNavigation } from "@/widgets/storageList/hooks/useFolderPathNavigation";
 import { skipToken } from "@reduxjs/toolkit/query";
-import { useMemo, useState } from "react";
+import { useRouter } from "expo-router";
+import { useCallback, useMemo, useState } from "react";
 import { useStorageActions } from "../../../hooks/useStorageActions";
 import { useStorageNavigation } from "../../../hooks/useStorageNavigation";
 import { useStorageOrSharedUpload } from "../../../hooks/useStorageOrSharedUpload";
@@ -18,6 +19,7 @@ import { useStorageSectionItemsPipeline } from "./useStorageSectionItemsPipeline
 import { useStorageSectionScreenHandlersBridge } from "./useStorageSectionScreenHandlersBridge";
 import { useStorageSectionFavoritesMoveRedirect } from "./useStorageSectionFavoritesMoveRedirect";
 import { useStorageSectionConversionAndArchive } from "./useStorageSectionConversionAndArchive";
+import { stashPendingOpenFromFavorites } from "@/widgets/shared/pendingOpenFromFavorites";
 import { defaultOptions } from "../data/defaultOptions";
 import type { ResolvedStorageSectionOptions, StorageSectionProps } from "../types";
 
@@ -71,12 +73,62 @@ export function useStorageSectionCore(props: StorageSectionProps) {
     openFolder,
     navigateTo,
   } = useFolderPathNavigation(options.rootLabel ?? "Root");
+  const router = useRouter();
 
   const isAtLogicalRoot = currentParentId === null;
 
   const isFavoritesVirtualRoot = Boolean(
     options.favoritesBrowseMode && options.initialItems && isAtLogicalRoot
   );
+
+  const { data: favorites, refetch: refetchFavoritesQuery } = useGetFavoritesQuery(undefined, {
+    skip: !storageId,
+  });
+
+  const favoriteResourceTypeById = useMemo(() => {
+    const map = new Map<string, ResourceType>();
+    for (const item of favorites?.items ?? []) {
+      map.set(item.id, item.resourceType);
+    }
+    return map;
+  }, [favorites?.items]);
+
+  const handleOpenFolder = useCallback(
+    (folder: StorageItem) => {
+      const isSharedFavoriteAtRoot =
+        isFavoritesVirtualRoot &&
+        (favoriteResourceTypeById.get(folder.id) === ResourceType.SHARED ||
+          (!!storageId && folder.storageId !== storageId));
+
+      if (isSharedFavoriteAtRoot) {
+        stashPendingOpenFromFavorites(folder);
+        router.push("/(tabs)/shared");
+        return;
+      }
+      openFolder(folder);
+    },
+    [isFavoritesVirtualRoot, favoriteResourceTypeById, storageId, router, openFolder]
+  );
+
+  const favoritesSharedResourceId = useMemo(() => {
+    if (!options.favoritesBrowseMode) return undefined;
+    // Path includes root at index 0. First shared node defines resource scope.
+    for (const segment of path.slice(1)) {
+      if (!segment.id) continue;
+      const favItem = favorites?.items?.find((f) => f.id === segment.id);
+      const isSharedByType =
+        favoriteResourceTypeById.get(segment.id) === ResourceType.SHARED;
+      const isForeignStorage =
+        !!favItem && !!storageId && favItem.storageId !== storageId;
+      if (isSharedByType || isForeignStorage) {
+        return segment.id;
+      }
+    }
+    return undefined;
+  }, [options.favoritesBrowseMode, path, favoriteResourceTypeById, favorites?.items, storageId]);
+
+  const effectiveResourceId = sharedContext?.resourceId ?? favoritesSharedResourceId;
+  const isSharedScope = Boolean(effectiveResourceId);
 
   const navigationParentId =
     externalData?.currentParentId !== undefined
@@ -97,21 +149,38 @@ export function useStorageSectionCore(props: StorageSectionProps) {
     storageId && !externalData
       ? options.initialItems && isAtLogicalRoot
         ? skipToken
-        : { storageId, parentId: currentParentId ?? undefined }
+        : {
+            storageId,
+            ...(effectiveResourceId ? { resourceId: effectiveResourceId } : {}),
+            parentId: currentParentId ?? undefined,
+          }
       : skipToken
   );
 
-  const refetchStructure = sharedContext?.refetchStructure ?? (() => void refetchStructureQuery());
+  const refetchStructure = useMemo(() => {
+    if (sharedContext?.refetchStructure) return sharedContext.refetchStructure;
+    return () => {
+      try {
+        void refetchStructureQuery();
+      } catch {
+        // Virtual roots may skip structure query entirely; there is nothing to refetch.
+      }
+      if (options.favoritesBrowseMode) {
+        void refetchFavoritesQuery();
+      }
+    };
+  }, [
+    sharedContext?.refetchStructure,
+    refetchStructureQuery,
+    options.favoritesBrowseMode,
+    refetchFavoritesQuery,
+  ]);
 
   useStorageNavigation({
     targetParentId: options.targetParentId,
     structure: structure ?? undefined,
     setCurrentParentId,
     setPath,
-  });
-
-  const { data: favorites } = useGetFavoritesQuery(undefined, {
-    skip: !storageId,
   });
 
   const favoriteItemIds = useMemo(() => {
@@ -140,6 +209,7 @@ export function useStorageSectionCore(props: StorageSectionProps) {
     storageId,
     navigationParentId,
     sharedContext,
+    sharedResourceId: effectiveResourceId,
     archiveMode,
     convertItem,
     setConvertItem,
@@ -174,10 +244,10 @@ export function useStorageSectionCore(props: StorageSectionProps) {
     uploadFiles,
     clearUploads,
   } = useStorageOrSharedUpload({
-    variant: sharedContext ? "shared" : "storage",
+    variant: isSharedScope ? "shared" : "storage",
     storageId,
     storageParentId: mutationParentId || undefined,
-    sharedResourceId: sharedContext?.resourceId ?? "",
+    sharedResourceId: effectiveResourceId ?? "",
     sharedParentId:
       mutationParentId === null || mutationParentId === undefined
         ? ""
@@ -188,8 +258,8 @@ export function useStorageSectionCore(props: StorageSectionProps) {
   const actions = useStorageActions({
     storageId,
     currentParentId: mutationParentId,
-    resourceId: sharedContext?.resourceId,
-    resourceType: sharedContext ? ResourceType.SHARED : undefined,
+    resourceId: effectiveResourceId,
+    resourceType: isSharedScope ? ResourceType.SHARED : undefined,
     refetchStructure,
     onConvertRequest: setConvertItem,
     setSelectedItem,
@@ -231,7 +301,7 @@ export function useStorageSectionCore(props: StorageSectionProps) {
       refetchStructure,
       selectedItemState,
       actions,
-      createFolderResourceId: sharedContext?.resourceId,
+      createFolderResourceId: effectiveResourceId,
       addItemTag,
       removeItemTag,
     }
@@ -271,11 +341,13 @@ export function useStorageSectionCore(props: StorageSectionProps) {
     storageId,
     storageTags,
     path,
-    openFolder,
+    openFolder: handleOpenFolder,
     navigateTo,
     isFavoritesVirtualRoot,
     navigationParentId,
     mutationParentId,
+    effectiveResourceId,
+    isSharedScope,
     isStructureLoading,
     isStructureError,
     refetchStructure,

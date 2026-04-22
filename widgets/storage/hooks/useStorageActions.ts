@@ -1,4 +1,5 @@
 import {
+  favoritesApi,
   useAddFavoriteFromSharedMutation,
   useAddFavoriteFromStorageMutation,
   useRemoveFavoriteFromSharedMutation,
@@ -8,8 +9,9 @@ import {
   useLazyDownloadSharedFileQuery,
   useLazyDownloadStorageFileQuery,
 } from "@/api/fileApi";
-import { useGrantPermissionsMutation } from "@/api/sharedApi";
+import { sharedApi, useGrantPermissionsMutation } from "@/api/sharedApi";
 import {
+  storageApi,
   useCopyStorageItemMutation,
   useMoveStorageItemMutation,
   useMoveStorageItemToTrashMutation,
@@ -19,13 +21,16 @@ import {
 import { AccessRole } from "@/api/types/room";
 import { ResourceType } from "@/api/types/shared";
 import { StorageItem } from "@/api/types/storage";
+import { useI18n } from "@/shared/localization";
 import { createUploader, UploadProvider } from "@/services/upload/UploaderFactory";
+import type { AppDispatch } from "@/store/store";
 import {
   getStorageQuotaAlertMessage,
   isStorageQuotaExceededError,
 } from "@/widgets/storage/utils/storageQuota";
 import { useCallback } from "react";
 import { Alert } from "react-native";
+import { useDispatch } from "react-redux";
 
 interface UseStorageActionsProps {
   storageId: string;
@@ -60,6 +65,8 @@ export const useStorageActions = ({
   setInfoModalVisible,
   setMoveModalVisible,
 }: UseStorageActionsProps) => {
+  const dispatch = useDispatch<AppDispatch>();
+  const { t } = useI18n();
   const effectiveResourceType = resourceType ?? ResourceType.STORAGE;
   const [updateItem] = useUpdateStorageItemMutation();
   const [copyItem] = useCopyStorageItemMutation();
@@ -73,6 +80,56 @@ export const useStorageActions = ({
   const [grantPermissions] = useGrantPermissionsMutation();
   const [downloadStorageFile] = useLazyDownloadStorageFileQuery();
   const [downloadSharedFile] = useLazyDownloadSharedFileQuery();
+
+  const incrementDownloadCountInCachedLists = useCallback(
+    (itemId: string) => {
+      const bump = (list: StorageItem[]) => {
+        const hit = list.find((row) => row.id === itemId);
+        if (!hit || hit.isDirectory) return;
+        const next = (hit.downloadCount ?? hit.fileMeta?.downloadCount ?? 0) + 1;
+        hit.downloadCount = next;
+        if (hit.fileMeta) {
+          hit.fileMeta.downloadCount = next;
+        }
+      };
+
+      dispatch(
+        storageApi.util.updateQueryData(
+          "getStorageStructure",
+          {
+            storageId,
+            ...(resourceId ? { resourceId } : {}),
+            parentId: currentParentId ?? undefined,
+          },
+          bump
+        )
+      );
+
+      if (resourceId) {
+        dispatch(
+          sharedApi.util.updateQueryData(
+            "getSharedStructure",
+            { storageId, resourceId, parentId: currentParentId ?? undefined },
+            bump
+          )
+        );
+        dispatch(
+          sharedApi.util.updateQueryData(
+            "getSharedResources",
+            undefined,
+            bump as unknown as (draft: unknown) => void
+          )
+        );
+      }
+
+      dispatch(
+        favoritesApi.util.updateQueryData("getFavorites", undefined, (draft) => {
+          bump(draft.items as unknown as StorageItem[]);
+        })
+      );
+    },
+    [dispatch, storageId, resourceId, currentParentId]
+  );
 
   const handleDownloadFile = useCallback(
     async (item: StorageItem) => {
@@ -92,12 +149,21 @@ export const useStorageActions = ({
         for (const { url } of response) {
           await uploader.download(url);
         }
-        Alert.alert("Успешно", "Файл загружен");
+        incrementDownloadCountInCachedLists(item.id);
+        Alert.alert(t("common.success"), t("storage.download.success"));
       } catch {
-        Alert.alert("Ошибка", "Не удалось скачать файл");
+        Alert.alert(t("common.error"), t("storage.download.failed"));
       }
     },
-    [storageId, effectiveResourceType, resourceId, downloadSharedFile, downloadStorageFile]
+    [
+      storageId,
+      effectiveResourceType,
+      resourceId,
+      downloadSharedFile,
+      downloadStorageFile,
+      incrementDownloadCountInCachedLists,
+      t,
+    ]
   );
 
   const handleConvert = useCallback(
@@ -193,13 +259,29 @@ export const useStorageActions = ({
           itemId: selectedItem.id,
           newParentId,
         }).unwrap();
+        if (effectiveResourceType === ResourceType.SHARED && resourceId) {
+          dispatch(
+            sharedApi.util.invalidateTags([
+              { type: "Shared", id: resourceId },
+              { type: "SharedResources", id: storageId },
+            ])
+          );
+        }
         refetchStructure();
         setSelectedItem(null);
       } catch {
         Alert.alert("Ошибка", "Не удалось переместить");
       }
     },
-    [storageId, resourceId, moveItem, refetchStructure, setSelectedItem]
+    [
+      storageId,
+      resourceId,
+      effectiveResourceType,
+      moveItem,
+      refetchStructure,
+      dispatch,
+      setSelectedItem,
+    ]
   );
 
   const handleAddToFavorites = useCallback(
@@ -307,7 +389,11 @@ export const useStorageActions = ({
   );
 
   const handleGrantAccess = useCallback(
-    async (friendId: number, selectedItem: StorageItem | null) => {
+    async (
+      friendId: number,
+      selectedItem: StorageItem | null,
+      role: AccessRole = AccessRole.WRITE
+    ) => {
       if (!selectedItem || !storageId) return;
       try {
         await grantPermissions({
@@ -315,15 +401,24 @@ export const useStorageActions = ({
           resourceId: selectedItem.id,
           resourceType: effectiveResourceType,
           targetUserId: friendId,
-          role: AccessRole.WRITE,
+          role,
         }).unwrap();
+        refetchStructure();
+        setGrantAccessModalVisible(false);
         Alert.alert("Успешно", "Доступ предоставлен");
         setSelectedItem(null);
       } catch {
         Alert.alert("Ошибка", "Не удалось предоставить доступ");
       }
     },
-    [storageId, effectiveResourceType, grantPermissions, setSelectedItem]
+    [
+      storageId,
+      effectiveResourceType,
+      grantPermissions,
+      refetchStructure,
+      setGrantAccessModalVisible,
+      setSelectedItem,
+    ]
   );
 
   const handleViewPermissions = useCallback(

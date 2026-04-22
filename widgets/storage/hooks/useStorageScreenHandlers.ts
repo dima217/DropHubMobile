@@ -1,4 +1,5 @@
 import { StorageItem } from "@/api/types/storage";
+import { AccessRole } from "@/api/types/room";
 import { useCallback } from "react";
 import { Alert } from "react-native";
 
@@ -12,7 +13,8 @@ interface StorageActions {
   handleRemoveItemTag: (tag: string, selectedItem: StorageItem | null) => void;
   handleGrantAccess: (
     friendId: number,
-    selectedItem: StorageItem | null
+    selectedItem: StorageItem | null,
+    role: AccessRole
   ) => void;
 }
 
@@ -105,8 +107,8 @@ export const useStorageScreenHandlers = ({
   );
 
   const handleGrantAccess = useCallback(
-    (friendId: number) => {
-      actions.handleGrantAccess(friendId, selectedItem);
+    (friendId: number, role: AccessRole) => {
+      actions.handleGrantAccess(friendId, selectedItem, role);
     },
     [actions, selectedItem]
   );

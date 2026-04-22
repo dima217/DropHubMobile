@@ -5,6 +5,7 @@ import type { StyleProp, TextStyle, ViewStyle } from "react-native";
 import ActivityIndicator from "../ui/ActivityIndicator";
 
 import { Colors } from "@/constants/design-tokens";
+import { useI18n } from "@/shared/localization";
 import { styles } from "./styles";
 
 interface ButtonProps {
@@ -28,6 +29,7 @@ const Button = ({
   style,
   textStyle,
 }: ButtonProps) => {
+  const { tl } = useI18n();
   const isDisabled = disabled || loading;
 
   return (
@@ -52,7 +54,7 @@ const Button = ({
             textStyle,
           ]}
         >
-          {title}
+          {tl(title)}
         </Text>
       )}
     </TouchableOpacity>

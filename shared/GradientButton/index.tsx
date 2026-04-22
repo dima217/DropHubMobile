@@ -4,6 +4,7 @@ import { Text, TouchableOpacity } from "react-native";
 import type { StyleProp, TextStyle, ViewStyle } from "react-native";
 
 import { Colors } from "@/constants/design-tokens";
+import { useI18n } from "@/shared/localization";
 
 import ActivityIndicator from "@/shared/ui/ActivityIndicator";
 
@@ -32,6 +33,7 @@ const GradientButton = ({
   gradientStyle,
   textStyle,
 }: GradientButtonProps) => {
+  const { tl } = useI18n();
   const isDisabled = disabled || loading;
 
   const gradientColors = isDisabled ? disabledGradient : Colors.buttonGradient;
@@ -61,7 +63,7 @@ const GradientButton = ({
               textStyle,
             ]}
           >
-            {title}
+            {tl(title)}
           </Text>
         )}
       </LinearGradient>

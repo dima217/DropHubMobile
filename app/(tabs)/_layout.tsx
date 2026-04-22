@@ -1,4 +1,5 @@
 import { Colors } from "@/constants/design-tokens";
+import { useI18n } from "@/shared/localization";
 import AuthChecker from "@/services/auth/AuthChecker";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { BlurView } from "expo-blur";
@@ -6,6 +7,7 @@ import { Tabs } from "expo-router";
 import { View } from "react-native";
 
 export default function TabLayout() {
+  const { tl } = useI18n();
   return (
     <>
       <AuthChecker />
@@ -50,27 +52,37 @@ export default function TabLayout() {
         <Tabs.Screen
           name="home"
           options={{
+            title: tl("Home"),
             tabBarIcon: ({ color }) => (
               <FontAwesome size={28} name="home" color={color} />
             ),
           }}
         />
 
-        <Tabs.Screen name="rooms" options={{
-          tabBarIcon: ({ color }) => (
-            <FontAwesome size={28} name="group" color={color} />
-          ),
-        }} />
+        <Tabs.Screen
+          name="rooms"
+          options={{
+            title: tl("Rooms"),
+            tabBarIcon: ({ color }) => (
+              <FontAwesome size={28} name="group" color={color} />
+            ),
+          }}
+        />
 
-        <Tabs.Screen name="storage" options={{
-          tabBarIcon: ({ color }) => (
-            <FontAwesome size={28} name="folder" color={color} />
-          ),
-        }} />
+        <Tabs.Screen
+          name="storage"
+          options={{
+            title: tl("Storage"),
+            tabBarIcon: ({ color }) => (
+              <FontAwesome size={28} name="folder" color={color} />
+            ),
+          }}
+        />
 
         <Tabs.Screen
           name="profile"
           options={{
+            title: tl("My Profile"),
             tabBarIcon: ({ color }) => (
               <FontAwesome size={28} name="user" color={color} />
             ),

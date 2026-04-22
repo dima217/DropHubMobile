@@ -1,4 +1,4 @@
-import { useConvertStorageFileMutation } from "@/api";
+import { useConvertStorageFileMutation, useCreateStorageFolderMutation } from "@/api";
 import { useArchiveRoomToStorageMutation } from "@/api/storageApi";
 import type { FileConversionType } from "@/api/types/file";
 import { StorageItem } from "@/api/types/storage";
@@ -15,6 +15,7 @@ type Params = {
   storageId: string;
   navigationParentId: string | null;
   sharedContext: StorageSectionProps["sharedContext"];
+  sharedResourceId?: string;
   archiveMode: StorageSectionProps["archiveMode"];
   convertItem: StorageItem | null;
   setConvertItem: (v: StorageItem | null) => void;
@@ -26,6 +27,7 @@ export function useStorageSectionConversionAndArchive(params: Params) {
     storageId,
     navigationParentId,
     sharedContext,
+    sharedResourceId,
     archiveMode,
     convertItem,
     setConvertItem,
@@ -35,6 +37,7 @@ export function useStorageSectionConversionAndArchive(params: Params) {
   const [archiveRoomToStorage, { isLoading: isArchivingRoom }] =
     useArchiveRoomToStorageMutation();
   const [convertStorageFile] = useConvertStorageFileMutation();
+  const [createStorageFolder] = useCreateStorageFolderMutation();
 
   const storageConversionOptions = useMemo(
     () =>
@@ -52,14 +55,33 @@ export function useStorageSectionConversionAndArchive(params: Params) {
       if (!storageId || !convertItem?.fileId) return;
       setConvertSubmitting(true);
       try {
+        let targetParentId = convertItem.parentId ?? undefined;
+
+        // This conversion always produces multiple files; create a dedicated folder upfront.
+        if (conversion === "pdf_to_images") {
+          const folder = await createStorageFolder({
+            storageId,
+            ...(sharedResourceId ? { resourceId: sharedResourceId } : {}),
+            name: `${convertItem.name} (converted)`,
+            parentId: convertItem.parentId ?? undefined,
+            isDirectory: true,
+          }).unwrap();
+
+          targetParentId =
+            (folder.item as { id?: string; _id?: string }).id ??
+            (folder.item as { id?: string; _id?: string })._id ??
+            targetParentId;
+        }
+
         const result = await convertStorageFile({
           storageId,
-          ...(sharedContext ? { resourceId: sharedContext.resourceId } : {}),
+          ...(sharedResourceId ? { resourceId: sharedResourceId } : {}),
           fileId: convertItem.fileId,
-          parentId: convertItem.parentId ?? undefined,
+          parentId: targetParentId,
           conversion,
         }).unwrap();
         const n = result.createdFiles?.length ?? 0;
+
         Alert.alert(
           "Готово",
           n > 1 ? `Создано файлов: ${n}` : "Файл сконвертирован и сохранён"
@@ -77,7 +99,15 @@ export function useStorageSectionConversionAndArchive(params: Params) {
         setConvertSubmitting(false);
       }
     },
-    [storageId, convertItem, convertStorageFile, sharedContext, setConvertItem, setConvertSubmitting]
+    [
+      storageId,
+      convertItem,
+      convertStorageFile,
+      createStorageFolder,
+      sharedResourceId,
+      setConvertItem,
+      setConvertSubmitting,
+    ]
   );
 
   const handleConfirmArchiveRoom = useCallback(async () => {

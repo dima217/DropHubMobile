@@ -1,5 +1,6 @@
 import { Colors } from "@/constants/design-tokens";
 import Header from "@/shared/Header";
+import { useI18n } from "@/shared/localization";
 import ProfileUpdateModal from "@/shared/Modals/ProfileUpdateModal";
 import View from "@/shared/View";
 import ProfileCard from "@/widgets/profile/components/ProfileCard";
@@ -9,13 +10,14 @@ import { Alert, View as RNView, StyleSheet } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 
 const Profile = () => {
+  const { tl } = useI18n();
   const params = useLocalSearchParams();
   const showProfileUpdatedModal = params.showModal === 'profileUpdated';
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <View>
-        <Header title="My Profile" onBackPress={() => Alert.alert("Back")} />
+        <Header title={tl("My Profile")} onBackPress={() => Alert.alert(tl("Back"))} />
         <RNView style={styles.content}>
           <ProfileCard />
           <ProfileMenu />

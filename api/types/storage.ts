@@ -28,6 +28,16 @@ export interface GetStorageStructureRequest {
     parentId?: string;
 }
 
+export interface StorageSharedWithUser {
+    userId: number;
+    role: AccessRole;
+    email: string | null;
+    profile: {
+        firstName: string;
+        avatarUrl: string | null;
+    } | null;
+}
+
 export interface StorageItem {
     id: string;
     userId: string;
@@ -43,9 +53,15 @@ export interface StorageItem {
     filesCount?: number;
     foldersCount?: number;
     fileMeta?: FileMeta;
+    /** File-only size shortcut returned by some endpoints (e.g. trash list). */
+    size?: number;
+    /** File-only download counter shortcut returned by structure endpoints. */
+    downloadCount?: number;
+    sharedWith?: StorageSharedWithUser[];
 }
 
 export interface StorageItemResponse {
+    id: string;
     userId: string;
     name: string;
     storageId: string;
@@ -137,6 +153,8 @@ export interface GetTrashItemsResponse {
     isDirectory: boolean;
     parentId: string | null;
     fileId: string | null;
+    /** File-only size shortcut (bytes). */
+    size?: number;
     creatorId: number;
     tags: string[];
     deletedAt: string | null;

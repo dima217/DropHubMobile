@@ -1,5 +1,6 @@
 import React from "react";
 import { TextInput as RNTextInput, Text, View } from "react-native";
+import { useI18n } from "@/shared/localization";
 
 import type {
   TextInputProps as RNTextInputProps,
@@ -30,12 +31,17 @@ const TextInput = ({
   multiline,
   ...rest
 }: TextInputProps) => {
+  const { tl } = useI18n();
   const hasError = Boolean(errorMessage);
+  const localizedLabel = label ? tl(label) : undefined;
+  const localizedError = errorMessage ? tl(errorMessage) : undefined;
+  const localizedPlaceholder =
+    typeof rest.placeholder === "string" ? tl(rest.placeholder) : rest.placeholder;
 
   return (
     <View style={[styles.container, style]}>
       <View style={styles.labelContainer}>
-        <Text style={styles.label}>{label}</Text>
+        <Text style={styles.label}>{localizedLabel}</Text>
       </View>
       <View
         style={[
@@ -52,11 +58,12 @@ const TextInput = ({
           enablesReturnKeyAutomatically
           multiline={multiline}
           {...rest}
+          placeholder={localizedPlaceholder}
         />
         {right && <View style={styles.rightContainer}>{right}</View>}
       </View>
       <View style={styles.errorContainer}>
-        <Text style={styles.error}>{errorMessage}</Text>
+        <Text style={styles.error}>{localizedError}</Text>
       </View>
     </View>
   );

@@ -9,6 +9,8 @@ import { ThemedText } from "@/shared/core/ThemedText";
 import { StorageSection } from "@/widgets/storage/components/StorageSection";
 import { useFolderPathNavigation } from "@/widgets/storageList/hooks/useFolderPathNavigation";
 import type { StorageItemMenuOptions } from "@/widgets/storageList/menu/storageItemMenu";
+import { consumePendingOpenFromFavorites } from "@/widgets/shared/pendingOpenFromFavorites";
+import { useFocusEffect } from "@react-navigation/native";
 import { skipToken } from "@reduxjs/toolkit/query";
 import React, { useCallback, useMemo } from "react";
 import { ActivityIndicator, View as RNView, StyleSheet } from "react-native";
@@ -19,10 +21,22 @@ import { ActivityIndicator, View as RNView, StyleSheet } from "react-native";
 export function SharedSection() {
   useAutoMarkSharedNotificationsRead();
 
-  const { data: sharedResources, isLoading } = useGetSharedResourcesQuery();
+  const {
+    data: sharedResources,
+    isLoading,
+    refetch: refetchSharedResources,
+  } = useGetSharedResourcesQuery();
 
   const { currentParentId, path, openFolder, navigateTo } =
     useFolderPathNavigation("Shared");
+
+  useFocusEffect(
+    useCallback(() => {
+      const pending = consumePendingOpenFromFavorites();
+      if (!pending) return;
+      openFolder(pending);
+    }, [openFolder])
+  );
 
   const storageId = sharedResources?.[0]?.storageId ?? "";
   /** Корень дерева в breadcrumbs (`path[1]`) или текущая папка — как в запросе структуры */
@@ -60,8 +74,14 @@ export function SharedSection() {
     );
 
   const refetchStructure = useCallback(() => {
-    void refetch();
-  }, [refetch]);
+    // Root list is powered by sharedResources, nested levels by structure.
+    void refetchSharedResources();
+    try {
+      void refetch();
+    } catch {
+      // Structure query can be skipped on Shared root.
+    }
+  }, [refetchSharedResources, refetch]);
 
   const items = useMemo(() => {
     const sort = (a: StorageItem, b: StorageItem) => {
@@ -70,9 +90,13 @@ export function SharedSection() {
       return a.name.localeCompare(b.name);
     };
     if (currentParentId === null) {
-      return (sharedResources ?? []).filter((i) => !i.deletedAt).sort(sort);
+      return (sharedResources ?? [])
+        .filter((i) => i.parentId === null && !i.deletedAt)
+        .sort(sort);
     }
-    return (structure ?? []).filter((i) => !i.deletedAt).sort(sort);
+    return (structure ?? [])
+      .filter((i) => i.parentId === currentParentId && !i.deletedAt)
+      .sort(sort);
   }, [currentParentId, sharedResources, structure]);
 
   const menuOptions = useMemo<StorageItemMenuOptions>(() => {
@@ -84,8 +108,8 @@ export function SharedSection() {
     }
     if (!canWrite) {
       return {
-        folder: ["permissions", "info"],
-        file: ["download", "permissions", "info"],
+        folder: ["info"],
+        file: ["download", "info"],
       };
     }
     if (canManagePermissions) {

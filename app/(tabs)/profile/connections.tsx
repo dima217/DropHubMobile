@@ -10,6 +10,7 @@ import { useFriendRequestUpdate } from "@/hooks/data/useFriendRequestUpdate";
 import { ThemedText } from "@/shared/core/ThemedText";
 import GradientButton from "@/shared/GradientButton";
 import Header from "@/shared/Header";
+import { useI18n } from "@/shared/localization";
 import SearchInput from "@/shared/SearchInput";
 import Toogle from "@/shared/Toogle";
 import View from "@/shared/View";
@@ -25,9 +26,12 @@ import { View as RNView, StyleSheet } from "react-native";
 import { useSelector } from "react-redux";
   
 const Connections = () => {
+  const { tl } = useI18n();
   const [search, setSearch] = useState("");
   const router = useRouter();
-  const [selectedTab, setSelectedTab] = useState("Friends");
+  const friendsTab = tl("Friends");
+  const requestsTab = tl("Requests");
+  const [selectedTab, setSelectedTab] = useState(friendsTab);
   const [friendRequests, setFriendRequests] = useState<FriendRequestResponse[]>([]);
   const accessToken = useSelector((state: RootState) => state.auth.accessToken);
   const [updatesEnabled, setUpdatesEnabled] = useState(false);
@@ -109,7 +113,7 @@ const Connections = () => {
 
       <RNView style={styles.topRow}>
         <ThemedText type="link" style={styles.connectionsText}>
-          Connections ({friends.data?.length || 0})
+          {tl("Connections")} ({friends.data?.length || 0})
         </ThemedText>
         <GradientButton
           style={styles.addButton}
@@ -119,7 +123,7 @@ const Connections = () => {
       </RNView>
 
       <Toogle
-        options={["Friends", "Requests"]}
+        options={[friendsTab, requestsTab]}
         selected={selectedTab}
         onSelect={setSelectedTab}
       />
@@ -127,8 +131,8 @@ const Connections = () => {
       <SearchInput value={search} onChange={setSearch} />
 
       <ConnectionsList
-        data={selectedTab === "Friends" ? friendsData : requestsData}
-        type={selectedTab === "Friends" ? "friend" : "friendRequest"}
+        data={selectedTab === friendsTab ? friendsData : requestsData}
+        type={selectedTab === friendsTab ? "friend" : "friendRequest"}
         onAcceptRequest={handleAcceptRequest}
         onRejectRequest={handleRejectRequest}
         onShareResource={handleShareResource}

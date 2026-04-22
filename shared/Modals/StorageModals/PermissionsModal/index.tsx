@@ -3,6 +3,7 @@ import {
   useRevokePermissionsMutation,
 } from "@/api/sharedApi";
 import { AccessRole } from "@/api/types/room";
+import { ResourceType } from "@/api/types/shared";
 import { Colors } from "@/constants/design-tokens";
 import { ThemedText } from "@/shared/core/ThemedText";
 import ActivityIndicator from "@/shared/ui/ActivityIndicator";
@@ -22,6 +23,7 @@ interface PermissionsModalProps {
   itemId: string;
   onClose: () => void;
   storageId?: string;
+  onPermissionsChanged?: () => void;
 }
 
 const roleLabels: Record<AccessRole, string> = {
@@ -35,8 +37,9 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
   itemId,
   onClose,
   storageId,
+  onPermissionsChanged,
 }) => {
-  const { data: participants, isLoading } = useGetSharedItemParticipantsQuery(
+  const { data: participants, isLoading, refetch } = useGetSharedItemParticipantsQuery(
     { itemId },
     { skip: !itemId || !visible }
   );
@@ -48,10 +51,12 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
       await revokePermissions({
         storageId,
         resourceId: itemId,
-        resourceType: "shared" as any,
+        resourceType: ResourceType.SHARED,
         targetUserId: userId,
         role,
       }).unwrap();
+      void refetch();
+      onPermissionsChanged?.();
     } catch (error) {
       console.error("Failed to revoke permissions:", error);
     }

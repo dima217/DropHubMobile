@@ -31,6 +31,7 @@ const FileCard: React.FC<FileCardProps> = ({
   downloadProgress,
   tags = [],
   tagColors = {},
+  sharedWith = [],
 }) => {
   const [showFullPreview, setShowFullPreview] = useState(false);
   const [roomSignedUrl, setRoomSignedUrl] = useState<string | null>(null);
@@ -115,6 +116,7 @@ const FileCard: React.FC<FileCardProps> = ({
           menuItems={menuItems}
           tags={tags}
           tagColors={tagColors}
+          sharedWith={sharedWith}
         />
 
         {progress !== undefined && <Progress progress={progress} />}

@@ -9,6 +9,7 @@ import RenameItemModal from "@/shared/Modals/StorageModals/RenameItemModal";
 import TagsModal from "@/shared/Modals/StorageModals/TagsModal";
 import UploadPreviewModal from "@/shared/Modals/UploadPreviewModal";
 import type { PendingUploadFile } from "@/shared/types/pendingUpload";
+import { AccessRole } from "@/api/types/room";
 import React from "react";
 import { UploadingFile } from "../../hooks/useStorageFileUpload";
 
@@ -52,8 +53,9 @@ export interface StorageSectionModalsProps {
     handleAddItemTag: (tag: string) => void;
     handleRemoveItemTag: (tag: string) => void;
     handleRemoveGlobalTag: (tag: string) => void;
-    handleGrantAccess: (friendId: number) => void;
+    handleGrantAccess: (friendId: number, role: AccessRole) => void;
     handleConfirmArchiveRoom: () => void;
+    onPermissionsChanged?: () => void;
   };
   /** When set (e.g. redirect from room with archiveRoomId), show archive bar and use this onCancel */
   archiveMode?: { onCancel: () => void };
@@ -150,6 +152,7 @@ export const StorageSectionModals: React.FC<StorageSectionModalsProps> = ({
         visible={permissionsModalVisible}
         itemId={selectedItem?.id || ""}
         storageId={storageId}
+        onPermissionsChanged={handlers.onPermissionsChanged}
         onClose={() => {
           setters.setPermissionsModalVisible(false);
           setSelectedItem(null);

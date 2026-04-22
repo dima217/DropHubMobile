@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { ThemedText } from '@/shared/core/ThemedText';
+import { useI18n } from '@/shared/localization';
 import { Colors } from '@/constants/design-tokens';
 import { Feather } from '@expo/vector-icons';
 
@@ -13,6 +14,7 @@ const PreviewToggleSwitch: React.FC<PreviewToggleSwitchProps> = ({
   isEnabled,
   onToggle,
 }) => {
+  const { tl } = useI18n();
   return (
     <TouchableOpacity
       style={[styles.container, isEnabled && styles.containerActive]}
@@ -25,7 +27,7 @@ const PreviewToggleSwitch: React.FC<PreviewToggleSwitchProps> = ({
         color={isEnabled ? Colors.primary : Colors.secondary}
       />
       <ThemedText style={[styles.label, isEnabled && styles.labelActive]}>
-        Preview
+        {tl('Preview')}
       </ThemedText>
     </TouchableOpacity>
   );

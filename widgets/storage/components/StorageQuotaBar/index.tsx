@@ -1,5 +1,6 @@
 import { Colors } from "@/constants/design-tokens";
 import { ThemedText } from "@/shared/core/ThemedText";
+import { useI18n } from "@/shared/localization";
 import React from "react";
 import { StyleSheet, View as RNView } from "react-native";
 import {
@@ -20,6 +21,7 @@ export const StorageQuotaBar: React.FC<StorageQuotaBarProps> = ({
   usedBytes,
   maxBytes,
 }) => {
+  const { tl } = useI18n();
   if (!Number.isFinite(maxBytes) || maxBytes <= 0) return null;
 
   const used = Number.isFinite(usedBytes) ? Math.max(0, usedBytes) : 0;
@@ -31,13 +33,13 @@ export const StorageQuotaBar: React.FC<StorageQuotaBarProps> = ({
     <RNView style={styles.wrap}>
       <RNView style={styles.row}>
         <ThemedText style={styles.label} numberOfLines={1}>
-          Хранилище: {formatBytes(used)} из {formatBytes(maxBytes)}
+          {tl("Хранилище")}: {formatBytes(used)} {tl("из")} {formatBytes(maxBytes)}
         </ThemedText>
         <ThemedText
           style={[styles.free, nearFull && styles.freeWarn]}
           numberOfLines={1}
         >
-          свободно {formatBytes(free)}
+          {tl("свободно")} {formatBytes(free)}
         </ThemedText>
       </RNView>
       <RNView style={styles.track}>

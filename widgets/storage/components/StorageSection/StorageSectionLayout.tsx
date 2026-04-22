@@ -214,6 +214,7 @@ export function StorageSectionLayout({ vm }: Props) {
           handleRemoveGlobalTag,
           handleGrantAccess,
           handleConfirmArchiveRoom,
+          onPermissionsChanged: refetchStructure,
         }}
         archiveMode={archiveMode ? { onCancel: archiveMode.onCancel } : undefined}
         archiveModeDescription={

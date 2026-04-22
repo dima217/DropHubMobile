@@ -1,2 +1,2 @@
 /** HTTP + Socket origin; keep in sync with `api/baseApi` baseUrl. */
-export const API_ORIGIN = "http://10.145.68.195:3000";
+export const API_ORIGIN = "http://10.39.10.195:3000";

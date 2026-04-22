@@ -1,4 +1,5 @@
 import { FileItem } from '@/api/types/file';
+import type { StorageSharedWithUser } from '@/api/types/storage';
 import { FileMenuManager } from '../../menu/fileMenu';
 
 export interface FileCardProps {
@@ -19,4 +20,5 @@ export interface FileCardProps {
   downloadProgress?: number;
   tags?: string[];
   tagColors?: Record<string, string>;
+  sharedWith?: StorageSharedWithUser[];
 }

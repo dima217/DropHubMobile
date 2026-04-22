@@ -2,19 +2,39 @@ import {
     useDeleteRoomFilesMutation,
     useLazyDownloadRoomFilesQuery,
 } from "@/api/fileApi";
+import { roomApi } from "@/api/roomApi";
+import { useI18n } from "@/shared/localization";
 import { createUploader, UploadProvider } from "@/services/upload/UploaderFactory";
 import { useCallback, useState } from "react";
 import { Alert } from "react-native";
+import { useDispatch } from "react-redux";
+import type { AppDispatch } from "@/store/store";
 
 export const useRoomFileManipulations = (
   roomId?: string,
   onAfterDelete?: () => void
 ) => {
+  const dispatch = useDispatch<AppDispatch>();
+  const { t } = useI18n();
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
 
   const [deleteRoomFiles] = useDeleteRoomFilesMutation();
   const [downloadRoomFiles] = useLazyDownloadRoomFilesQuery();
+
+  const incrementDownloadCountInRoomCache = useCallback(
+    (fileId: string) => {
+      if (!roomId) return;
+      dispatch(
+        roomApi.util.updateQueryData("getRoomDetails", roomId, (draft) => {
+          const hit = draft.files?.find((file) => file._id === fileId);
+          if (!hit) return;
+          hit.downloadCount = (hit.downloadCount ?? 0) + 1;
+        })
+      );
+    },
+    [dispatch, roomId]
+  );
 
   /* ---------- helpers ---------- */
 
@@ -51,14 +71,18 @@ export const useRoomFileManipulations = (
 
         for (const { fileId, url } of response) {
           await uploader.download(url);
-          Alert.alert("Success", `File ${fileId} downloaded`);
+          incrementDownloadCountInRoomCache(fileId);
+          Alert.alert(
+            t("rooms.download.success"),
+            t("rooms.file.downloaded", { fileId })
+          );
         }
       } catch (e) {
         console.error(e);
-        Alert.alert("Error", "Failed to download files");
+        Alert.alert(t("common.error"), t("rooms.download.failed"));
       }
     },
-    [roomId, downloadRoomFiles]
+    [roomId, downloadRoomFiles, incrementDownloadCountInRoomCache, t]
   );
 
   const handleShareFiles = useCallback(

@@ -45,11 +45,17 @@ export function FavoritesSection({ renderHeaderActions }: FavoritesSectionProps)
       folder: StorageItemMenuOption[];
       file: StorageItemMenuOption[];
     };
-    return {
-      folder: base.folder.filter((k) => k !== "copy"),
-      file: base.file.filter((k) => k !== "copy"),
+    const rootOwnFolder = base.folder.filter((k) => k !== "copy");
+    const rootOwnFile = base.file.filter((k) => k !== "copy");
+
+    return (item: StorageItem) => {
+      const isForeign = item.storageId !== storageId;
+      if (isForeign) {
+        return ["favorite", "info"];
+      }
+      return item.isDirectory ? rootOwnFolder : rootOwnFile;
     };
-  }, []);
+  }, [storageId]);
 
   const loading = isFavoritesLoading || isStorageLoading;
 

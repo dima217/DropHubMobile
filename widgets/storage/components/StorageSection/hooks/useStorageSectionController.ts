@@ -40,9 +40,9 @@ export function useStorageSectionController(props: StorageSectionProps) {
     (itemIds: string[]) => ({
       storageId: core.storageId,
       itemIds,
-      ...(sharedContext?.resourceId ? { resourceId: sharedContext.resourceId } : {}),
+      ...(core.effectiveResourceId ? { resourceId: core.effectiveResourceId } : {}),
     }),
-    [core.storageId, sharedContext?.resourceId]
+    [core.storageId, core.effectiveResourceId]
   );
 
   const {
