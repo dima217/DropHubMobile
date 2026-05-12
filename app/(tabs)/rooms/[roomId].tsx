@@ -1,7 +1,9 @@
 import { useConvertRoomFileMutation } from "@/api/fileApi";
 import { useGetRoomDetailsQuery } from "@/api/roomApi";
 import type { FileConversionType } from "@/api/types/file";
-import { Colors } from "@/constants/design-tokens";
+import { useThemedStyles } from "@/hooks/useThemedStyles";
+import { useThemeColors } from "@/hooks/useThemeColors";
+
 import { useI18n } from "@/shared/localization";
 import { useAutoMarkRoomFileNotificationsRead } from "@/hooks/data/useAutoMarkNotificationsOnView";
 import { useRoomFilesUpdate } from "@/hooks/data/useRoomFilesUpdate";
@@ -32,6 +34,30 @@ import { useSelector } from "react-redux";
 import RoomPlaceholder from "./room-placeholder";
 
 const RoomDetailsScreen = () => {
+  const themeColors = useThemeColors();
+  const styles = useThemedStyles((c) => ({
+
+  container: { flex: 1 },
+  loader: { marginTop: 50 },
+  uploadButton: {
+    position: 'absolute',
+    right: 16,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: c.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  chatButton: { padding: 4, justifyContent: 'center', alignItems: 'center' },
+
+}));
+
   const { tl } = useI18n();
   const { roomId } = useLocalSearchParams<{ roomId: string }>();
   const router = useRouter();
@@ -195,7 +221,7 @@ const RoomDetailsScreen = () => {
     return (
       <View style={styles.container}>
         <Header title="Room Details" />
-        <ActivityIndicator size="large" color={Colors.primary} style={styles.loader} />
+        <ActivityIndicator size="large" color={themeColors.primary} style={styles.loader} />
       </View>
     );
   }
@@ -223,7 +249,7 @@ const RoomDetailsScreen = () => {
           title="Room Details"
           rightAction={
             <TouchableOpacity onPress={handleNavigateToChat} style={styles.chatButton} activeOpacity={0.7}>
-              <Feather name="message-circle" size={22} color={Colors.primary} />
+              <Feather name="message-circle" size={22} color={themeColors.primary} />
             </TouchableOpacity>
           }
         />
@@ -255,7 +281,7 @@ const RoomDetailsScreen = () => {
         onPress={pickFiles}
         activeOpacity={0.8}
       >
-        <Feather name="upload" size={24} color={Colors.brightText} />
+        <Feather name="upload" size={24} color={themeColors.brightText} />
       </TouchableOpacity>
 
       <UploadPreviewModal
@@ -291,26 +317,5 @@ const RoomDetailsScreen = () => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: { flex: 1 },
-  loader: { marginTop: 50 },
-  uploadButton: {
-    position: 'absolute',
-    right: 16,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: Colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  chatButton: { padding: 4, justifyContent: 'center', alignItems: 'center' },
-});
 
 export default RoomDetailsScreen;

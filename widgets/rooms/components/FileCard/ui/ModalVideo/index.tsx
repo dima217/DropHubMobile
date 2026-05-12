@@ -1,13 +1,16 @@
+import { useThemeColors } from '@/hooks/useThemeColors';
 import { useVideoPlayer, VideoView } from 'expo-video';
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { Platform } from 'react-native';
-import { styles } from '../../styles';
+import createFileCardStyles from '../../styles';
 
 interface ModalVideoProps {
   uri: string;
 }
 
 const ModalVideo = ({ uri }: ModalVideoProps) => {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createFileCardStyles(colors), [colors]);
   const player = useVideoPlayer(uri, (p) => {
     p.loop = false;
     p.muted = false;

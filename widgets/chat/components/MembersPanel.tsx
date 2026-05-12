@@ -4,8 +4,8 @@ import {
   useRemoveChatChannelMemberMutation,
 } from "@/api/chatChannelsApi";
 import type { ChatChannelMemberRow } from "@/api/types/chatChannels";
-import { Colors } from "@/constants/design-tokens";
-import React, { useState } from "react";
+import { useThemeColors } from "@/hooks/useThemeColors";
+import React, { useMemo, useState } from "react";
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Alert } from "react-native";
 import { USERS, getUserName } from "../lib/users";
 
@@ -25,6 +25,83 @@ export function MembersPanel({ channelId, currentUserId, onClose, onRefresh }: P
   const members: ChatChannelMemberRow[] = data?.items ?? []
   const [showAddPicker, setShowAddPicker] = useState(false)
   const [message, setMessage] = useState('')
+  const colors = useThemeColors()
+  const s = useMemo(
+    () =>
+      StyleSheet.create({
+        container: {
+          width: 260,
+          borderLeftWidth: 1,
+          borderLeftColor: colors.border,
+          backgroundColor: colors.listBackground,
+        },
+        header: {
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: 12,
+          borderBottomWidth: 1,
+          borderBottomColor: colors.border,
+        },
+        title: { fontSize: 14, fontWeight: "600", color: colors.text },
+        close: { fontSize: 24, color: colors.text },
+        section: { padding: 12, borderBottomWidth: 1, borderBottomColor: colors.border },
+        addBtn: {
+          paddingVertical: 8,
+          backgroundColor: colors.cardBackground,
+          borderRadius: 8,
+          borderWidth: 1,
+          borderColor: colors.border,
+          alignItems: "center",
+        },
+        addBtnText: { fontSize: 12, fontWeight: "500", color: colors.text },
+        picker: { marginTop: 8, maxHeight: 120 },
+        pickerItem: { flexDirection: "row", alignItems: "center", padding: 6, borderRadius: 4 },
+        pickerAvatar: {
+          width: 24,
+          height: 24,
+          borderRadius: 12,
+          backgroundColor: colors.gradientPrimary,
+          alignItems: "center",
+          justifyContent: "center",
+          marginRight: 8,
+        },
+        pickerAvatarText: { fontSize: 10, fontWeight: "bold", color: colors.brightText },
+        pickerName: { fontSize: 12, fontWeight: "500", color: colors.brightText },
+        pickerEmail: { fontSize: 10, color: colors.secondary },
+        empty: { fontSize: 11, color: colors.secondary, padding: 4, textAlign: "center" },
+        message: { fontSize: 11, color: colors.text, marginTop: 6 },
+        list: { flex: 1, padding: 12 },
+        loading: { fontSize: 12, color: colors.secondary, textAlign: "center", padding: 16 },
+        member: { flexDirection: "row", alignItems: "center", marginBottom: 6 },
+        memberAvatar: {
+          width: 28,
+          height: 28,
+          borderRadius: 14,
+          backgroundColor: colors.gradientPrimary,
+          alignItems: "center",
+          justifyContent: "center",
+          marginRight: 8,
+        },
+        memberAvatarMe: { backgroundColor: colors.primary },
+        memberAvatarText: { fontSize: 10, fontWeight: "bold", color: colors.brightText },
+        memberInfo: { flex: 1, minWidth: 0 },
+        memberName: { fontSize: 12, fontWeight: "500", color: colors.brightText },
+        memberEmail: { fontSize: 10, color: colors.secondary },
+        owner: { fontSize: 9, color: "#FFD700" },
+        footer: { padding: 12, borderTopWidth: 1, borderTopColor: colors.border },
+        leaveBtn: {
+          paddingVertical: 8,
+          backgroundColor: "rgba(255,74,117,0.15)",
+          borderRadius: 8,
+          borderWidth: 1,
+          borderColor: colors.reject,
+          alignItems: "center",
+        },
+        leaveText: { fontSize: 12, fontWeight: "500", color: colors.reject },
+      }),
+    [colors]
+  )
 
   const handleAdd = async (sub: string) => {
     setMessage('')
@@ -133,76 +210,3 @@ export function MembersPanel({ channelId, currentUserId, onClose, onRefresh }: P
     </View>
   )
 }
-
-const s = StyleSheet.create({
-  container: {
-    width: 260,
-    borderLeftWidth: 1,
-    borderLeftColor: Colors.border,
-    backgroundColor: Colors.listBackground,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
-  },
-  title: { fontSize: 14, fontWeight: "600", color: Colors.text },
-  close: { fontSize: 24, color: Colors.text },
-  section: { padding: 12, borderBottomWidth: 1, borderBottomColor: Colors.border },
-  addBtn: {
-    paddingVertical: 8,
-    backgroundColor: Colors.cardBackground,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    alignItems: "center",
-  },
-  addBtnText: { fontSize: 12, fontWeight: "500", color: Colors.text },
-  picker: { marginTop: 8, maxHeight: 120 },
-  pickerItem: { flexDirection: "row", alignItems: "center", padding: 6, borderRadius: 4 },
-  pickerAvatar: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: Colors.gradientPrimary,
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 8,
-  },
-  pickerAvatarText: { fontSize: 10, fontWeight: "bold", color: Colors.brightText },
-  pickerName: { fontSize: 12, fontWeight: "500", color: Colors.brightText },
-  pickerEmail: { fontSize: 10, color: Colors.secondary },
-  empty: { fontSize: 11, color: Colors.secondary, padding: 4, textAlign: "center" },
-  message: { fontSize: 11, color: Colors.text, marginTop: 6 },
-  list: { flex: 1, padding: 12 },
-  loading: { fontSize: 12, color: Colors.secondary, textAlign: "center", padding: 16 },
-  member: { flexDirection: "row", alignItems: "center", marginBottom: 6 },
-  memberAvatar: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: Colors.gradientPrimary,
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 8,
-  },
-  memberAvatarMe: { backgroundColor: Colors.primary },
-  memberAvatarText: { fontSize: 10, fontWeight: "bold", color: Colors.brightText },
-  memberInfo: { flex: 1, minWidth: 0 },
-  memberName: { fontSize: 12, fontWeight: "500", color: Colors.brightText },
-  memberEmail: { fontSize: 10, color: Colors.secondary },
-  owner: { fontSize: 9, color: "#FFD700" },
-  footer: { padding: 12, borderTopWidth: 1, borderTopColor: Colors.border },
-  leaveBtn: {
-    paddingVertical: 8,
-    backgroundColor: "rgba(255,74,117,0.15)",
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: Colors.reject,
-    alignItems: "center",
-  },
-  leaveText: { fontSize: 12, fontWeight: "500", color: Colors.reject },
-});

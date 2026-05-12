@@ -1,6 +1,6 @@
 import type { ChatChannelMessage } from "@/api/types/chatChannels";
-import { Colors } from "@/constants/design-tokens";
-import React, { useState } from "react";
+import { useThemeColors } from "@/hooks/useThemeColors";
+import React, { useMemo, useState } from "react";
 import { View, Text, TouchableOpacity, Pressable, StyleSheet } from "react-native";
 import { getUserName } from "../lib/users";
 
@@ -26,22 +26,6 @@ function formatTime(iso: string) {
   }
 }
 
-function DeliveryStatus({
-  status,
-  readBy,
-}: {
-  status?: ChatChannelMessage["status"];
-  readBy?: Set<string>;
-}) {
-  if (!status) return null;
-  const hasReaders = readBy && readBy.size > 0;
-  if (status === "sending") return <Text style={st.status}>○</Text>;
-  if (status === "sent" && !hasReaders) return <Text style={st.status}>✓</Text>;
-  if (status === "read" || hasReaders)
-    return <Text style={[st.status, st.statusRead]}>✓✓</Text>;
-  return <Text style={st.status}>✓✓</Text>;
-}
-
 const EMOJIS = ["👍", "❤️", "😂", "😮", "😢", "🔥", "🎉", "👀"];
 
 export function MessageItem({
@@ -51,12 +35,131 @@ export function MessageItem({
   currentUserId,
   onReaction,
   onReply,
-  onEdit,
+  onEdit: _onEdit,
   onDelete,
   onPin,
   readBy,
   replyMsg,
 }: Props) {
+  const colors = useThemeColors();
+  const st = useMemo(
+    () =>
+      StyleSheet.create({
+        wrap: { marginTop: 2 },
+        wrapHeader: { marginTop: 12 },
+        systemWrap: { alignItems: "center", marginVertical: 8 },
+        systemText: {
+          fontSize: 12,
+          color: colors.secondary,
+          backgroundColor: colors.cardBackground,
+          paddingHorizontal: 12,
+          paddingVertical: 4,
+          borderRadius: 16,
+        },
+        replyRow: {
+          flexDirection: "row",
+          alignItems: "center",
+          paddingLeft: 32,
+          marginBottom: 4,
+          gap: 6,
+          minHeight: 16,
+        },
+        replyCornerWrap: {
+          width: 18,
+          height: 14,
+          justifyContent: "flex-end",
+          alignItems: "flex-end",
+          paddingRight: 2,
+        },
+        replyCorner: {
+          width: 14,
+          height: 12,
+          borderLeftWidth: 2,
+          borderTopWidth: 2,
+          borderColor: colors.grey,
+          borderTopLeftRadius: 4,
+        },
+        replyCtxText: { flex: 1, fontSize: 11, color: colors.secondary, minWidth: 0 },
+        replyCtxName: { fontWeight: "600", color: colors.text },
+        replySep: { color: colors.grey },
+        replySnippet: { color: colors.secondary },
+        header: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 2 },
+        avatar: {
+          width: 24,
+          height: 24,
+          borderRadius: 12,
+          alignItems: "center",
+          justifyContent: "center",
+        },
+        avatarOwn: { backgroundColor: colors.primary },
+        avatarOther: { backgroundColor: colors.gradientPrimary },
+        avatarText: { fontSize: 10, fontWeight: "bold", color: colors.brightText },
+        sender: { fontSize: 14, fontWeight: "600" },
+        senderOwn: { color: colors.primary },
+        senderOther: { color: colors.gradientPrimary },
+        time: { fontSize: 10, color: colors.grey },
+        status: { fontSize: 10, color: colors.secondary, marginLeft: 4 },
+        statusRead: { color: colors.gradientPrimary },
+        pin: { fontSize: 10, color: "#FFD700" },
+        body: { paddingLeft: 32 },
+        content: { fontSize: 14, color: colors.text },
+        deleted: { fontSize: 14, color: colors.secondary, fontStyle: "italic" },
+        edited: { fontSize: 10, color: colors.secondary },
+        reactions: { flexDirection: "row", flexWrap: "wrap", gap: 4, marginTop: 4 },
+        reaction: {
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 4,
+          paddingHorizontal: 6,
+          paddingVertical: 2,
+          borderRadius: 12,
+          backgroundColor: colors.cardBackground,
+          borderWidth: 1,
+          borderColor: colors.border,
+        },
+        reactionActive: { backgroundColor: colors.inactive, borderColor: colors.primary },
+        reactionEmoji: { fontSize: 12 },
+        reactionCount: { fontSize: 12, color: colors.text },
+        actions: { flexDirection: "row", gap: 4, marginTop: 4 },
+        actionBtn: {
+          width: 24,
+          height: 24,
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: colors.cardBackground,
+          borderRadius: 4,
+        },
+        deleteText: { fontSize: 12 },
+        reactionPicker: {
+          flexDirection: "row",
+          flexWrap: "wrap",
+          gap: 4,
+          marginTop: 4,
+          alignItems: "center",
+        },
+        reactionPickBtn: { width: 32, height: 32, alignItems: "center", justifyContent: "center" },
+        reactionPickEmoji: { fontSize: 18 },
+        closePick: { color: colors.secondary, fontSize: 12, marginLeft: 8 },
+      }),
+    [colors]
+  );
+
+  function DeliveryStatus({
+    status,
+    readBy: readers,
+  }: {
+    status?: ChatChannelMessage["status"];
+    readBy?: Set<string>;
+  }) {
+    if (!status) return null;
+    const hasReaders = readers && readers.size > 0;
+    if (status === "sending") return <Text style={st.status}>○</Text>;
+    if (status === "sent" && !hasReaders) return <Text style={st.status}>✓</Text>;
+    if (status === "read" || hasReaders)
+      return <Text style={[st.status, st.statusRead]}>✓✓</Text>;
+    return <Text style={st.status}>✓✓</Text>;
+  }
+
   const [showActions, setShowActions] = useState(false);
   const [showReactionPicker, setShowReactionPicker] = useState(false);
 
@@ -186,101 +289,3 @@ export function MessageItem({
     </Pressable>
   );
 }
-
-const st = StyleSheet.create({
-  wrap: { marginTop: 2 },
-  wrapHeader: { marginTop: 12 },
-  systemWrap: { alignItems: "center", marginVertical: 8 },
-  systemText: {
-    fontSize: 12,
-    color: Colors.secondary,
-    backgroundColor: Colors.cardBackground,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 16,
-  },
-  replyRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingLeft: 32,
-    marginBottom: 4,
-    gap: 6,
-    minHeight: 16,
-  },
-  replyCornerWrap: {
-    width: 18,
-    height: 14,
-    justifyContent: "flex-end",
-    alignItems: "flex-end",
-    paddingRight: 2,
-  },
-  replyCorner: {
-    width: 14,
-    height: 12,
-    borderLeftWidth: 2,
-    borderTopWidth: 2,
-    borderColor: Colors.grey,
-    borderTopLeftRadius: 4,
-  },
-  replyCtxText: { flex: 1, fontSize: 11, color: Colors.secondary, minWidth: 0 },
-  replyCtxName: { fontWeight: "600", color: Colors.text },
-  replySep: { color: Colors.grey },
-  replySnippet: { color: Colors.secondary },
-  header: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 2 },
-  avatar: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  avatarOwn: { backgroundColor: Colors.primary },
-  avatarOther: { backgroundColor: Colors.gradientPrimary },
-  avatarText: { fontSize: 10, fontWeight: "bold", color: Colors.brightText },
-  sender: { fontSize: 14, fontWeight: "600" },
-  senderOwn: { color: Colors.primary },
-  senderOther: { color: Colors.gradientPrimary },
-  time: { fontSize: 10, color: Colors.grey },
-  status: { fontSize: 10, color: Colors.secondary, marginLeft: 4 },
-  statusRead: { color: Colors.gradientPrimary },
-  pin: { fontSize: 10, color: "#FFD700" },
-  body: { paddingLeft: 32 },
-  content: { fontSize: 14, color: Colors.text },
-  deleted: { fontSize: 14, color: Colors.secondary, fontStyle: "italic" },
-  edited: { fontSize: 10, color: Colors.secondary },
-  reactions: { flexDirection: "row", flexWrap: "wrap", gap: 4, marginTop: 4 },
-  reaction: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 12,
-    backgroundColor: Colors.cardBackground,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  reactionActive: { backgroundColor: Colors.inactive, borderColor: Colors.primary },
-  reactionEmoji: { fontSize: 12 },
-  reactionCount: { fontSize: 12, color: Colors.text },
-  actions: { flexDirection: "row", gap: 4, marginTop: 4 },
-  actionBtn: {
-    width: 24,
-    height: 24,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: Colors.cardBackground,
-    borderRadius: 4,
-  },
-  deleteText: { fontSize: 12 },
-  reactionPicker: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 4,
-    marginTop: 4,
-    alignItems: "center",
-  },
-  reactionPickBtn: { width: 32, height: 32, alignItems: "center", justifyContent: "center" },
-  reactionPickEmoji: { fontSize: 18 },
-  closePick: { color: Colors.secondary, fontSize: 12, marginLeft: 8 },
-});

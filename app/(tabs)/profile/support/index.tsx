@@ -1,5 +1,6 @@
-import { Colors } from "@/constants/design-tokens";
 import Header from "@/shared/Header";
+import { useThemedStyles } from "@/hooks/useThemedStyles";
+import { useThemeColors } from "@/hooks/useThemeColors";
 import CreateSupportTicketModal from "@/shared/Modals/SupportModals/CreateSupportTicketModal";
 import View from "@/shared/View";
 import { ThemedText } from "@/shared/core/ThemedText";
@@ -12,11 +13,11 @@ import {
   ActivityIndicator,
   FlatList,
   View as RNView,
-  StyleSheet,
   TouchableOpacity,
 } from "react-native";
 
 export default function SupportListScreen() {
+  const colors = useThemeColors();
   const router = useRouter();
   const {
     accessToken,
@@ -27,6 +28,20 @@ export default function SupportListScreen() {
     isCreating,
     onSubmitForm,
   } = useProfileSupportScreen();
+
+  const styles = useThemedStyles((c) => ({
+    listContent: { paddingBottom: 32, paddingVertical: 12 },
+    listIntro: { paddingVertical: 16, gap: 6 },
+    introTitle: {
+      color: c.brightText,
+      fontSize: 17,
+      fontWeight: "600",
+    },
+    introHint: { color: c.secondary, fontSize: 13, lineHeight: 18 },
+    empty: { color: c.secondary, paddingVertical: 28, textAlign: "center" },
+    loader: { marginVertical: 32 },
+    centerMsg: { color: c.text, padding: 24, textAlign: "center" },
+  }));
 
   if (!accessToken) {
     return (
@@ -47,7 +62,7 @@ export default function SupportListScreen() {
             hitSlop={12}
             accessibilityLabel="Новое обращение"
           >
-            <Feather name="plus-circle" size={26} color={Colors.primary} />
+            <Feather name="plus-circle" size={26} color={colors.primary} />
           </TouchableOpacity>
         }
       />
@@ -72,7 +87,7 @@ export default function SupportListScreen() {
         }
         ListEmptyComponent={
           isLoading ? (
-            <ActivityIndicator color={Colors.primary} style={styles.loader} />
+            <ActivityIndicator color={colors.primary} style={styles.loader} />
           ) : (
             <ThemedText style={styles.empty}>Пока нет обращений — нажмите +</ThemedText>
           )
@@ -90,17 +105,3 @@ export default function SupportListScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  listContent: { paddingBottom: 32, paddingVertical: 12 },
-  listIntro: { paddingVertical: 16, gap: 6 },
-  introTitle: {
-    color: Colors.brightText,
-    fontSize: 17,
-    fontWeight: "600",
-  },
-  introHint: { color: Colors.secondary, fontSize: 13, lineHeight: 18 },
-  empty: { color: Colors.secondary, paddingVertical: 28, textAlign: "center" },
-  loader: { marginVertical: 32 },
-  centerMsg: { color: Colors.text, padding: 24, textAlign: "center" },
-});

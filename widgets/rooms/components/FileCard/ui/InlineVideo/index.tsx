@@ -1,10 +1,10 @@
-import { Colors } from '@/constants/design-tokens';
 import { Feather } from '@expo/vector-icons';
+import { useThemeColors } from "@/hooks/useThemeColors";
 import { Image } from 'expo-image';
 import { useVideoPlayer, VideoView } from 'expo-video';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Platform, Pressable, StyleSheet, View } from 'react-native';
-import { styles } from '../../styles';
+import createFileCardStyles from '../../styles';
 
 interface InlineVideoProps {
   uri: string;
@@ -19,6 +19,8 @@ const InlineVideo = ({
   overlayPaused,
   onOpenFull,
 }: InlineVideoProps) => {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createFileCardStyles(colors), [colors]);
   const [showPoster, setShowPoster] = useState(!!posterUri);
   const player = useVideoPlayer(uri, (p) => {
     p.loop = true;
@@ -57,7 +59,7 @@ const InlineVideo = ({
         android_ripple={{ color: 'rgba(255,255,255,0.12)' }}
       />
       <View style={styles.expandHint} pointerEvents="none">
-        <Feather name="maximize-2" size={14} color={Colors.brightText} />
+        <Feather name="maximize-2" size={14} color="#FFFFFF" />
       </View>
     </View>
   );

@@ -1,19 +1,27 @@
-import { Colors } from "@/constants/design-tokens";
 import { ThemedText } from "@/shared/core/ThemedText";
+import { useThemedStyles } from "@/hooks/useThemedStyles";
+import { useThemeColors } from "@/hooks/useThemeColors";
 import Header from "@/shared/Header";
 import View from "@/shared/View";
 import { useSupportTicketDetailScreen } from "@/widgets/support/hooks/useSupportTicketDetailScreen";
 import SupportTicketDetailView from "@/widgets/support/components/SupportTicketDetailView";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React from "react";
-import { ActivityIndicator, ScrollView, StyleSheet } from "react-native";
+import { ActivityIndicator, ScrollView } from "react-native";
 
 export default function SupportTicketDetailScreen() {
+  const colors = useThemeColors();
   const router = useRouter();
   const { ticketId } = useLocalSearchParams<{ ticketId: string }>();
   const rawId = typeof ticketId === "string" ? ticketId : ticketId?.[0];
   const { ticket, isLoading, isFetching, enabled } =
     useSupportTicketDetailScreen(rawId);
+
+  const styles = useThemedStyles((c) => ({
+    scroll: { paddingVertical: 16, paddingBottom: 32 },
+    loader: { marginTop: 24 },
+    centerMsg: { color: c.text, padding: 24, textAlign: "center" },
+  }));
 
   return (
     <View>
@@ -21,7 +29,7 @@ export default function SupportTicketDetailScreen() {
       {!enabled ? (
         <ThemedText style={styles.centerMsg}>Нет данных.</ThemedText>
       ) : isLoading && !ticket ? (
-        <ActivityIndicator color={Colors.primary} style={styles.loader} />
+        <ActivityIndicator color={colors.primary} style={styles.loader} />
       ) : ticket ? (
         <ScrollView
           contentContainerStyle={styles.scroll}
@@ -35,9 +43,3 @@ export default function SupportTicketDetailScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  scroll: { paddingVertical: 16, paddingBottom: 32 },
-  loader: { marginTop: 24 },
-  centerMsg: { color: Colors.text, padding: 24, textAlign: "center" },
-});

@@ -1,9 +1,11 @@
-import { Colors } from "@/constants/design-tokens";
+import { useThemeColors } from "@/hooks/useThemeColors";
+import { useThemedStyles } from "@/hooks/useThemedStyles";
+
 import Button from "@/shared/Button";
 import { ThemedText } from "@/shared/core/ThemedText";
 import GradientView from "@/shared/Gradient";
 import React, { ReactNode } from "react";
-import { Modal, StyleSheet, View, ViewStyle } from "react-native";
+import { Modal, View, ViewStyle } from "react-native";
 
 export interface BaseModalButton {
   title: string;
@@ -47,6 +49,66 @@ const BaseModal: React.FC<BaseModalProps> = ({
   titleType = "subtitle",
   messageType = "default",
 }) => {
+  const themeColors = useThemeColors();
+  const styles = useThemedStyles((c) => ({
+
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+  },
+  innerContainer: {
+    width: "85%",
+    height: "32%",
+  },
+  modalView: {
+    borderRadius: 12,
+    justifyContent: "center",
+    padding: 12,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+    width: "100%",
+    maxWidth: 400,
+  },
+  modalTitle: {
+    marginBottom: 10,
+  },
+  modalText: {
+    marginBottom: 20,
+    textAlign: "center",
+  },
+  childrenContainer: {
+    width: "100%",
+    marginBottom: 20,
+  },
+  buttonContainer: {
+    flexDirection: "column",
+    alignItems: "center",
+    width: "100%",
+    gap: 10,
+  },
+  button: {
+    elevation: 2,
+    marginHorizontal: 5,
+  },
+  buttonPrimary: {
+    backgroundColor: c.primary,
+  },
+  buttonSecondary: {
+    backgroundColor: c.text,
+    borderWidth: 1,
+  },
+
+}));
+
   const handleRequestClose = () => {
     if (onClose) {
       onClose();
@@ -115,7 +177,7 @@ const BaseModal: React.FC<BaseModalProps> = ({
                   textColor={
                     button.textColor ||
                     (button.variant === "secondary"
-                      ? Colors.primary
+                      ? themeColors.primary
                       : undefined)
                   }
                 />
@@ -129,60 +191,3 @@ const BaseModal: React.FC<BaseModalProps> = ({
 };
 
 export default BaseModal;
-
-const styles = StyleSheet.create({
-  centeredView: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.6)",
-  },
-  innerContainer: {
-    width: "85%",
-    height: "32%",
-  },
-  modalView: {
-    borderRadius: 12,
-    justifyContent: "center",
-    padding: 12,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-    width: "100%",
-    maxWidth: 400,
-  },
-  modalTitle: {
-    marginBottom: 10,
-  },
-  modalText: {
-    marginBottom: 20,
-    textAlign: "center",
-  },
-  childrenContainer: {
-    width: "100%",
-    marginBottom: 20,
-  },
-  buttonContainer: {
-    flexDirection: "column",
-    alignItems: "center",
-    width: "100%",
-    gap: 10,
-  },
-  button: {
-    elevation: 2,
-    marginHorizontal: 5,
-  },
-  buttonPrimary: {
-    backgroundColor: Colors.primary,
-  },
-  buttonSecondary: {
-    backgroundColor: Colors.text,
-    borderWidth: 1,
-  },
-});

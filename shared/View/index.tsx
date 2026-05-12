@@ -1,4 +1,5 @@
-import { Colors } from "@/constants/design-tokens";
+import { useThemedStyles } from "@/hooks/useThemedStyles";
+
 import React from "react";
 import {
   View as RNView,
@@ -14,21 +15,23 @@ interface CustomViewProps extends ViewProps {
 }
 
 const View: React.FC<CustomViewProps> = ({ style, children, ...rest }) => {
+  const styles = useThemedStyles((c) => ({
+
+  container: {
+    flex: 1,
+    backgroundColor: c.background,
+    paddingHorizontal: 16,
+    paddingTop: 50,
+    paddingBottom: 16,
+  },
+
+}));
+
   return (
     <RNView style={[styles.container, style]} {...rest}>
       {children}
     </RNView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.background,
-    paddingHorizontal: 16,
-    paddingTop: 50,
-    paddingBottom: 16,
-  },
-});
 
 export default View;

@@ -1,6 +1,7 @@
 import { ThemedText } from "@/shared/core/ThemedText";
+import { useThemeColors } from "@/hooks/useThemeColors";
 import GradientView from "@/shared/Gradient";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Modal,
   StyleSheet,
@@ -17,7 +18,7 @@ import Animated, {
 } from "react-native-reanimated";
 import CreateSupportTicketFormFields from "./components/CreateSupportTicketFormFields";
 import CreateSupportTicketModalFooter from "./components/CreateSupportTicketModalFooter";
-import { styles } from "./styles";
+import { createSupportTicketModalStyles } from "./styles";
 
 export type CreateSupportTicketPayload = {
   title: string;
@@ -40,6 +41,11 @@ const CreateSupportTicketModal: React.FC<CreateSupportTicketModalProps> = ({
   onClose,
   onSubmit,
 }) => {
+  const colors = useThemeColors();
+  const styles = useMemo(
+    () => createSupportTicketModalStyles(colors),
+    [colors]
+  );
   const { height: windowHeight } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const [title, setTitle] = useState("");

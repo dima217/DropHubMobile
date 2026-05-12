@@ -1,7 +1,7 @@
-import { Colors } from "@/constants/design-tokens";
+import { useThemeColors } from "@/hooks/useThemeColors";
 import { ThemedText } from "@/shared/core/ThemedText";
 import { useI18n } from "@/shared/localization";
-import React from "react";
+import React, { useMemo } from "react";
 import { StyleSheet, View as RNView } from "react-native";
 import {
   formatBytes,
@@ -22,6 +22,50 @@ export const StorageQuotaBar: React.FC<StorageQuotaBarProps> = ({
   maxBytes,
 }) => {
   const { tl } = useI18n();
+  const colors = useThemeColors();
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        wrap: {
+          marginBottom: 12,
+          gap: 6,
+        },
+        row: {
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+          gap: 8,
+        },
+        label: {
+          flex: 1,
+          fontSize: 12,
+          color: colors.secondary,
+        },
+        free: {
+          fontSize: 12,
+          color: colors.secondary,
+        },
+        freeWarn: {
+          color: colors.reject,
+        },
+        track: {
+          height: 6,
+          borderRadius: 3,
+          backgroundColor: colors.border,
+          overflow: "hidden",
+        },
+        fill: {
+          height: "100%",
+          borderRadius: 3,
+          backgroundColor: colors.primary,
+        },
+        fillWarn: {
+          backgroundColor: colors.reject,
+        },
+      }),
+    [colors]
+  );
+
   if (!Number.isFinite(maxBytes) || maxBytes <= 0) return null;
 
   const used = Number.isFinite(usedBytes) ? Math.max(0, usedBytes) : 0;
@@ -54,42 +98,3 @@ export const StorageQuotaBar: React.FC<StorageQuotaBarProps> = ({
     </RNView>
   );
 };
-
-const styles = StyleSheet.create({
-  wrap: {
-    marginBottom: 12,
-    gap: 6,
-  },
-  row: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    gap: 8,
-  },
-  label: {
-    flex: 1,
-    fontSize: 12,
-    color: Colors.secondary,
-  },
-  free: {
-    fontSize: 12,
-    color: Colors.secondary,
-  },
-  freeWarn: {
-    color: Colors.reject,
-  },
-  track: {
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: Colors.border,
-    overflow: "hidden",
-  },
-  fill: {
-    height: "100%",
-    borderRadius: 3,
-    backgroundColor: Colors.primary,
-  },
-  fillWarn: {
-    backgroundColor: Colors.reject,
-  },
-});

@@ -1,6 +1,6 @@
-import { Colors } from "@/constants/design-tokens";
+import { useThemeColors } from "@/hooks/useThemeColors";
 import { Feather } from "@expo/vector-icons";
-import React from "react";
+import React, { useMemo } from "react";
 import { StyleSheet, TouchableOpacity, View as RNView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -19,6 +19,42 @@ export const StorageFAB: React.FC<StorageFABProps> = ({
 }) => {
   const insets = useSafeAreaInsets();
   const [isExpanded, setIsExpanded] = React.useState(false);
+  const colors = useThemeColors();
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        fabContainer: {
+          position: "absolute",
+          right: 16,
+          alignItems: "center",
+          gap: 12,
+        },
+        mainFab: {
+          width: 56,
+          height: 56,
+          borderRadius: 28,
+          backgroundColor: colors.primary,
+          justifyContent: "center",
+          alignItems: "center",
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.25,
+          shadowRadius: 3.84,
+          elevation: 5,
+        },
+        smallFab: {
+          width: 44,
+          height: 44,
+          borderRadius: 22,
+          backgroundColor: colors.cardBackground,
+          justifyContent: "center",
+          alignItems: "center",
+          borderWidth: 1,
+          borderColor: colors.border,
+        },
+      }),
+    [colors]
+  );
 
   return (
     <RNView
@@ -34,14 +70,14 @@ export const StorageFAB: React.FC<StorageFABProps> = ({
             onPress={onCreateFolder}
             disabled={isCreatingFolder}
           >
-            <Feather name="folder-plus" size={20} color={Colors.brightText} />
+            <Feather name="folder-plus" size={20} color={colors.brightText} />
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.smallFab}
             onPress={onUploadFiles}
             disabled={!isStorageReady}
           >
-            <Feather name="upload" size={20} color={Colors.brightText} />
+            <Feather name="upload" size={20} color={colors.brightText} />
           </TouchableOpacity>
         </>
       )}
@@ -52,42 +88,9 @@ export const StorageFAB: React.FC<StorageFABProps> = ({
         <Feather
           name={isExpanded ? "x" : "plus"}
           size={24}
-          color={Colors.brightText}
+          color={colors.brightText}
         />
       </TouchableOpacity>
     </RNView>
   );
 };
-
-const styles = StyleSheet.create({
-  fabContainer: {
-    position: "absolute",
-    right: 16,
-    alignItems: "center",
-    gap: 12,
-  },
-  mainFab: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: Colors.primary,
-    justifyContent: "center",
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  smallFab: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: Colors.cardBackground,
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-});
-

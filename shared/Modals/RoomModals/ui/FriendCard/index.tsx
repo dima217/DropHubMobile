@@ -1,4 +1,6 @@
-import { Colors } from "@/constants/design-tokens";
+import { useThemedStyles } from "@/hooks/useThemedStyles";
+import { useThemeColors } from "@/hooks/useThemeColors";
+
 import { ThemedText } from "@/shared/core/ThemedText";
 import Avatar from "@/widgets/profile/components/ProfileCard/ui/Avatar";
 import { Ionicons } from "@expo/vector-icons";
@@ -24,7 +26,55 @@ const FriendCard: React.FC<FriendCardProps> = ({
   onToggle,
   selectionColor,
 }) => {
-  const checkboxColor = isSelected ? selectionColor : Colors.secondary;
+  const themeColors = useThemeColors();
+  const styles = useThemedStyles((c) => ({
+
+  friendItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 50,
+    backgroundColor: c.inactive,
+    marginBottom: 8,
+    gap: 12,
+  },
+  friendItemSelected: {
+    backgroundColor: c.cardBackground,
+    borderWidth: 1,
+  },
+  friendText: {
+    flex: 1,
+    fontSize: 14,
+    color: c.text,
+  },
+  friendTextSelected: {
+    color: c.brightText,
+    fontWeight: "600",
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: c.secondary,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "transparent",
+  },
+  checkboxSelected: {
+    backgroundColor: c.primary,
+    borderColor: c.primary,
+  },
+  checkmark: {
+    color: c.brightText,
+    fontSize: 10,
+    fontWeight: "bold",
+  },
+
+}));
+
+  const checkboxColor = isSelected ? selectionColor : themeColors.secondary;
   const checkboxBackgroundColor = isSelected ? selectionColor : "transparent";
   return (
     <TouchableOpacity
@@ -41,55 +91,10 @@ const FriendCard: React.FC<FriendCardProps> = ({
         {firstName}
       </ThemedText>
       <View style={[styles.checkbox, { borderColor: checkboxColor, backgroundColor: checkboxBackgroundColor }]}>
-        {isSelected && <Ionicons name="checkmark" size={16} color={Colors.brightText} />}
+        {isSelected && <Ionicons name="checkmark" size={16} color={themeColors.brightText} />}
       </View>
     </TouchableOpacity>
   );
 };
-
-const styles = StyleSheet.create({
-  friendItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    borderRadius: 50,
-    backgroundColor: Colors.inactive,
-    marginBottom: 8,
-    gap: 12,
-  },
-  friendItemSelected: {
-    backgroundColor: Colors.cardBackground,
-    borderWidth: 1,
-  },
-  friendText: {
-    flex: 1,
-    fontSize: 14,
-    color: Colors.text,
-  },
-  friendTextSelected: {
-    color: Colors.brightText,
-    fontWeight: "600",
-  },
-  checkbox: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 2,
-    borderColor: Colors.secondary,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "transparent",
-  },
-  checkboxSelected: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
-  },
-  checkmark: {
-    color: Colors.brightText,
-    fontSize: 10,
-    fontWeight: "bold",
-  },
-});
 
 export default FriendCard;

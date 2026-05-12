@@ -2,7 +2,9 @@ import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { ThemedText } from '@/shared/core/ThemedText';
 import { useI18n } from '@/shared/localization';
-import { Colors } from '@/constants/design-tokens';
+import { useThemedStyles } from "@/hooks/useThemedStyles";
+import { useThemeColors } from "@/hooks/useThemeColors";
+
 import { Feather } from '@expo/vector-icons';
 
 interface PreviewToggleSwitchProps {
@@ -14,6 +16,35 @@ const PreviewToggleSwitch: React.FC<PreviewToggleSwitchProps> = ({
   isEnabled,
   onToggle,
 }) => {
+  const themeColors = useThemeColors();
+  const styles = useThemedStyles((c) => ({
+
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: c.inactive,
+    borderWidth: 1,
+    borderColor: c.border,
+  },
+  containerActive: {
+    backgroundColor: c.cardBackground,
+    borderColor: c.primary,
+  },
+  label: {
+    fontSize: 14,
+    color: c.secondary,
+  },
+  labelActive: {
+    color: c.primary,
+    fontWeight: '600',
+  },
+
+}));
+
   const { tl } = useI18n();
   return (
     <TouchableOpacity
@@ -24,7 +55,7 @@ const PreviewToggleSwitch: React.FC<PreviewToggleSwitchProps> = ({
       <Feather
         name={isEnabled ? 'eye' : 'eye-off'}
         size={18}
-        color={isEnabled ? Colors.primary : Colors.secondary}
+        color={isEnabled ? themeColors.primary : themeColors.secondary}
       />
       <ThemedText style={[styles.label, isEnabled && styles.labelActive]}>
         {tl('Preview')}
@@ -33,31 +64,4 @@ const PreviewToggleSwitch: React.FC<PreviewToggleSwitchProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: Colors.inactive,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  containerActive: {
-    backgroundColor: Colors.cardBackground,
-    borderColor: Colors.primary,
-  },
-  label: {
-    fontSize: 14,
-    color: Colors.secondary,
-  },
-  labelActive: {
-    color: Colors.primary,
-    fontWeight: '600',
-  },
-});
-
 export default PreviewToggleSwitch;
-

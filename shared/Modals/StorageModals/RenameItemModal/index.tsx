@@ -1,4 +1,6 @@
-import { Colors } from "@/constants/design-tokens";
+import { useThemedStyles } from "@/hooks/useThemedStyles";
+import { useThemeColors } from "@/hooks/useThemeColors";
+
 import { ThemedText } from "@/shared/core/ThemedText";
 import TextInput from "@/shared/TextInput";
 import React, { useEffect, useState } from "react";
@@ -23,6 +25,77 @@ const RenameItemModal: React.FC<RenameItemModalProps> = ({
   onClose,
   onConfirm,
 }) => {
+  const themeColors = useThemeColors();
+  const styles = useThemedStyles((c) => ({
+
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  container: {
+    backgroundColor: c.background,
+    borderRadius: 20,
+    width: "85%",
+    padding: 20,
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: "600",
+    color: c.brightText,
+  },
+  closeButton: {
+    padding: 4,
+  },
+  content: {
+    marginBottom: 20,
+  },
+  label: {
+    fontSize: 14,
+    color: c.text,
+    marginBottom: 8,
+  },
+  input: {
+    marginTop: 8,
+  },
+  footer: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  button: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: "center",
+  },
+  cancelButton: {
+    backgroundColor: c.cardBackground,
+    borderWidth: 1,
+    borderColor: c.border,
+  },
+  confirmButton: {
+    backgroundColor: c.primary,
+  },
+  cancelButtonText: {
+    color: c.brightText,
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  confirmButtonText: {
+    color: c.brightText,
+    fontSize: 16,
+    fontWeight: "600",
+  },
+
+}));
+
   const [newName, setNewName] = useState(currentName);
 
   useEffect(() => {
@@ -45,7 +118,7 @@ const RenameItemModal: React.FC<RenameItemModalProps> = ({
           <View style={styles.header}>
             <ThemedText style={styles.title}>Переименовать</ThemedText>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <Feather name="x" size={24} color={Colors.brightText} />
+              <Feather name="x" size={24} color={themeColors.brightText} />
             </TouchableOpacity>
           </View>
 
@@ -81,73 +154,4 @@ const RenameItemModal: React.FC<RenameItemModalProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  container: {
-    backgroundColor: Colors.background,
-    borderRadius: 20,
-    width: "85%",
-    padding: 20,
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: "600",
-    color: Colors.brightText,
-  },
-  closeButton: {
-    padding: 4,
-  },
-  content: {
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 14,
-    color: Colors.text,
-    marginBottom: 8,
-  },
-  input: {
-    marginTop: 8,
-  },
-  footer: {
-    flexDirection: "row",
-    gap: 12,
-  },
-  button: {
-    flex: 1,
-    paddingVertical: 14,
-    borderRadius: 12,
-    alignItems: "center",
-  },
-  cancelButton: {
-    backgroundColor: Colors.cardBackground,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  confirmButton: {
-    backgroundColor: Colors.primary,
-  },
-  cancelButtonText: {
-    color: Colors.brightText,
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  confirmButtonText: {
-    color: Colors.brightText,
-    fontSize: 16,
-    fontWeight: "600",
-  },
-});
-
 export default RenameItemModal;
-

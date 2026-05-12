@@ -1,10 +1,10 @@
-import { Colors } from '@/constants/design-tokens';
 import { Feather } from '@expo/vector-icons';
+import { useThemeColors } from "@/hooks/useThemeColors";
 import { Image } from 'expo-image';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Modal, TouchableOpacity, View } from 'react-native';
 import ModalVideo from '../../ui/ModalVideo';
-import { styles } from '../../styles';
+import createFileCardStyles from '../../styles';
 
 interface PreviewModalProps {
   visible: boolean;
@@ -21,6 +21,8 @@ const PreviewModal = ({
   remoteMediaUri,
   imageUri,
 }: PreviewModalProps) => {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createFileCardStyles(colors), [colors]);
   return (
     <Modal
       visible={visible}
@@ -30,7 +32,7 @@ const PreviewModal = ({
     >
       <View style={styles.fullPreviewOverlay}>
         <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-          <Feather name="x" size={24} color={Colors.brightText} />
+          <Feather name="x" size={24} color="#FFFFFF" />
         </TouchableOpacity>
         {visible &&
           (isVideo && remoteMediaUri ? (

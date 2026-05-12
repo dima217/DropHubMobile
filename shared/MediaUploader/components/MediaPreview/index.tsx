@@ -1,4 +1,6 @@
-import { Colors } from "@/constants/design-tokens";
+import { useThemedStyles } from "@/hooks/useThemedStyles";
+import { useThemeColors } from "@/hooks/useThemeColors";
+
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import React from "react";
 import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
@@ -10,28 +12,9 @@ interface Props {
 }
 
 const MediaPreview: React.FC<Props> = ({ media, onRemove }) => {
-  return (
-    <View style={styles.wrapper}>
-      <Image
-        key={media.uri}
-        source={{ uri: media.thumbnail || media.uri }}
-        style={styles.preview}
-      />
+  const themeColors = useThemeColors();
+  const styles = useThemedStyles((c) => ({
 
-      <TouchableOpacity style={styles.removeBtn} onPress={onRemove}>
-        <MaterialCommunityIcons
-          name="close-circle"
-          size={32}
-          color={Colors.primary}
-        />
-      </TouchableOpacity>
-    </View>
-  );
-};
-
-export default MediaPreview;
-
-const styles = StyleSheet.create({
   wrapper: {
     width: "100%",
     height: "100%",
@@ -46,4 +29,26 @@ const styles = StyleSheet.create({
     top: 10,
     right: 10,
   },
-});
+
+}));
+
+  return (
+    <View style={styles.wrapper}>
+      <Image
+        key={media.uri}
+        source={{ uri: media.thumbnail || media.uri }}
+        style={styles.preview}
+      />
+
+      <TouchableOpacity style={styles.removeBtn} onPress={onRemove}>
+        <MaterialCommunityIcons
+          name="close-circle"
+          size={32}
+          color={themeColors.primary}
+        />
+      </TouchableOpacity>
+    </View>
+  );
+};
+
+export default MediaPreview;

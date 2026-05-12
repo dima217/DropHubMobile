@@ -1,6 +1,6 @@
 import { useCreateChatChannelMutation } from "@/api/chatChannelsApi";
-import { Colors } from "@/constants/design-tokens";
-import React, { useState } from "react";
+import { useThemeColors } from "@/hooks/useThemeColors";
+import React, { useMemo, useState } from "react";
 import {
   Modal,
   ScrollView,
@@ -24,6 +24,111 @@ export function CreateChannelModal({ currentUserId, onClose, onCreated }: Props)
   const [type, setType] = useState<'group' | 'direct'>('group')
   const [error, setError] = useState('')
   const [createChatChannel, { isLoading: creating }] = useCreateChatChannelMutation()
+  const colors = useThemeColors()
+  const s = useMemo(
+    () =>
+      StyleSheet.create({
+        overlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.6)" },
+        modal: { flex: 1, justifyContent: "center", padding: 16 },
+        content: {
+          backgroundColor: colors.background,
+          borderRadius: 12,
+          borderWidth: 1,
+          borderColor: colors.border,
+          maxHeight: "90%",
+        },
+        header: {
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: 16,
+          borderBottomWidth: 1,
+          borderBottomColor: colors.border,
+        },
+        title: { fontSize: 18, fontWeight: "600", color: colors.brightText },
+        close: { fontSize: 28, color: colors.text },
+        tabs: { flexDirection: "row", gap: 8, margin: 20, marginBottom: 16 },
+        tab: {
+          flex: 1,
+          paddingVertical: 8,
+          borderRadius: 8,
+          backgroundColor: colors.cardBackground,
+          alignItems: "center",
+        },
+        tabActive: { backgroundColor: colors.primary },
+        tabText: { fontSize: 14, fontWeight: "500", color: colors.text },
+        tabTextActive: { color: colors.brightText },
+        field: { marginHorizontal: 20, marginBottom: 16 },
+        label: { fontSize: 14, color: colors.text, marginBottom: 8 },
+        input: {
+          backgroundColor: colors.cardBackground,
+          borderWidth: 1,
+          borderColor: colors.border,
+          borderRadius: 8,
+          paddingHorizontal: 12,
+          paddingVertical: 10,
+          fontSize: 14,
+          color: colors.brightText,
+        },
+        userList: { maxHeight: 200 },
+        user: {
+          flexDirection: "row",
+          alignItems: "center",
+          padding: 10,
+          borderRadius: 8,
+          backgroundColor: colors.cardBackground,
+          borderWidth: 1,
+          borderColor: colors.border,
+          marginBottom: 4,
+        },
+        userSelected: { backgroundColor: colors.inactive, borderColor: colors.primary },
+        userAvatar: {
+          width: 32,
+          height: 32,
+          borderRadius: 16,
+          backgroundColor: colors.inactive,
+          alignItems: "center",
+          justifyContent: "center",
+          marginRight: 12,
+        },
+        userAvatarSelected: { backgroundColor: colors.primary },
+        userAvatarText: { fontSize: 12, fontWeight: "bold", color: colors.brightText },
+        userInfo: { flex: 1, minWidth: 0 },
+        userName: { fontSize: 14, fontWeight: "500", color: colors.brightText },
+        userEmail: { fontSize: 12, color: colors.secondary },
+        check: { color: colors.primary, fontSize: 14 },
+        error: {
+          marginHorizontal: 20,
+          marginBottom: 16,
+          padding: 12,
+          backgroundColor: "rgba(255,74,117,0.15)",
+          borderRadius: 8,
+          borderWidth: 1,
+          borderColor: colors.reject,
+        },
+        errorText: { fontSize: 14, color: colors.reject },
+        buttons: { flexDirection: "row", gap: 8, margin: 20, marginTop: 0 },
+        cancelBtn: {
+          flex: 1,
+          paddingVertical: 10,
+          borderRadius: 8,
+          backgroundColor: colors.cardBackground,
+          alignItems: "center",
+        },
+        cancelText: { fontSize: 14, fontWeight: "500", color: colors.text },
+        submitBtn: {
+          flex: 1,
+          paddingVertical: 10,
+          borderRadius: 8,
+          backgroundColor: colors.primary,
+          alignItems: "center",
+        },
+        submitBtnDisabled: { backgroundColor: colors.grey },
+        submitText: { fontSize: 14, fontWeight: "500", color: colors.brightText },
+        submitTextDisabled: { color: colors.secondary },
+      }),
+    [colors]
+  )
 
   const otherUsers = USERS.filter((u) => u.id !== currentUserId);
 
@@ -94,7 +199,7 @@ export function CreateChannelModal({ currentUserId, onClose, onCreated }: Props)
                 value={name}
                 onChangeText={setName}
                 placeholder="e.g. Project Chat"
-                placeholderTextColor={Colors.secondary}
+                placeholderTextColor={colors.secondary}
               />
             </View>
           )}
@@ -146,104 +251,3 @@ export function CreateChannelModal({ currentUserId, onClose, onCreated }: Props)
     </Modal>
   )
 }
-
-const s = StyleSheet.create({
-  overlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.6)" },
-  modal: { flex: 1, justifyContent: "center", padding: 16 },
-  content: {
-    backgroundColor: Colors.background,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    maxHeight: "90%",
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
-  },
-  title: { fontSize: 18, fontWeight: "600", color: Colors.brightText },
-  close: { fontSize: 28, color: Colors.text },
-  tabs: { flexDirection: "row", gap: 8, margin: 20, marginBottom: 16 },
-  tab: {
-    flex: 1,
-    paddingVertical: 8,
-    borderRadius: 8,
-    backgroundColor: Colors.cardBackground,
-    alignItems: "center",
-  },
-  tabActive: { backgroundColor: Colors.primary },
-  tabText: { fontSize: 14, fontWeight: "500", color: Colors.text },
-  tabTextActive: { color: Colors.brightText },
-  field: { marginHorizontal: 20, marginBottom: 16 },
-  label: { fontSize: 14, color: Colors.text, marginBottom: 8 },
-  input: {
-    backgroundColor: Colors.cardBackground,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 14,
-    color: Colors.brightText,
-  },
-  userList: { maxHeight: 200 },
-  user: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 10,
-    borderRadius: 8,
-    backgroundColor: Colors.cardBackground,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    marginBottom: 4,
-  },
-  userSelected: { backgroundColor: Colors.inactive, borderColor: Colors.primary },
-  userAvatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: Colors.inactive,
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 12,
-  },
-  userAvatarSelected: { backgroundColor: Colors.primary },
-  userAvatarText: { fontSize: 12, fontWeight: "bold", color: Colors.brightText },
-  userInfo: { flex: 1, minWidth: 0 },
-  userName: { fontSize: 14, fontWeight: "500", color: Colors.brightText },
-  userEmail: { fontSize: 12, color: Colors.secondary },
-  check: { color: Colors.primary, fontSize: 14 },
-  error: {
-    marginHorizontal: 20,
-    marginBottom: 16,
-    padding: 12,
-    backgroundColor: "rgba(255,74,117,0.15)",
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: Colors.reject,
-  },
-  errorText: { fontSize: 14, color: Colors.reject },
-  buttons: { flexDirection: "row", gap: 8, margin: 20, marginTop: 0 },
-  cancelBtn: {
-    flex: 1,
-    paddingVertical: 10,
-    borderRadius: 8,
-    backgroundColor: Colors.cardBackground,
-    alignItems: "center",
-  },
-  cancelText: { fontSize: 14, fontWeight: "500", color: Colors.text },
-  submitBtn: {
-    flex: 1,
-    paddingVertical: 10,
-    borderRadius: 8,
-    backgroundColor: Colors.primary,
-    alignItems: "center",
-  },
-  submitBtnDisabled: { backgroundColor: Colors.grey },
-  submitText: { fontSize: 14, fontWeight: "500", color: Colors.brightText },
-  submitTextDisabled: { color: Colors.secondary },
-});

@@ -1,5 +1,7 @@
 import { roomApi, useGetRoomDetailsQuery } from "@/api/roomApi";
-import { Colors } from "@/constants/design-tokens";
+import { useThemedStyles } from "@/hooks/useThemedStyles";
+import { useThemeColors } from "@/hooks/useThemeColors";
+
 import Header from "@/shared/Header";
 import SearchButton from "@/shared/SearchButton";
 import View from "@/shared/View";
@@ -16,6 +18,57 @@ import {
 import { useDispatch } from "react-redux";
 
 const StorageScreen = () => {
+  const themeColors = useThemeColors();
+  const styles = useThemedStyles((c) => ({
+
+  center: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  errorText: {
+    color: c.reject,
+  },
+  headerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  breadcrumbContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingRight: 8,
+  },
+  breadcrumbItemWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  breadcrumbText: {
+    color: c.text,
+    fontSize: 14,
+  },
+  breadcrumbTextActive: {
+    color: c.primary,
+    fontWeight: "600",
+  },
+  breadcrumbUnderline: {
+    height: 2,
+    backgroundColor: c.primary,
+    marginTop: 2,
+    borderRadius: 1,
+  },
+  breadcrumbSeparator: {
+    color: c.secondary,
+    marginHorizontal: 4,
+  },
+  tagButton: {
+    padding: 4,
+  },
+
+}));
+
   const router = useRouter();
   const dispatch = useDispatch();
   const { archiveRoomId } = useLocalSearchParams<{ archiveRoomId?: string }>();
@@ -68,7 +121,7 @@ const StorageScreen = () => {
               onPress={() => onOpenGlobalTags()}
               style={styles.tagButton}
             >
-              <Feather name="tag" size={20} color={Colors.primary} />
+              <Feather name="tag" size={20} color={themeColors.primary} />
             </TouchableOpacity>
           </RNView>
         )}
@@ -77,53 +130,5 @@ const StorageScreen = () => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  center: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  errorText: {
-    color: Colors.reject,
-  },
-  headerRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  breadcrumbContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingRight: 8,
-  },
-  breadcrumbItemWrapper: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  breadcrumbText: {
-    color: Colors.text,
-    fontSize: 14,
-  },
-  breadcrumbTextActive: {
-    color: Colors.primary,
-    fontWeight: "600",
-  },
-  breadcrumbUnderline: {
-    height: 2,
-    backgroundColor: Colors.primary,
-    marginTop: 2,
-    borderRadius: 1,
-  },
-  breadcrumbSeparator: {
-    color: Colors.secondary,
-    marginHorizontal: 4,
-  },
-  tagButton: {
-    padding: 4,
-  },
-});
 
 export default StorageScreen;

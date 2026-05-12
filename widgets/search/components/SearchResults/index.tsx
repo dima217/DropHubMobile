@@ -5,14 +5,14 @@ import {
   SearchResponse,
 } from "@/api/types/search";
 import { StorageItem } from "@/api/types/storage";
-import { Colors } from "@/constants/design-tokens";
+import { useThemeColors } from "@/hooks/useThemeColors";
 import { ThemedText } from "@/shared/core/ThemedText";
 import FileCard from "@/widgets/rooms/components/FileCard";
 import FolderCard from "@/widgets/rooms/components/FolderCard";
 import { StorageSection } from "@/widgets/storage/components/StorageSection";
 import { menuOptions as storageMenuOptions } from "@/widgets/storage/components/StorageSection/data/defaultOptions";
 import { useRouter } from "expo-router";
-import React from "react";
+import React, { useMemo } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -54,11 +54,37 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
   resourceType,
 }) => {
   const router = useRouter();
+  const colors = useThemeColors();
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        center: {
+          justifyContent: "center",
+          alignItems: "center",
+          paddingTop: 100,
+        },
+        storageSectionContainer: {
+          flex: 1,
+        },
+        listContent: {
+          paddingVertical: 12,
+        },
+        emptyContainer: {
+          padding: 40,
+          alignItems: "center",
+        },
+        emptyText: {
+          color: colors.secondary,
+          fontSize: 14,
+        },
+      }),
+    [colors]
+  );
 
   if (isLoading) {
     return (
       <RNView style={styles.center}>
-        <ActivityIndicator size="large" color={Colors.primary} />
+        <ActivityIndicator size="large" color={colors.primary} />
       </RNView>
     );
   }
@@ -193,26 +219,4 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
     />
   );
 };
-
-const styles = StyleSheet.create({
-  center: {
-    justifyContent: "center",
-    alignItems: "center",
-    paddingTop: 100,
-  },
-  storageSectionContainer: {
-    flex: 1,
-  },
-  listContent: {
-    paddingVertical: 12,
-  },
-  emptyContainer: {
-    padding: 40,
-    alignItems: "center",
-  },
-  emptyText: {
-    color: Colors.secondary,
-    fontSize: 14,
-  },
-});
 

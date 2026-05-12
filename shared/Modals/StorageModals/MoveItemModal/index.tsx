@@ -1,4 +1,6 @@
-import { Colors } from "@/constants/design-tokens";
+import { useThemedStyles } from "@/hooks/useThemedStyles";
+import { useThemeColors } from "@/hooks/useThemeColors";
+
 import { ThemedText } from "@/shared/core/ThemedText";
 import { Feather } from "@expo/vector-icons";
 import React from "react";
@@ -20,6 +22,84 @@ const MoveItemModal: React.FC<MoveItemModalProps> = ({
   onConfirm,
   moveIntoSelfBlocked = false,
 }) => {
+  const themeColors = useThemeColors();
+  const styles = useThemedStyles((c) => ({
+
+  overlay: {},
+  container: {
+    backgroundColor: c.background,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    maxHeight: "80%",
+    padding: 20,
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: "600",
+    color: c.brightText,
+  },
+  closeButton: {
+    padding: 4,
+  },
+  center: {
+    padding: 40,
+    alignItems: "center",
+  },
+  description: {
+    fontSize: 14,
+    color: c.secondary,
+    marginBottom: 16,
+  },
+  warningText: {
+    fontSize: 13,
+    color: c.reject,
+    marginBottom: 12,
+    lineHeight: 18,
+  },
+  footer: {
+    flexDirection: "row",
+    gap: 12,
+    marginTop: 20,
+  },
+  button: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: "center",
+  },
+  cancelButton: {
+    backgroundColor: c.cardBackground,
+    borderWidth: 1,
+    borderColor: c.border,
+  },
+  confirmButton: {
+    backgroundColor: c.primary,
+  },
+  confirmButtonDisabled: {
+    opacity: 0.45,
+  },
+  confirmButtonTextDisabled: {
+    opacity: 0.9,
+  },
+  cancelButtonText: {
+    color: c.brightText,
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  confirmButtonText: {
+    color: c.brightText,
+    fontSize: 16,
+    fontWeight: "600",
+  },
+
+}));
+
   const handleConfirm = () => {
     if (moveIntoSelfBlocked) return;
     onConfirm(currentParentId);
@@ -34,7 +114,7 @@ const MoveItemModal: React.FC<MoveItemModalProps> = ({
             <View style={styles.header}>
               <ThemedText style={styles.title}>Переместить</ThemedText>
               <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-                <Feather name="x" size={24} color={Colors.brightText} />
+                <Feather name="x" size={24} color={themeColors.brightText} />
               </TouchableOpacity>
             </View>
 
@@ -82,80 +162,4 @@ const MoveItemModal: React.FC<MoveItemModalProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  overlay: {},
-  container: {
-    backgroundColor: Colors.background,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    maxHeight: "80%",
-    padding: 20,
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: "600",
-    color: Colors.brightText,
-  },
-  closeButton: {
-    padding: 4,
-  },
-  center: {
-    padding: 40,
-    alignItems: "center",
-  },
-  description: {
-    fontSize: 14,
-    color: Colors.secondary,
-    marginBottom: 16,
-  },
-  warningText: {
-    fontSize: 13,
-    color: Colors.reject,
-    marginBottom: 12,
-    lineHeight: 18,
-  },
-  footer: {
-    flexDirection: "row",
-    gap: 12,
-    marginTop: 20,
-  },
-  button: {
-    flex: 1,
-    paddingVertical: 14,
-    borderRadius: 12,
-    alignItems: "center",
-  },
-  cancelButton: {
-    backgroundColor: Colors.cardBackground,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  confirmButton: {
-    backgroundColor: Colors.primary,
-  },
-  confirmButtonDisabled: {
-    opacity: 0.45,
-  },
-  confirmButtonTextDisabled: {
-    opacity: 0.9,
-  },
-  cancelButtonText: {
-    color: Colors.brightText,
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  confirmButtonText: {
-    color: Colors.brightText,
-    fontSize: 16,
-    fontWeight: "600",
-  },
-});
-
 export default MoveItemModal;
-

@@ -1,6 +1,7 @@
 import { useGetNotificationsQuery, useMarkNotificationsReadMutation } from "@/api";
+import { useThemedStyles } from "@/hooks/useThemedStyles";
+import { useThemeColors } from "@/hooks/useThemeColors";
 import type { AppNotification } from "@/api/types/notification";
-import { Colors } from "@/constants/design-tokens";
 import { PushNotificationDataType } from "@/constants/pushNotifications";
 import Header from "@/shared/Header";
 import View from "@/shared/View";
@@ -12,7 +13,6 @@ import {
   FlatList,
   Pressable,
   View as RNView,
-  StyleSheet,
 } from "react-native";
 
 const PAGE_SIZE = 20;
@@ -39,6 +39,7 @@ function navigateByNotification(router: ReturnType<typeof useRouter>, item: AppN
 }
 
 export default function NotificationsScreen() {
+  const colors = useThemeColors();
   const router = useRouter();
   const [offset, setOffset] = useState(0);
   const [items, setItems] = useState<AppNotification[]>([]);
@@ -49,6 +50,68 @@ export default function NotificationsScreen() {
     offset,
   });
   const [markRead, { isLoading: isMarkingRead }] = useMarkNotificationsReadMutation();
+
+  const styles = useThemedStyles((c) => ({
+    listContent: {
+      paddingVertical: 12,
+      paddingBottom: 32,
+      gap: 10,
+    },
+    row: {
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: c.border,
+      backgroundColor: c.cardBackground,
+      padding: 12,
+      gap: 6,
+    },
+    unreadRow: {
+      borderColor: c.primary,
+    },
+    pressed: {
+      opacity: 0.85,
+    },
+    rowHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      gap: 8,
+    },
+    title: {
+      color: c.brightText,
+      fontSize: 15,
+      fontWeight: "600",
+      flex: 1,
+    },
+    body: {
+      color: c.text,
+      fontSize: 14,
+      lineHeight: 20,
+    },
+    date: {
+      color: c.secondary,
+      fontSize: 12,
+    },
+    unreadDot: {
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+      backgroundColor: c.primary,
+    },
+    empty: {
+      color: c.secondary,
+      textAlign: "center",
+      paddingVertical: 24,
+    },
+    loader: {
+      marginVertical: 20,
+    },
+    syncText: {
+      color: c.secondary,
+      textAlign: "center",
+      paddingTop: 8,
+    },
+  }));
 
   useEffect(() => {
     if (!data) return;
@@ -127,14 +190,14 @@ export default function NotificationsScreen() {
         )}
         ListEmptyComponent={
           isLoading ? (
-            <ActivityIndicator style={styles.loader} color={Colors.primary} />
+            <ActivityIndicator style={styles.loader} color={colors.primary} />
           ) : (
             <ThemedText style={styles.empty}>No notifications yet.</ThemedText>
           )
         }
         ListFooterComponent={
           isFetching && offset > 0 ? (
-            <ActivityIndicator style={styles.loader} color={Colors.primary} />
+            <ActivityIndicator style={styles.loader} color={colors.primary} />
           ) : isMarkingRead ? (
             <ThemedText style={styles.syncText}>Updating...</ThemedText>
           ) : null
@@ -143,65 +206,3 @@ export default function NotificationsScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  listContent: {
-    paddingVertical: 12,
-    paddingBottom: 32,
-    gap: 10,
-  },
-  row: {
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    backgroundColor: Colors.cardBackground,
-    padding: 12,
-    gap: 6,
-  },
-  unreadRow: {
-    borderColor: Colors.primary,
-  },
-  pressed: {
-    opacity: 0.85,
-  },
-  rowHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 8,
-  },
-  title: {
-    color: Colors.brightText,
-    fontSize: 15,
-    fontWeight: "600",
-    flex: 1,
-  },
-  body: {
-    color: Colors.text,
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  date: {
-    color: Colors.secondary,
-    fontSize: 12,
-  },
-  unreadDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: Colors.primary,
-  },
-  empty: {
-    color: Colors.secondary,
-    textAlign: "center",
-    paddingVertical: 24,
-  },
-  loader: {
-    marginVertical: 20,
-  },
-  syncText: {
-    color: Colors.secondary,
-    textAlign: "center",
-    paddingTop: 8,
-  },
-});

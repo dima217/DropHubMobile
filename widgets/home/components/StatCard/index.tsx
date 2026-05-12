@@ -1,4 +1,5 @@
-import { Colors } from "@/constants/design-tokens";
+import { useThemedStyles } from "@/hooks/useThemedStyles";
+
 import { ThemedText } from "@/shared/core/ThemedText";
 import React from "react";
 import { StyleSheet } from "react-native";
@@ -23,6 +24,30 @@ const StatCard = React.memo(({
   subtitle,
   delay = 0 
 }: StatCardProps) => {
+  const styles = useThemedStyles((c) => ({
+
+  statCard: {
+    borderRadius: 16,
+    marginTop: 16,
+    flexDirection: "row",
+    alignItems: "center",  
+    gap: 10,
+  },
+  statCardTitle: {
+    color: c.text,
+  },
+  statCardValue: {
+    color: c.primary,
+    fontSize: 32,
+    fontWeight: "700",
+  },
+  statCardSubtitle: {
+    color: c.secondary,
+    marginTop: 4,
+  },
+
+}));
+
   const opacity = useSharedValue(0);
   const translateY = useSharedValue(20);
   const scale = useSharedValue(0.9);
@@ -56,27 +81,4 @@ const StatCard = React.memo(({
 
 StatCard.displayName = "StatCard";
 
-const styles = StyleSheet.create({
-  statCard: {
-    borderRadius: 16,
-    marginTop: 16,
-    flexDirection: "row",
-    alignItems: "center",  
-    gap: 10,
-  },
-  statCardTitle: {
-    color: Colors.text,
-  },
-  statCardValue: {
-    color: Colors.primary,
-    fontSize: 32,
-    fontWeight: "700",
-  },
-  statCardSubtitle: {
-    color: Colors.secondary,
-    marginTop: 4,
-  },
-});
-
 export default StatCard;
-

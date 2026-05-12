@@ -1,4 +1,6 @@
-import { Colors } from "@/constants/design-tokens";
+import { useThemedStyles } from "@/hooks/useThemedStyles";
+import { useThemeColors } from "@/hooks/useThemeColors";
+
 import Button from "@/shared/Button";
 import { ThemedText } from "@/shared/core/ThemedText";
 import Avatar from "@/widgets/profile/components/ProfileCard/ui/Avatar";
@@ -18,30 +20,9 @@ const FriendCard = ({
   onPress,
   onShareResource,
 }: FriendCardProps) => {
-  return (
-    <TouchableOpacity onPress={onPress} style={styles.container}>
-      <View style={styles.content}>
-        <Avatar
-          size="small"
-          uri={avatarUrl}
-          title={firstName[0]?.toUpperCase() || "?"}
-        />
-        <ThemedText type="subtitle" style={styles.name}>
-          {firstName}
-        </ThemedText>
-      </View>
-      <Button
-        title="Поделиться ресурсом"
-        onPress={onShareResource}
-        style={styles.shareButton}
-        textStyle={styles.buttonText}
-        buttonColor={Colors.primary}
-      />
-    </TouchableOpacity>
-  );
-};
+  const themeColors = useThemeColors();
+  const styles = useThemedStyles((c) => ({
 
-const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     alignItems: "center",
@@ -50,7 +31,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 50,
-    backgroundColor: Colors.cardBackground,
+    backgroundColor: c.cardBackground,
   },
   content: {
     flexDirection: "row",
@@ -70,7 +51,30 @@ const styles = StyleSheet.create({
   buttonText: {
     fontSize: 12,
   },
-});
+
+}));
+
+  return (
+    <TouchableOpacity onPress={onPress} style={styles.container}>
+      <View style={styles.content}>
+        <Avatar
+          size="small"
+          uri={avatarUrl}
+          title={firstName[0]?.toUpperCase() || "?"}
+        />
+        <ThemedText type="subtitle" style={styles.name}>
+          {firstName}
+        </ThemedText>
+      </View>
+      <Button
+        title="Поделиться ресурсом"
+        onPress={onShareResource}
+        style={styles.shareButton}
+        textStyle={styles.buttonText}
+        buttonColor={themeColors.primary}
+      />
+    </TouchableOpacity>
+  );
+};
 
 export default FriendCard;
-

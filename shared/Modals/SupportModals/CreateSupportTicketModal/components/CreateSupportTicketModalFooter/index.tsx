@@ -1,9 +1,9 @@
-import { Colors } from "@/constants/design-tokens";
 import { ThemedText } from "@/shared/core/ThemedText";
+import { useThemeColors } from "@/hooks/useThemeColors";
 import { Feather } from "@expo/vector-icons";
-import React from "react";
+import React, { useMemo } from "react";
 import { ActivityIndicator, TouchableOpacity, View } from "react-native";
-import { styles } from "../../styles";
+import { createSupportTicketModalStyles } from "../../styles";
 
 type Props = {
   isSubmitting: boolean;
@@ -17,7 +17,13 @@ const CreateSupportTicketModalFooter: React.FC<Props> = ({
   canSubmit,
   onCancel,
   onSubmit,
-}) => (
+}) => {
+  const colors = useThemeColors();
+  const styles = useMemo(
+    () => createSupportTicketModalStyles(colors),
+    [colors]
+  );
+  return (
   <View style={styles.footer}>
     <TouchableOpacity
       style={[styles.footerBtn, styles.cancelBtn]}
@@ -32,13 +38,13 @@ const CreateSupportTicketModalFooter: React.FC<Props> = ({
       disabled={!canSubmit || isSubmitting}
     >
       {isSubmitting ? (
-        <ActivityIndicator color={Colors.brightText} />
+        <ActivityIndicator color={colors.brightText} />
       ) : (
         <View style={{ flexDirection: "row", alignItems: "center" }}>
           <Feather
             name="send"
             size={18}
-            color={Colors.brightText}
+            color={colors.brightText}
             style={{ marginRight: 8 }}
           />
           <ThemedText style={styles.submitText}>Отправить</ThemedText>
@@ -47,5 +53,5 @@ const CreateSupportTicketModalFooter: React.FC<Props> = ({
     </TouchableOpacity>
   </View>
 );
-
+}
 export default CreateSupportTicketModalFooter;

@@ -1,11 +1,11 @@
 import { useLazyDownloadRoomFilesQuery } from '@/api/fileApi';
-import { Colors } from '@/constants/design-tokens';
+import { useThemeColors } from "@/hooks/useThemeColors";
 import AuthorshipSection from '@/shared/ui/AuthorshipSection';
 import { Feather } from '@expo/vector-icons';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import PreviewModal from './modals/PreviewModal';
-import { styles } from './styles';
+import createFileCardStyles from './styles';
 import type { FileCardProps } from './types';
 import Header from './ui/Header';
 import ImagePreview from './ui/ImagePreview';
@@ -33,6 +33,8 @@ const FileCard: React.FC<FileCardProps> = ({
   tagColors = {},
   sharedWith = [],
 }) => {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createFileCardStyles(colors), [colors]);
   const [showFullPreview, setShowFullPreview] = useState(false);
   const [roomSignedUrl, setRoomSignedUrl] = useState<string | null>(null);
   const [fetchRoomDownloadUrl] = useLazyDownloadRoomFilesQuery();
@@ -142,7 +144,7 @@ const FileCard: React.FC<FileCardProps> = ({
 
       {isSelected && (
         <View style={styles.selectedIndicator}>
-          <Feather name="check-circle" size={20} color={Colors.primary} />
+          <Feather name="check-circle" size={20} color={colors.primary} />
         </View>
       )}
 

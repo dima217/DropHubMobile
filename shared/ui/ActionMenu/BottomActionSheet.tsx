@@ -1,4 +1,5 @@
-import { Colors } from "@/constants/design-tokens";
+import { useThemedStyles } from "@/hooks/useThemedStyles";
+
 import { ThemedText } from "@/shared/core/ThemedText";
 import GradientView from "@/shared/Gradient";
 import React, { ReactNode, useEffect } from "react";
@@ -23,6 +24,58 @@ const BottomActionSheet: React.FC<BottomActionSheetProps> = ({
   title,
   children,
 }) => {
+  const styles = useThemedStyles((c) => ({
+
+  modalContainer: {
+    flex: 1,
+    justifyContent: "flex-end",
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  container: {
+    width: "100%",
+    maxHeight: "85%",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    overflow: "hidden",
+    backgroundColor: "transparent",
+  },
+  sheet: {
+    width: "100%",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingTop: 12,
+    paddingBottom: 32,
+    paddingHorizontal: 16,
+    minHeight: 200,
+    flex: 0,
+  },
+  handleContainer: {
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  handle: {
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: c.secondary,
+  },
+  title: {
+    marginBottom: 20,
+    textAlign: "center",
+    color: c.brightText,
+  },
+  content: {
+    width: "100%",
+  },
+  contentContainer: {
+    paddingBottom: 8,
+  },
+
+}));
+
   const progress = useSharedValue(0);
 
   useEffect(() => {
@@ -77,55 +130,5 @@ const BottomActionSheet: React.FC<BottomActionSheetProps> = ({
     </Modal>
   );
 };
-
-const styles = StyleSheet.create({
-  modalContainer: {
-    flex: 1,
-    justifyContent: "flex-end",
-  },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.5)",
-  },
-  container: {
-    width: "100%",
-    maxHeight: "85%",
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    overflow: "hidden",
-    backgroundColor: "transparent",
-  },
-  sheet: {
-    width: "100%",
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    paddingTop: 12,
-    paddingBottom: 32,
-    paddingHorizontal: 16,
-    minHeight: 200,
-    flex: 0,
-  },
-  handleContainer: {
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  handle: {
-    width: 40,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: Colors.secondary,
-  },
-  title: {
-    marginBottom: 20,
-    textAlign: "center",
-    color: Colors.brightText,
-  },
-  content: {
-    width: "100%",
-  },
-  contentContainer: {
-    paddingBottom: 8,
-  },
-});
 
 export default BottomActionSheet;

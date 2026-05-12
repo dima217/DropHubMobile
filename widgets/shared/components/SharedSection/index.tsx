@@ -3,8 +3,8 @@ import { useGetStorageInfoQuery } from "@/api/storageApi";
 import { AccessRole } from "@/api/types/room";
 import { GetSharedResourcesResponse } from "@/api/types/shared";
 import type { StorageItem } from "@/api/types/storage";
-import { Colors } from "@/constants/design-tokens";
 import { useAutoMarkSharedNotificationsRead } from "@/hooks/data/useAutoMarkNotificationsOnView";
+import { useThemeColors } from "@/hooks/useThemeColors";
 import { ThemedText } from "@/shared/core/ThemedText";
 import { StorageSection } from "@/widgets/storage/components/StorageSection";
 import { useFolderPathNavigation } from "@/widgets/storageList/hooks/useFolderPathNavigation";
@@ -20,6 +20,27 @@ import { ActivityIndicator, View as RNView, StyleSheet } from "react-native";
  */
 export function SharedSection() {
   useAutoMarkSharedNotificationsRead();
+  const colors = useThemeColors();
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        center: {
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          paddingTop: 100,
+        },
+        emptyContainer: {
+          padding: 40,
+          alignItems: "center",
+        },
+        emptyText: {
+          color: colors.secondary,
+          fontSize: 14,
+        },
+      }),
+    [colors]
+  );
 
   const {
     data: sharedResources,
@@ -195,7 +216,7 @@ export function SharedSection() {
   if (loading) {
     return (
       <RNView style={styles.center}>
-        <ActivityIndicator size="large" color={Colors.primary} />
+        <ActivityIndicator size="large" color={colors.primary} />
       </RNView>
     );
   }
@@ -234,20 +255,3 @@ export function SharedSection() {
     />
   );
 }
-
-const styles = StyleSheet.create({
-  center: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingTop: 100,
-  },
-  emptyContainer: {
-    padding: 40,
-    alignItems: "center",
-  },
-  emptyText: {
-    color: Colors.secondary,
-    fontSize: 14,
-  },
-});

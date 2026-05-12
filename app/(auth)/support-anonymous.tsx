@@ -1,5 +1,6 @@
-import { Colors } from "@/constants/design-tokens";
 import { ThemedText } from "@/shared/core/ThemedText";
+import { useThemedStyles } from "@/hooks/useThemedStyles";
+import { useThemeColors } from "@/hooks/useThemeColors";
 import Header from "@/shared/Header";
 import { useI18n } from "@/shared/localization";
 import CreateSupportTicketModal from "@/shared/Modals/SupportModals/CreateSupportTicketModal";
@@ -14,11 +15,11 @@ import {
   Alert,
   View as RNView,
   ScrollView,
-  StyleSheet,
   TouchableOpacity,
 } from "react-native";
 
 export default function SupportAnonymousScreen() {
+  const colors = useThemeColors();
   const { tl } = useI18n();
   const router = useRouter();
   const {
@@ -34,6 +35,23 @@ export default function SupportAnonymousScreen() {
     onSubmitForm,
     forgetTicket,
   } = useAnonymousSupportScreen();
+
+  const styles = useThemedStyles((c) => ({
+    scroll: { flex: 1 },
+    content: { paddingVertical: 16, paddingBottom: 32 },
+    detailWrap: { marginTop: 4 },
+    errorCard: {
+      backgroundColor: c.cardBackground,
+      borderRadius: 16,
+      padding: 18,
+      borderWidth: 1,
+      borderColor: c.border,
+      gap: 12,
+    },
+    hint: { color: c.text, fontSize: 14, lineHeight: 20 },
+    link: { color: c.primary, fontSize: 14 },
+    loader: { marginTop: 24 },
+  }));
 
   const onForget = () => {
     Alert.alert(
@@ -65,7 +83,7 @@ export default function SupportAnonymousScreen() {
         {!stored ? (
           <SupportAnonymousEmptyCTA onOpenForm={() => setFormOpen(true)} />
         ) : canFetchTicket && isLoading && !ticket ? (
-          <ActivityIndicator color={Colors.primary} style={styles.loader} />
+          <ActivityIndicator color={colors.primary} style={styles.loader} />
         ) : showTicket ? (
           <RNView style={styles.detailWrap}>
             <SupportTicketDetailView
@@ -97,20 +115,3 @@ export default function SupportAnonymousScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  scroll: { flex: 1 },
-  content: { paddingVertical: 16, paddingBottom: 32 },
-  detailWrap: { marginTop: 4 },
-  errorCard: {
-    backgroundColor: Colors.cardBackground,
-    borderRadius: 16,
-    padding: 18,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    gap: 12,
-  },
-  hint: { color: Colors.text, fontSize: 14, lineHeight: 20 },
-  link: { color: Colors.primary, fontSize: 14 },
-  loader: { marginTop: 24 },
-});

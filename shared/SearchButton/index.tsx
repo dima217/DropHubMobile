@@ -1,10 +1,23 @@
-import { Colors } from "@/constants/design-tokens";
+import { useThemedStyles } from "@/hooks/useThemedStyles";
+import { useThemeColors } from "@/hooks/useThemeColors";
+
 import { useRouter } from "expo-router";
 import React from "react";
 import { StyleSheet, TouchableOpacity } from "react-native";
 import { Feather } from "@expo/vector-icons";
 
 const SearchButton: React.FC = () => {
+  const themeColors = useThemeColors();
+  const styles = useThemedStyles((c) => ({
+
+  button: {
+    padding: 4,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+}));
+
   const router = useRouter();
 
   return (
@@ -13,18 +26,9 @@ const SearchButton: React.FC = () => {
       onPress={() => router.push("/(tabs)/search")}
       activeOpacity={0.7}
     >
-      <Feather name="search" size={20} color={Colors.primary} />
+      <Feather name="search" size={20} color={themeColors.primary} />
     </TouchableOpacity>
   );
 };
 
-const styles = StyleSheet.create({
-  button: {
-    padding: 4,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-});
-
 export default SearchButton;
-

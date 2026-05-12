@@ -1,7 +1,9 @@
 import { useGetFriendsQuery } from "@/api/friendApi";
 import { roomApi, useGetByRoomsListQuery } from "@/api/roomApi";
 import { RoomDetails } from "@/api/types/room";
-import { Colors } from "@/constants/design-tokens";
+import { useThemedStyles } from "@/hooks/useThemedStyles";
+import { useThemeColors } from "@/hooks/useThemeColors";
+
 import { useAddedToRoom } from "@/hooks/data/useAddedToRoom";
 import { useRemovedFromRoom } from "@/hooks/data/useRemovedFromRoom";
 import { secureStore } from "@/services/secureStore";
@@ -17,6 +19,22 @@ import { ActivityIndicator, FlatList, StyleSheet } from "react-native";
 import { useDispatch } from "react-redux";
 
 const Rooms = () => {
+  const themeColors = useThemeColors();
+  const styles = useThemedStyles((c) => ({
+
+  addButton: {
+    marginTop: 20,
+    marginBottom: 16,
+  },
+  listContainer: {
+    paddingBottom: 20,
+  },
+  loader: {
+    marginTop: 50,
+  },
+
+}));
+
   const router = useRouter();
   const dispatch = useDispatch();
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -73,7 +91,7 @@ const Rooms = () => {
       />
 
       {isLoading ? (
-        <ActivityIndicator size="large" color={Colors.primary} style={styles.loader} />
+        <ActivityIndicator size="large" color={themeColors.primary} style={styles.loader} />
       ) : (
         <FlatList
           data={rooms || []}
@@ -102,18 +120,5 @@ const Rooms = () => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  addButton: {
-    marginTop: 20,
-    marginBottom: 16,
-  },
-  listContainer: {
-    paddingBottom: 20,
-  },
-  loader: {
-    marginTop: 50,
-  },
-});
 
 export default Rooms;

@@ -1,7 +1,8 @@
-import React from "react";
+import { useThemeColors } from "@/hooks/useThemeColors";
+import React, { useMemo } from "react";
 import { View as RNView } from "react-native";
 import { useStorageSectionController } from "./hooks/useStorageSectionController";
-import { storageSectionStyles as styles } from "./styles";
+import { createStorageSectionStyles } from "./styles";
 import { StorageSectionLayout } from "./StorageSectionLayout";
 import type { StorageSectionProps } from "./types";
 
@@ -22,6 +23,8 @@ export type {
  * - Parent must pass `menuOptions`; optional `getMenuItems` overrides default menu building
  */
 export const StorageSection: React.FC<StorageSectionProps> = (props) => {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStorageSectionStyles(colors), [colors]);
   const vm = useStorageSectionController(props);
 
   if (vm.isStorageInfoError || vm.isStructureError) {

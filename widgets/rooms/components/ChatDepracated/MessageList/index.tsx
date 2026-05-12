@@ -1,4 +1,5 @@
-import { Colors } from "@/constants/design-tokens";
+import { useThemedStyles } from "@/hooks/useThemedStyles";
+
 import { ThemedText } from "@/shared/core/ThemedText";
 import View from "@/shared/View";
 import React, { forwardRef } from "react";
@@ -26,6 +27,28 @@ interface MessageListProps {
 
 const MessageList = forwardRef<FlatList, MessageListProps>(
   ({ messages, isMyMessage }, ref) => {
+  const styles = useThemedStyles((c) => ({
+
+  messagesList: {
+    paddingHorizontal: 12,
+    paddingTop: 16,
+    paddingBottom: 16,
+    flexGrow: 1,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 60,
+  },
+  emptyText: {
+    fontSize: 14,
+    color: c.secondary,
+    textAlign: "center",
+  },
+
+}));
+
     const renderMessage: ListRenderItem<Message> = ({ item }) => (
       <MessageBubble message={item} isMyMessage={isMyMessage(item)} />
     );
@@ -57,25 +80,4 @@ const MessageList = forwardRef<FlatList, MessageListProps>(
 
 MessageList.displayName = "MessageList";
 
-const styles = StyleSheet.create({
-  messagesList: {
-    paddingHorizontal: 12,
-    paddingTop: 16,
-    paddingBottom: 16,
-    flexGrow: 1,
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingVertical: 60,
-  },
-  emptyText: {
-    fontSize: 14,
-    color: Colors.secondary,
-    textAlign: "center",
-  },
-});
-
 export default MessageList;
-

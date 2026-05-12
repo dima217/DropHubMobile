@@ -1,8 +1,11 @@
-import { Colors } from "@/constants/design-tokens";
+import { useThemedStyles } from "@/hooks/useThemedStyles";
 import React from "react";
-import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
+import { Image, TouchableOpacity, View } from "react-native";
 import { useAvatarPicker } from "../../hooks/useAvatarPicker";
 import { getImageSource } from "../../utils";
+
+const CIRCLE_SIZE = 140;
+const PLUS_SIZE = 36;
 
 interface MediaUploaderProps {
   value?: string;
@@ -17,6 +20,52 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
   onChange,
   defaultImages,
 }) => {
+  const styles = useThemedStyles((c) => ({
+
+  container: {
+    width: CIRCLE_SIZE,
+    height: CIRCLE_SIZE,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  uploadArea: {
+    width: CIRCLE_SIZE,
+    height: CIRCLE_SIZE,
+    borderRadius: CIRCLE_SIZE / 2,
+    borderWidth: 1,
+    borderColor: c.primary,
+    overflow: "hidden",
+  },
+  addButton: {
+    position: "absolute",
+    top: 10,
+    right: 0,
+  },
+  plusCircle: {
+    width: PLUS_SIZE,
+    height: PLUS_SIZE,
+    borderWidth: 2,
+    borderColor: c.border,
+    borderRadius: PLUS_SIZE / 2,
+    backgroundColor: c.primary,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  plusHorizontal: {
+    position: "absolute",
+    width: 12,
+    height: 2,
+    backgroundColor: "#fff",
+  },
+  plusVertical: {
+    position: "absolute",
+    width: 2,
+    height: 12,
+    backgroundColor: "#fff",
+  },
+
+}));
+
   const { pickMedia } = useAvatarPicker();
 
   const handlePick = async () => {
@@ -44,50 +93,3 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
 };
 
 export default MediaUploader;
-
-const CIRCLE_SIZE = 140;
-const PLUS_SIZE = 36;
-
-const styles = StyleSheet.create({
-  container: {
-    width: CIRCLE_SIZE,
-    height: CIRCLE_SIZE,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  uploadArea: {
-    width: CIRCLE_SIZE,
-    height: CIRCLE_SIZE,
-    borderRadius: CIRCLE_SIZE / 2,
-    borderWidth: 1,
-    borderColor: Colors.primary,
-    overflow: "hidden",
-  },
-  addButton: {
-    position: "absolute",
-    top: 10,
-    right: 0,
-  },
-  plusCircle: {
-    width: PLUS_SIZE,
-    height: PLUS_SIZE,
-    borderWidth: 2,
-    borderColor: Colors.border,
-    borderRadius: PLUS_SIZE / 2,
-    backgroundColor: Colors.primary,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  plusHorizontal: {
-    position: "absolute",
-    width: 12,
-    height: 2,
-    backgroundColor: "#fff",
-  },
-  plusVertical: {
-    position: "absolute",
-    width: 2,
-    height: 12,
-    backgroundColor: "#fff",
-  },
-});

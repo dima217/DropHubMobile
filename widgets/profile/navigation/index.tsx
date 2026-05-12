@@ -1,7 +1,7 @@
 import Settings from "@/assets/images/Setting.svg";
 import SignOut from "@/assets/images/SignOut.svg";
 import Support from "@/assets/images/Support.svg";
-import { Colors } from "@/constants/design-tokens";
+import { useThemeColors } from "@/hooks/useThemeColors";
 import { syncFcmTokenToBackend } from "@/services/push/syncFcmTokenToBackend";
 import { secureStore } from "@/services/secureStore";
 import LogoutConfirmationModal from "@/shared/Modals/LogoutConfirmationModal";
@@ -26,6 +26,7 @@ export const useProfileMenuItems = (): {
 } => {
   const dispatch = useDispatch();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const { secondary } = useThemeColors();
 
   const handleLogoutClick = () => {
     console.log("Logout clicked");
@@ -59,14 +60,14 @@ export const useProfileMenuItems = (): {
     {
       id: "trash",
       title: "Trash",
-      icon: <Feather name="trash" size={24} color={Colors.secondary} />,
+      icon: <Feather name="trash" size={24} color={secondary} />,
       href: "/(tabs)/trash",
       isNested: true,
     },
     {
       id: "notifications",
       title: "Notifications",
-      icon: <Feather name="bell" size={24} color={Colors.secondary} />,
+      icon: <Feather name="bell" size={24} color={secondary} />,
       href: "/(tabs)/profile/notifications",
       isNested: true,
     },

@@ -1,5 +1,5 @@
-import { Colors } from "@/constants/design-tokens";
 import { Feather } from "@expo/vector-icons";
+import { useThemeColors } from "@/hooks/useThemeColors";
 import { MotiView } from "moti";
 import * as React from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
@@ -12,7 +12,13 @@ interface WaveButtonProps {
     size: number;
 }
 
-export default function WaveButton({ onPress, color, icon, size }: WaveButtonProps) {
+export default function WaveButton({
+  onPress,
+  color,
+  icon,
+  size,
+}: WaveButtonProps) {
+  const colors = useThemeColors();
     return (
         <View style={[styles.container, { width: size * 4, height: size * 3 }]}>
             <TouchableOpacity style={[{ width: size,
@@ -28,7 +34,7 @@ export default function WaveButton({ onPress, color, icon, size }: WaveButtonPro
                             {width: size, height: size, borderRadius: size, backgroundColor: color}]}/>
                         )
                     })}
-                <Feather name={icon as keyof typeof Feather.glyphMap} size={size / 2} color={Colors.brightText} />
+                <Feather name={icon as keyof typeof Feather.glyphMap} size={size / 2} color={colors.brightText} />
             </TouchableOpacity>
         </View>
     );

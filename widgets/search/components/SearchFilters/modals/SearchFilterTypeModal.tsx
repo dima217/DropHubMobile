@@ -1,4 +1,4 @@
-import { Colors } from "@/constants/design-tokens";
+import { useThemeColors } from "@/hooks/useThemeColors";
 import { ThemedText } from "@/shared/core/ThemedText";
 import { Feather } from "@expo/vector-icons";
 import React, { useMemo } from "react";
@@ -23,6 +23,74 @@ export const SearchFilterTypeModal: React.FC<SearchFilterTypeModalProps> = ({
   onSelect,
   onClose,
 }) => {
+  const colors = useThemeColors();
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        overlay: {
+          flex: 1,
+          backgroundColor: "rgba(0,0,0,0.5)",
+          justifyContent: "flex-end",
+        },
+        sheet: {
+          backgroundColor: colors.background,
+          borderTopLeftRadius: 20,
+          borderTopRightRadius: 20,
+          paddingHorizontal: 20,
+          paddingBottom: 32,
+          maxHeight: "70%",
+        },
+        header: {
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+          paddingVertical: 16,
+          borderBottomWidth: 1,
+          borderBottomColor: colors.border,
+        },
+        title: {
+          fontSize: 18,
+          fontWeight: "600",
+          color: colors.brightText,
+        },
+        closeBtn: {
+          padding: 4,
+        },
+        list: {
+          paddingTop: 8,
+        },
+        row: {
+          flexDirection: "row",
+          alignItems: "center",
+          paddingVertical: 14,
+          gap: 12,
+        },
+        label: {
+          flex: 1,
+          fontSize: 16,
+          color: colors.text,
+        },
+        labelActive: {
+          color: colors.brightText,
+          fontWeight: "500",
+        },
+        checkbox: {
+          width: 22,
+          height: 22,
+          borderRadius: 6,
+          borderWidth: 2,
+          borderColor: colors.border,
+          alignItems: "center",
+          justifyContent: "center",
+        },
+        checkboxChecked: {
+          backgroundColor: colors.primary,
+          borderColor: colors.primary,
+        },
+      }),
+    [colors]
+  );
+
   const selectedSet = useMemo(
     () => new Set(selectedMimeTypes),
     [selectedMimeTypes]
@@ -51,7 +119,7 @@ export const SearchFilterTypeModal: React.FC<SearchFilterTypeModalProps> = ({
           <View style={styles.header}>
             <ThemedText style={styles.title}>Тип файла</ThemedText>
             <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
-              <Feather name="x" size={24} color={Colors.brightText} />
+              <Feather name="x" size={24} color={colors.brightText} />
             </TouchableOpacity>
           </View>
           <View style={styles.list}>
@@ -65,9 +133,9 @@ export const SearchFilterTypeModal: React.FC<SearchFilterTypeModalProps> = ({
                   activeOpacity={0.7}
                 >
                   <Feather
-                    name={opt.icon as any}
+                    name={opt.icon as keyof typeof Feather.glyphMap}
                     size={22}
-                    color={isChecked ? Colors.primary : Colors.secondary}
+                    color={isChecked ? colors.primary : colors.secondary}
                   />
                   <ThemedText
                     style={[styles.label, isChecked && styles.labelActive]}
@@ -85,7 +153,7 @@ export const SearchFilterTypeModal: React.FC<SearchFilterTypeModalProps> = ({
                       <Feather
                         name="check"
                         size={14}
-                        color={Colors.brightText}
+                        color="#FFFFFF"
                       />
                     )}
                   </View>
@@ -98,66 +166,3 @@ export const SearchFilterTypeModal: React.FC<SearchFilterTypeModalProps> = ({
     </Modal>
   );
 };
-
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "flex-end",
-  },
-  sheet: {
-    backgroundColor: Colors.background,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    paddingHorizontal: 20,
-    paddingBottom: 32,
-    maxHeight: "70%",
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: Colors.brightText,
-  },
-  closeBtn: {
-    padding: 4,
-  },
-  list: {
-    paddingTop: 8,
-  },
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 14,
-    gap: 12,
-  },
-  label: {
-    flex: 1,
-    fontSize: 16,
-    color: Colors.text,
-  },
-  labelActive: {
-    color: Colors.brightText,
-    fontWeight: "500",
-  },
-  checkbox: {
-    width: 22,
-    height: 22,
-    borderRadius: 6,
-    borderWidth: 2,
-    borderColor: Colors.border,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  checkboxChecked: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
-  },
-});

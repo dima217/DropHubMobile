@@ -1,6 +1,8 @@
 import { useSearchQuery } from "@/api/searchApi";
 import { SearchResourceType } from "@/api/types/search";
-import { Colors } from "@/constants/design-tokens";
+import { useThemedStyles } from "@/hooks/useThemedStyles";
+import { useThemeColors } from "@/hooks/useThemeColors";
+
 import Header from "@/shared/Header";
 import SearchInput from "@/shared/SearchInput";
 import View from "@/shared/View";
@@ -19,6 +21,32 @@ import {
 const SEARCH_HISTORY_KEY = "@search_history";
 
 const GlobalSearchScreen = () => {
+  const themeColors = useThemeColors();
+  const styles = useThemedStyles((c) => ({
+
+  container: {
+    gap: 16,
+  },
+  filtersContainer: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 12,
+    marginBottom: 8,
+  },
+  filtersExpand: {
+    flex: 1,
+  },
+  searchButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: c.primary,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+}));
+
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedResourceType, setSelectedResourceType] =
     useState<SearchResourceType>(SearchResourceType.ALL);
@@ -86,7 +114,7 @@ const GlobalSearchScreen = () => {
           />
         </RNView>
         <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
-          <Feather name="search" size={20} color={Colors.brightText} />
+          <Feather name="search" size={20} color={themeColors.brightText} />
         </TouchableOpacity>
       </RNView>
 
@@ -106,28 +134,5 @@ const GlobalSearchScreen = () => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    gap: 16,
-  },
-  filtersContainer: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 12,
-    marginBottom: 8,
-  },
-  filtersExpand: {
-    flex: 1,
-  },
-  searchButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: Colors.primary,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-});
 
 export default GlobalSearchScreen;

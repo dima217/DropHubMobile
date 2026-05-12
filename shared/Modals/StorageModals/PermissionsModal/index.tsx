@@ -4,7 +4,9 @@ import {
 } from "@/api/sharedApi";
 import { AccessRole } from "@/api/types/room";
 import { ResourceType } from "@/api/types/shared";
-import { Colors } from "@/constants/design-tokens";
+import { useThemedStyles } from "@/hooks/useThemedStyles";
+import { useThemeColors } from "@/hooks/useThemeColors";
+
 import { ThemedText } from "@/shared/core/ThemedText";
 import ActivityIndicator from "@/shared/ui/ActivityIndicator";
 import React from "react";
@@ -39,6 +41,87 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
   storageId,
   onPermissionsChanged,
 }) => {
+  const themeColors = useThemeColors();
+  const styles = useThemedStyles((c) => ({
+
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "flex-end",
+  },
+  container: {
+    backgroundColor: c.background,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    maxHeight: "80%",
+    padding: 20,
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: "600",
+    color: c.brightText,
+  },
+  closeButton: {
+    padding: 4,
+  },
+  center: {
+    padding: 40,
+    alignItems: "center",
+  },
+  listContent: {
+    paddingBottom: 20,
+  },
+  participantItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 12,
+    borderRadius: 12,
+    backgroundColor: c.cardBackground,
+    marginBottom: 8,
+    gap: 12,
+  },
+  avatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+  },
+  participantInfo: {
+    flex: 1,
+    gap: 4,
+  },
+  participantName: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: c.brightText,
+  },
+  participantEmail: {
+    fontSize: 12,
+    color: c.secondary,
+  },
+  participantRole: {
+    fontSize: 12,
+    color: c.primary,
+  },
+  revokeButton: {
+    padding: 4,
+  },
+  emptyContainer: {
+    padding: 40,
+    alignItems: "center",
+  },
+  emptyText: {
+    color: c.secondary,
+    fontSize: 14,
+  },
+
+}));
+
   const { data: participants, isLoading, refetch } = useGetSharedItemParticipantsQuery(
     { itemId },
     { skip: !itemId || !visible }
@@ -69,7 +152,7 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
           <View style={styles.header}>
             <ThemedText style={styles.title}>Права доступа</ThemedText>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <Feather name="x" size={24} color={Colors.brightText} />
+              <Feather name="x" size={24} color={themeColors.brightText} />
             </TouchableOpacity>
           </View>
 
@@ -104,7 +187,7 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
                       onPress={() => handleRevoke(item.userId, item.role)}
                       style={styles.revokeButton}
                     >
-                      <Feather name="x-circle" size={20} color={Colors.reject} />
+                      <Feather name="x-circle" size={20} color={themeColors.reject} />
                     </TouchableOpacity>
                   )}
                 </View>
@@ -125,83 +208,4 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    justifyContent: "flex-end",
-  },
-  container: {
-    backgroundColor: Colors.background,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    maxHeight: "80%",
-    padding: 20,
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: "600",
-    color: Colors.brightText,
-  },
-  closeButton: {
-    padding: 4,
-  },
-  center: {
-    padding: 40,
-    alignItems: "center",
-  },
-  listContent: {
-    paddingBottom: 20,
-  },
-  participantItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 12,
-    borderRadius: 12,
-    backgroundColor: Colors.cardBackground,
-    marginBottom: 8,
-    gap: 12,
-  },
-  avatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-  },
-  participantInfo: {
-    flex: 1,
-    gap: 4,
-  },
-  participantName: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: Colors.brightText,
-  },
-  participantEmail: {
-    fontSize: 12,
-    color: Colors.secondary,
-  },
-  participantRole: {
-    fontSize: 12,
-    color: Colors.primary,
-  },
-  revokeButton: {
-    padding: 4,
-  },
-  emptyContainer: {
-    padding: 40,
-    alignItems: "center",
-  },
-  emptyText: {
-    color: Colors.secondary,
-    fontSize: 14,
-  },
-});
-
 export default PermissionsModal;
-

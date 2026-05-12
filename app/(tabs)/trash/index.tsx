@@ -7,7 +7,9 @@ import {
   useRestoreTrashItemMutation,
 } from "@/api/storageApi";
 import { StorageBatchResponse, StorageItem } from "@/api/types/storage";
-import { Colors } from "@/constants/design-tokens";
+import { useThemedStyles } from "@/hooks/useThemedStyles";
+import { useThemeColors } from "@/hooks/useThemeColors";
+
 import Header from "@/shared/Header";
 import View from "@/shared/View";
 import { ThemedText } from "@/shared/core/ThemedText";
@@ -55,6 +57,49 @@ function mergeBatchResponses(parts: StorageBatchResponse[]): StorageBatchRespons
 }
 
 const TrashScreen = () => {
+  const themeColors = useThemeColors();
+  const styles = useThemedStyles((c) => ({
+
+  center: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingTop: 100,
+  },
+  headerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 16,
+    marginBottom: 8,
+    gap: 8,
+    paddingHorizontal: 4,
+  },
+  breadcrumbContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingRight: 8,
+    flexGrow: 1,
+  },
+  clearTrashText: {
+    color: c.reject,
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  clearTrashBtnDisabled: {
+    opacity: 0.4,
+  },
+  emptyContainer: {
+    padding: 40,
+    alignItems: "center",
+  },
+  emptyText: {
+    color: c.secondary,
+    fontSize: 14,
+  },
+
+}));
+
   const { tl } = useI18n();
   const { data: storageInfo } = useGetStorageInfoQuery();
   const storageId = storageInfo?.id || "";
@@ -367,7 +412,7 @@ const TrashScreen = () => {
 
       {isLoading ? (
         <RNView style={styles.center}>
-          <ActivityIndicator size="large" color={Colors.primary} />
+          <ActivityIndicator size="large" color={themeColors.primary} />
         </RNView>
       ) : (
         <>
@@ -421,45 +466,5 @@ const TrashScreen = () => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  center: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingTop: 100,
-  },
-  headerRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginTop: 16,
-    marginBottom: 8,
-    gap: 8,
-    paddingHorizontal: 4,
-  },
-  breadcrumbContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingRight: 8,
-    flexGrow: 1,
-  },
-  clearTrashText: {
-    color: Colors.reject,
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  clearTrashBtnDisabled: {
-    opacity: 0.4,
-  },
-  emptyContainer: {
-    padding: 40,
-    alignItems: "center",
-  },
-  emptyText: {
-    color: Colors.secondary,
-    fontSize: 14,
-  },
-});
 
 export default TrashScreen;

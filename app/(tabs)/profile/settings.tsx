@@ -1,4 +1,5 @@
-import { Colors } from "@/constants/design-tokens";
+import { useThemedStyles } from "@/hooks/useThemedStyles";
+
 import { ThemedText } from "@/shared/core/ThemedText";
 import Header from "@/shared/Header";
 import { useI18n } from "@/shared/localization";
@@ -9,6 +10,48 @@ import { Pressable, StyleSheet } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 
 const Settings = () => {
+  const styles = useThemedStyles((c) => ({
+
+  content: {
+    paddingTop: 30,
+    paddingHorizontal: 20,
+  },
+  label: {
+    marginBottom: 20,
+    color: c.text,
+  },
+  languageOption: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    marginBottom: 12,
+    borderRadius: 12,
+    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    borderWidth: 1,
+    borderColor: c.inactive,
+  },
+  languageOptionActive: {
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    borderColor: c.primary,
+  },
+  languageText: {
+    fontSize: 16,
+    color: c.text,
+  },
+  languageTextActive: {
+    color: c.primary,
+    fontWeight: "600",
+  },
+  checkmark: {
+    fontSize: 20,
+    color: c.primary,
+    fontWeight: "bold",
+  },
+
+}));
+
   const dispatch = useDispatch();
   const { t } = useI18n();
   const selectedLanguage = useSelector(
@@ -54,45 +97,5 @@ const Settings = () => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  content: {
-    paddingTop: 30,
-    paddingHorizontal: 20,
-  },
-  label: {
-    marginBottom: 20,
-    color: Colors.text,
-  },
-  languageOption: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-    marginBottom: 12,
-    borderRadius: 12,
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
-    borderWidth: 1,
-    borderColor: Colors.inactive,
-  },
-  languageOptionActive: {
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
-    borderColor: Colors.primary,
-  },
-  languageText: {
-    fontSize: 16,
-    color: Colors.text,
-  },
-  languageTextActive: {
-    color: Colors.primary,
-    fontWeight: "600",
-  },
-  checkmark: {
-    fontSize: 20,
-    color: Colors.primary,
-    fontWeight: "bold",
-  },
-});
 
 export default Settings;

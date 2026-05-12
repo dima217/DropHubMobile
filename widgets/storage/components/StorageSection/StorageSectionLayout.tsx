@@ -1,8 +1,8 @@
-import { Colors } from "@/constants/design-tokens";
+import { useThemeColors } from "@/hooks/useThemeColors";
 import ConversionPickerModal from "@/shared/Modals/ConversionPickerModal";
 import MultiSelectBar from "@/shared/ui/MultiSelectBar";
 import PreviewToggleSwitch from "@/shared/ui/PreviewToggleSwitch";
-import React from "react";
+import React, { useMemo } from "react";
 import {
   ActivityIndicator,
   View as RNView,
@@ -16,11 +16,16 @@ import { StorageSectionModals } from "./StorageSectionModals";
 import { StorageBatchDestinationBanner } from "./components/StorageBatchDestinationBanner";
 import { StorageBatchTagsModal } from "./components/StorageBatchTagsModal";
 import type { StorageSectionViewModel } from "./hooks/useStorageSectionController";
-import { storageSectionStyles as styles } from "./styles";
+import { createStorageSectionStyles } from "./styles";
 
 type Props = { vm: StorageSectionViewModel };
 
 export function StorageSectionLayout({ vm }: Props) {
+  const themeColors = useThemeColors();
+  const styles = useMemo(
+    () => createStorageSectionStyles(themeColors),
+    [themeColors]
+  );
   const {
     options,
     isLoading,
@@ -95,7 +100,7 @@ export function StorageSectionLayout({ vm }: Props) {
     <View style={styles.container}>
       {isLoading && (
         <RNView style={styles.center}>
-          <ActivityIndicator size="large" color={Colors.primary} />
+          <ActivityIndicator size="large" color={themeColors.primary} />
         </RNView>
       )}
 

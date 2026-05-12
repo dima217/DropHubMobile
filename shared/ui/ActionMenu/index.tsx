@@ -1,4 +1,6 @@
-import { Colors } from "@/constants/design-tokens";
+import { useThemedStyles } from "@/hooks/useThemedStyles";
+import { useThemeColors } from "@/hooks/useThemeColors";
+
 import { Feather } from "@expo/vector-icons";
 import React, { useState } from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
@@ -11,6 +13,21 @@ interface ActionMenuProps {
 }
 
 const ActionMenu: React.FC<ActionMenuProps> = ({ items, title }) => {
+  const themeColors = useThemeColors();
+  const styles = useThemedStyles((c) => ({
+
+  button: {
+    padding: 4,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  itemsContainer: {
+    width: "100%",
+    gap: 8,
+  },
+
+}));
+
   const [isVisible, setIsVisible] = useState(false);
 
   const handleOpen = () => {
@@ -35,7 +52,7 @@ const ActionMenu: React.FC<ActionMenuProps> = ({ items, title }) => {
         style={styles.button}
         activeOpacity={0.7}
       >
-        <Feather name="more-vertical" size={20} color={Colors.brightText} />
+        <Feather name="more-vertical" size={20} color={themeColors.brightText} />
       </TouchableOpacity>
 
       <BottomActionSheet
@@ -57,17 +74,4 @@ const ActionMenu: React.FC<ActionMenuProps> = ({ items, title }) => {
   );
 };
 
-const styles = StyleSheet.create({
-  button: {
-    padding: 4,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  itemsContainer: {
-    width: "100%",
-    gap: 8,
-  },
-});
-
 export default ActionMenu;
-

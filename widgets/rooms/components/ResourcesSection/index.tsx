@@ -1,5 +1,6 @@
 import { FileItem } from '@/api/types/file';
-import { Colors } from '@/constants/design-tokens';
+import { useThemedStyles } from "@/hooks/useThemedStyles";
+
 import { ThemedText } from '@/shared/core/ThemedText';
 import { ActionMenuItemData } from '@/shared/ui/ActionMenu/ActionMenuItem';
 import PreviewToggleSwitch from '@/shared/ui/PreviewToggleSwitch';
@@ -53,6 +54,30 @@ const ResourcesSection: React.FC<ResourcesSectionProps> = ({
   onSelectionChange,
   isMultiSelectMode = false,
 }) => {
+  const styles = useThemedStyles((c) => ({
+
+  container: {
+    flex: 1,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: c.border,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: c.brightText,
+  },
+  listContent: {
+    paddingVertical: 16,
+  },
+
+}));
+
   const [previewEnabled, setPreviewEnabled] = useState(false);
   const handleFilePress = (file: FileItem) => {
     if (onFilePress) {
@@ -153,27 +178,5 @@ const ResourcesSection: React.FC<ResourcesSectionProps> = ({
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: Colors.brightText,
-  },
-  listContent: {
-    paddingVertical: 16,
-  },
-});
 
 export default ResourcesSection;

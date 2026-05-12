@@ -1,7 +1,8 @@
+import { useThemeColors } from "@/hooks/useThemeColors";
 import { ThemedText } from "@/shared/core/ThemedText";
-import React from "react";
+import React, { useMemo } from "react";
 import { TouchableOpacity, View as RNView } from "react-native";
-import { storageSectionStyles } from "../styles";
+import { createStorageSectionStyles } from "../styles";
 
 type BatchDest = { kind: "move" | "copy"; itemIds: string[] };
 
@@ -18,22 +19,24 @@ export function StorageBatchDestinationBanner({
   onCancel,
   onConfirm,
 }: Props) {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStorageSectionStyles(colors), [colors]);
   return (
-    <RNView style={storageSectionStyles.batchDestinationBanner}>
-      <ThemedText style={storageSectionStyles.batchDestinationText}>
+    <RNView style={styles.batchDestinationBanner}>
+      <ThemedText style={styles.batchDestinationText}>
         {batchDestination.kind === "move" ? "Переместить" : "Копировать"}{" "}
         {batchDestination.itemIds.length} эл. → откройте папку назначения (хлебные
         крошки), затем подтвердите.
       </ThemedText>
       {batchDestination.kind === "move" && isBatchMoveDestinationInvalid && (
-        <ThemedText style={storageSectionStyles.batchDestinationWarning}>
+        <ThemedText style={styles.batchDestinationWarning}>
           Сюда нельзя: текущая папка совпадает с перемещаемой или входит в
           выделение.
         </ThemedText>
       )}
-      <RNView style={storageSectionStyles.batchDestinationActions}>
+      <RNView style={styles.batchDestinationActions}>
         <TouchableOpacity onPress={onCancel}>
-          <ThemedText style={storageSectionStyles.batchDestinationCancel}>
+          <ThemedText style={styles.batchDestinationCancel}>
             Отмена
           </ThemedText>
         </TouchableOpacity>
@@ -45,10 +48,10 @@ export function StorageBatchDestinationBanner({
         >
           <ThemedText
             style={[
-              storageSectionStyles.batchDestinationConfirm,
+              styles.batchDestinationConfirm,
               batchDestination.kind === "move" &&
                 isBatchMoveDestinationInvalid &&
-                storageSectionStyles.batchDestinationConfirmDisabled,
+                styles.batchDestinationConfirmDisabled,
             ]}
           >
             {batchDestination.kind === "move"

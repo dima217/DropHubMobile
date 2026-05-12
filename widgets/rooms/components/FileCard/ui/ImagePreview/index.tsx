@@ -1,7 +1,8 @@
+import { useThemeColors } from '@/hooks/useThemeColors';
 import { Image } from 'expo-image';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { TouchableOpacity } from 'react-native';
-import { styles } from '../../styles';
+import createFileCardStyles from '../../styles';
 
 interface ImagePreviewProps {
   uri: string;
@@ -9,6 +10,8 @@ interface ImagePreviewProps {
 }
 
 const ImagePreview = ({ uri, onOpenFull }: ImagePreviewProps) => {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createFileCardStyles(colors), [colors]);
   return (
     <TouchableOpacity
       style={styles.previewContainer}

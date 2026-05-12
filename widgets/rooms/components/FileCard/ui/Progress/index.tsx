@@ -1,13 +1,16 @@
+import { useThemeColors } from '@/hooks/useThemeColors';
 import { ThemedText } from '@/shared/core/ThemedText';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View } from 'react-native';
-import { styles } from '../../styles';
+import createFileCardStyles from '../../styles';
 
 interface ProgressProps {
   progress: number;
 }
 
 const Progress = ({ progress }: ProgressProps) => {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createFileCardStyles(colors), [colors]);
   return (
     <View style={styles.progressContainer}>
       <View style={styles.progressBar}>

@@ -1,4 +1,6 @@
-import { Colors } from "@/constants/design-tokens";
+import { useThemedStyles } from "@/hooks/useThemedStyles";
+import { useThemeColors } from "@/hooks/useThemeColors";
+
 import Avatar from "@/widgets/profile/components/ProfileCard/ui/Avatar";
 import { Feather } from "@expo/vector-icons";
 import React from "react";
@@ -31,6 +33,43 @@ const SharedUsersPreview: React.FC<SharedUsersPreviewProps> = ({
   users = [],
   maxVisible = 3,
 }) => {
+  const themeColors = useThemeColors();
+  const styles = useThemedStyles((c) => ({
+
+  container: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 4,
+    gap: 6,
+  },
+  avatarsRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  avatarWrapper: {
+    marginRight: -8,
+  },
+  avatarOverlap: {
+    marginLeft: -8,
+  },
+  more: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: c.inactive,
+    borderWidth: 2,
+    borderColor: c.cardBackground,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  moreText: {
+    fontSize: 10,
+    color: c.brightText,
+    fontWeight: "600",
+  },
+
+}));
+
   if (!users.length) return null;
 
   const visible = users.slice(0, maxVisible);
@@ -38,7 +77,7 @@ const SharedUsersPreview: React.FC<SharedUsersPreviewProps> = ({
 
   return (
     <View style={styles.container}>
-      <Feather name="user" size={13} color={Colors.secondary} />
+      <Feather name="user" size={13} color={themeColors.secondary} />
       <View style={styles.avatarsRow}>
         {visible.map((user, index) => {
           const label = getPrimaryLabel(user);
@@ -65,39 +104,5 @@ const SharedUsersPreview: React.FC<SharedUsersPreviewProps> = ({
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 4,
-    gap: 6,
-  },
-  avatarsRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  avatarWrapper: {
-    marginRight: -8,
-  },
-  avatarOverlap: {
-    marginLeft: -8,
-  },
-  more: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: Colors.inactive,
-    borderWidth: 2,
-    borderColor: Colors.cardBackground,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  moreText: {
-    fontSize: 10,
-    color: Colors.brightText,
-    fontWeight: "600",
-  },
-});
 
 export default SharedUsersPreview;

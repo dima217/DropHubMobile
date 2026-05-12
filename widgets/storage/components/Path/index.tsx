@@ -1,11 +1,11 @@
-import { Colors } from "@/constants/design-tokens";
-import React from "react";
+import { useThemeColors } from "@/hooks/useThemeColors";
+import React, { useMemo } from "react";
 import {
-    View as RNView,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
+  View as RNView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
 } from "react-native";
 
 export interface BreadcrumbSegment {
@@ -22,6 +22,41 @@ export const StorageBreadcrumbs: React.FC<StorageBreadcrumbsProps> = ({
   path,
   onNavigate,
 }) => {
+  const colors = useThemeColors();
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        container: {
+          flexDirection: "row",
+          alignItems: "center",
+          paddingRight: 8,
+        },
+        itemWrapper: {
+          flexDirection: "row",
+          alignItems: "center",
+        },
+        text: {
+          color: colors.text,
+          fontSize: 14,
+        },
+        textActive: {
+          color: colors.primary,
+          fontWeight: "600",
+        },
+        underline: {
+          height: 2,
+          backgroundColor: colors.primary,
+          marginTop: 2,
+          borderRadius: 1,
+        },
+        separator: {
+          color: colors.secondary,
+          marginHorizontal: 4,
+        },
+      }),
+    [colors]
+  );
+
   return (
     <ScrollView
       horizontal
@@ -40,12 +75,7 @@ export const StorageBreadcrumbs: React.FC<StorageBreadcrumbsProps> = ({
               disabled={isLast}
               onPress={() => onNavigate(segment.id, index)}
             >
-              <Text
-                style={[
-                  styles.text,
-                  isLast && styles.textActive,
-                ]}
-              >
+              <Text style={[styles.text, isLast && styles.textActive]}>
                 {segment.name}
               </Text>
 
@@ -61,33 +91,3 @@ export const StorageBreadcrumbs: React.FC<StorageBreadcrumbsProps> = ({
     </ScrollView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingRight: 8,
-  },
-  itemWrapper: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  text: {
-    color: Colors.text,
-    fontSize: 14,
-  },
-  textActive: {
-    color: Colors.primary,
-    fontWeight: "600",
-  },
-  underline: {
-    height: 2,
-    backgroundColor: Colors.primary,
-    marginTop: 2,
-    borderRadius: 1,
-  },
-  separator: {
-    color: Colors.secondary,
-    marginHorizontal: 4,
-  },
-});

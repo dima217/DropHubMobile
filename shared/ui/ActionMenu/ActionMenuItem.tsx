@@ -1,4 +1,6 @@
-import { Colors } from "@/constants/design-tokens";
+import { useThemedStyles } from "@/hooks/useThemedStyles";
+import { useThemeColors } from "@/hooks/useThemeColors";
+
 import { ThemedText } from "@/shared/core/ThemedText";
 import React from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
@@ -19,6 +21,47 @@ interface ActionMenuItemProps {
 }
 
 const ActionMenuItem: React.FC<ActionMenuItemProps> = ({ item, onPress }) => {
+  const themeColors = useThemeColors();
+  const styles = useThemedStyles((c) => ({
+
+  item: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    backgroundColor: c.cardBackground,
+    marginBottom: 8,
+    gap: 12,
+  },
+  itemDisabled: {
+    opacity: 0.5,
+  },
+  iconContainer: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: c.inactive,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  iconContainerDestructive: {
+    backgroundColor: `${c.reject}20`,
+  },
+  label: {
+    flex: 1,
+    fontSize: 16,
+    color: c.brightText,
+  },
+  labelDestructive: {
+    color: c.reject,
+  },
+  labelDisabled: {
+    color: c.secondary,
+  },
+
+}));
+
   return (
     <TouchableOpacity
       style={[
@@ -39,10 +82,10 @@ const ActionMenuItem: React.FC<ActionMenuItemProps> = ({ item, onPress }) => {
           size={20}
           color={
             item.disabled
-              ? Colors.secondary
+              ? themeColors.secondary
               : item.destructive
-              ? Colors.reject
-              : Colors.primary
+              ? themeColors.reject
+              : themeColors.primary
           }
         />
       </View>
@@ -59,43 +102,4 @@ const ActionMenuItem: React.FC<ActionMenuItemProps> = ({ item, onPress }) => {
   );
 };
 
-const styles = StyleSheet.create({
-  item: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    backgroundColor: Colors.cardBackground,
-    marginBottom: 8,
-    gap: 12,
-  },
-  itemDisabled: {
-    opacity: 0.5,
-  },
-  iconContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: Colors.inactive,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  iconContainerDestructive: {
-    backgroundColor: `${Colors.reject}20`,
-  },
-  label: {
-    flex: 1,
-    fontSize: 16,
-    color: Colors.brightText,
-  },
-  labelDestructive: {
-    color: Colors.reject,
-  },
-  labelDisabled: {
-    color: Colors.secondary,
-  },
-});
-
 export default ActionMenuItem;
-

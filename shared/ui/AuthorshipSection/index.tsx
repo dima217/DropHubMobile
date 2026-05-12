@@ -1,4 +1,5 @@
-import { Colors } from '@/constants/design-tokens';
+import { useThemedStyles } from "@/hooks/useThemedStyles";
+
 import { ThemedText } from '@/shared/core/ThemedText';
 import Avatar from '@/widgets/profile/components/ProfileCard/ui/Avatar';
 import React from 'react';
@@ -15,6 +16,22 @@ const AuthorshipSection: React.FC<AuthorshipSectionProps> = ({
   firstName,
   userId,
 }) => {
+  const styles = useThemedStyles((c) => ({
+
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 8,
+  },
+  name: {
+    fontSize: 12,
+    color: c.text,
+    fontWeight: '500',
+  },
+
+}));
+
   if (!firstName && !userId) {
     return null;
   }
@@ -36,19 +53,4 @@ const AuthorshipSection: React.FC<AuthorshipSectionProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 8,
-  },
-  name: {
-    fontSize: 12,
-    color: Colors.text,
-    fontWeight: '500',
-  },
-});
-
 export default AuthorshipSection;
-

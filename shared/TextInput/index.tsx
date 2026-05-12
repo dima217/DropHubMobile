@@ -1,6 +1,7 @@
-import React from "react";
-import { TextInput as RNTextInput, Text, View } from "react-native";
+import { useThemeColors } from "@/hooks/useThemeColors";
 import { useI18n } from "@/shared/localization";
+import React, { useMemo } from "react";
+import { TextInput as RNTextInput, Text, View } from "react-native";
 
 import type {
   TextInputProps as RNTextInputProps,
@@ -9,7 +10,7 @@ import type {
   ViewStyle,
 } from "react-native";
 
-import styles from "./styles";
+import createTextInputStyles from "./styles";
 
 export interface TextInputProps extends Omit<RNTextInputProps, "style"> {
   label?: string;
@@ -32,6 +33,8 @@ const TextInput = ({
   ...rest
 }: TextInputProps) => {
   const { tl } = useI18n();
+  const colors = useThemeColors();
+  const styles = useMemo(() => createTextInputStyles(colors), [colors]);
   const hasError = Boolean(errorMessage);
   const localizedLabel = label ? tl(label) : undefined;
   const localizedError = errorMessage ? tl(errorMessage) : undefined;
@@ -57,6 +60,7 @@ const TextInput = ({
           editable={editable}
           enablesReturnKeyAutomatically
           multiline={multiline}
+          placeholderTextColor={colors.secondary}
           {...rest}
           placeholder={localizedPlaceholder}
         />

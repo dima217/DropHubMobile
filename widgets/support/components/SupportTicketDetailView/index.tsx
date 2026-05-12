@@ -1,5 +1,7 @@
 import type { SupportTicket } from "@/api/types/support";
-import { Colors } from "@/constants/design-tokens";
+import { useThemedStyles } from "@/hooks/useThemedStyles";
+import { useThemeColors } from "@/hooks/useThemeColors";
+
 import { ThemedText } from "@/shared/core/ThemedText";
 import SupportTicketStatusBadge from "@/widgets/support/components/SupportTicketStatusBadge";
 import { supportStatusColor } from "@/widgets/support/data/supportStatus";
@@ -41,104 +43,14 @@ const SupportTicketDetailView: React.FC<SupportTicketDetailViewProps> = ({
   resetLinkLabel,
   onResetPress,
 }) => {
-  const statusTint = supportStatusColor(ticket.status);
+  const themeColors = useThemeColors();
+  const styles = useThemedStyles((c) => ({
 
-  return (
-    <View style={styles.card}>
-      <View style={[styles.statusStripe, { backgroundColor: statusTint }]} />
-
-      <View style={styles.header}>
-        <View style={styles.titleBlock}>
-          <View style={[styles.iconCircle, { borderColor: statusTint + "55" }]}>
-            <Feather name="layers" size={20} color={statusTint} />
-          </View>
-          <View style={styles.titleTextWrap}>
-            <ThemedText style={styles.eyebrow}>Обращение в поддержку</ThemedText>
-            <ThemedText style={styles.ticketTitle}>{ticket.title}</ThemedText>
-          </View>
-        </View>
-        <SupportTicketStatusBadge status={ticket.status} />
-      </View>
-
-      <View style={styles.metaRow}>
-        <View style={styles.metaCard}>
-          <Feather name="calendar" size={16} color={Colors.secondary} />
-          <ThemedText style={styles.metaLabel}>Создано</ThemedText>
-          <ThemedText style={styles.metaValue}>{formatWhen(ticket.createdAt)}</ThemedText>
-        </View>
-        <View style={styles.metaCard}>
-          <Feather name="clock" size={16} color={Colors.secondary} />
-          <ThemedText style={styles.metaLabel}>Обновлено</ThemedText>
-          <ThemedText style={styles.metaValue}>{formatWhen(ticket.updatedAt)}</ThemedText>
-        </View>
-      </View>
-
-      <View style={styles.section}>
-        <View style={styles.sectionTitleRow}>
-          <Feather name="align-left" size={15} color={Colors.primary} />
-          <ThemedText style={styles.sectionTitle}>{detailsHeading}</ThemedText>
-        </View>
-        <View style={styles.bodyBox}>
-          <ThemedText style={styles.body}>{ticket.details}</ThemedText>
-        </View>
-      </View>
-
-      {ticket.adminResponse ? (
-        <View style={styles.section}>
-          <View style={styles.sectionTitleRow}>
-            <Feather name="headphones" size={15} color={Colors.gradientPrimary} />
-            <ThemedText style={styles.sectionTitle}>Ответ поддержки</ThemedText>
-          </View>
-          <View
-            style={[styles.replyBox, { borderLeftColor: Colors.primary }]}
-          >
-            <ThemedText style={styles.replyBody}>{ticket.adminResponse}</ThemedText>
-            {ticket.respondedAt ? (
-              <View style={styles.replyFooter}>
-                <Feather name="check-circle" size={12} color={Colors.secondary} />
-                <ThemedText style={styles.replyMeta}>
-                  {formatWhen(ticket.respondedAt)}
-                </ThemedText>
-              </View>
-            ) : null}
-          </View>
-        </View>
-      ) : (
-        <View style={styles.pendingHint}>
-          <Feather name="coffee" size={16} color={Colors.secondary} />
-          <ThemedText style={styles.pendingText}>
-            Ожидает ответа. Мы уведомим, когда поддержка отреагирует.
-          </ThemedText>
-        </View>
-      )}
-
-      {isFetching ? (
-        <View style={styles.fetchRow}>
-          <ActivityIndicator color={Colors.primary} size="small" />
-          <ThemedText style={styles.fetchText}>Обновление…</ThemedText>
-        </View>
-      ) : null}
-
-      {resetLinkLabel && onResetPress ? (
-        <TouchableOpacity
-          style={styles.secondaryBtn}
-          onPress={onResetPress}
-          activeOpacity={0.75}
-        >
-          <Feather name="rotate-ccw" size={16} color={Colors.primary} />
-          <ThemedText style={styles.secondaryBtnText}>{resetLinkLabel}</ThemedText>
-        </TouchableOpacity>
-      ) : null}
-    </View>
-  );
-};
-
-const styles = StyleSheet.create({
   card: {
-    backgroundColor: Colors.cardBackground,
+    backgroundColor: c.cardBackground,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: c.border,
     overflow: "hidden",
   },
   statusStripe: {
@@ -166,7 +78,7 @@ const styles = StyleSheet.create({
     height: 44,
     borderRadius: 14,
     borderWidth: 1,
-    backgroundColor: Colors.listBackground,
+    backgroundColor: c.listBackground,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -174,12 +86,12 @@ const styles = StyleSheet.create({
   eyebrow: {
     fontSize: 11,
     fontWeight: "600",
-    color: Colors.secondary,
+    color: c.secondary,
     textTransform: "uppercase",
     letterSpacing: 0.6,
   },
   ticketTitle: {
-    color: Colors.brightText,
+    color: c.brightText,
     fontSize: 19,
     fontWeight: "700",
     lineHeight: 26,
@@ -193,16 +105,16 @@ const styles = StyleSheet.create({
   },
   metaCard: {
     flex: 1,
-    backgroundColor: Colors.listBackground,
+    backgroundColor: c.listBackground,
     borderRadius: 14,
     padding: 12,
     gap: 4,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: c.border,
   },
   metaLabel: {
     fontSize: 11,
-    color: Colors.secondary,
+    color: c.secondary,
     marginTop: 4,
     textTransform: "uppercase",
     letterSpacing: 0.4,
@@ -210,7 +122,7 @@ const styles = StyleSheet.create({
   metaValue: {
     fontSize: 14,
     fontWeight: "600",
-    color: Colors.brightText,
+    color: c.brightText,
   },
   section: {
     paddingHorizontal: 18,
@@ -225,30 +137,30 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 14,
     fontWeight: "700",
-    color: Colors.brightText,
+    color: c.brightText,
   },
   bodyBox: {
-    backgroundColor: Colors.listBackground,
+    backgroundColor: c.listBackground,
     borderRadius: 14,
     padding: 14,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: c.border,
   },
   body: {
-    color: Colors.text,
+    color: c.text,
     fontSize: 15,
     lineHeight: 24,
   },
   replyBox: {
-    backgroundColor: Colors.inactive,
+    backgroundColor: c.inactive,
     borderRadius: 14,
     padding: 14,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: c.border,
     borderLeftWidth: 3,
   },
   replyBody: {
-    color: Colors.brightText,
+    color: c.brightText,
     fontSize: 15,
     lineHeight: 24,
   },
@@ -258,7 +170,7 @@ const styles = StyleSheet.create({
     gap: 6,
     marginTop: 10,
   },
-  replyMeta: { fontSize: 12, color: Colors.secondary },
+  replyMeta: { fontSize: 12, color: c.secondary },
   pendingHint: {
     flexDirection: "row",
     alignItems: "center",
@@ -267,15 +179,15 @@ const styles = StyleSheet.create({
     marginVertical: 12,
     padding: 12,
     borderRadius: 12,
-    backgroundColor: Colors.listBackground,
+    backgroundColor: c.listBackground,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: c.border,
   },
   pendingText: {
     flex: 1,
     fontSize: 13,
     lineHeight: 18,
-    color: Colors.secondary,
+    color: c.secondary,
   },
   fetchRow: {
     flexDirection: "row",
@@ -284,7 +196,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     paddingVertical: 14,
   },
-  fetchText: { fontSize: 13, color: Colors.secondary },
+  fetchText: { fontSize: 13, color: c.secondary },
   secondaryBtn: {
     flexDirection: "row",
     alignItems: "center",
@@ -296,14 +208,107 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: Colors.primary,
-    backgroundColor: Colors.primary + "12",
+    borderColor: c.primary,
+    backgroundColor: c.primary + "12",
   },
   secondaryBtnText: {
-    color: Colors.primary,
+    color: c.primary,
     fontSize: 14,
     fontWeight: "600",
   },
-});
+
+}));
+
+  const statusTint = supportStatusColor(ticket.status);
+
+  return (
+    <View style={styles.card}>
+      <View style={[styles.statusStripe, { backgroundColor: statusTint }]} />
+
+      <View style={styles.header}>
+        <View style={styles.titleBlock}>
+          <View style={[styles.iconCircle, { borderColor: statusTint + "55" }]}>
+            <Feather name="layers" size={20} color={statusTint} />
+          </View>
+          <View style={styles.titleTextWrap}>
+            <ThemedText style={styles.eyebrow}>Обращение в поддержку</ThemedText>
+            <ThemedText style={styles.ticketTitle}>{ticket.title}</ThemedText>
+          </View>
+        </View>
+        <SupportTicketStatusBadge status={ticket.status} />
+      </View>
+
+      <View style={styles.metaRow}>
+        <View style={styles.metaCard}>
+          <Feather name="calendar" size={16} color={themeColors.secondary} />
+          <ThemedText style={styles.metaLabel}>Создано</ThemedText>
+          <ThemedText style={styles.metaValue}>{formatWhen(ticket.createdAt)}</ThemedText>
+        </View>
+        <View style={styles.metaCard}>
+          <Feather name="clock" size={16} color={themeColors.secondary} />
+          <ThemedText style={styles.metaLabel}>Обновлено</ThemedText>
+          <ThemedText style={styles.metaValue}>{formatWhen(ticket.updatedAt)}</ThemedText>
+        </View>
+      </View>
+
+      <View style={styles.section}>
+        <View style={styles.sectionTitleRow}>
+          <Feather name="align-left" size={15} color={themeColors.primary} />
+          <ThemedText style={styles.sectionTitle}>{detailsHeading}</ThemedText>
+        </View>
+        <View style={styles.bodyBox}>
+          <ThemedText style={styles.body}>{ticket.details}</ThemedText>
+        </View>
+      </View>
+
+      {ticket.adminResponse ? (
+        <View style={styles.section}>
+          <View style={styles.sectionTitleRow}>
+            <Feather name="headphones" size={15} color={themeColors.gradientPrimary} />
+            <ThemedText style={styles.sectionTitle}>Ответ поддержки</ThemedText>
+          </View>
+          <View
+            style={[styles.replyBox, { borderLeftColor: themeColors.primary }]}
+          >
+            <ThemedText style={styles.replyBody}>{ticket.adminResponse}</ThemedText>
+            {ticket.respondedAt ? (
+              <View style={styles.replyFooter}>
+                <Feather name="check-circle" size={12} color={themeColors.secondary} />
+                <ThemedText style={styles.replyMeta}>
+                  {formatWhen(ticket.respondedAt)}
+                </ThemedText>
+              </View>
+            ) : null}
+          </View>
+        </View>
+      ) : (
+        <View style={styles.pendingHint}>
+          <Feather name="coffee" size={16} color={themeColors.secondary} />
+          <ThemedText style={styles.pendingText}>
+            Ожидает ответа. Мы уведомим, когда поддержка отреагирует.
+          </ThemedText>
+        </View>
+      )}
+
+      {isFetching ? (
+        <View style={styles.fetchRow}>
+          <ActivityIndicator color={themeColors.primary} size="small" />
+          <ThemedText style={styles.fetchText}>Обновление…</ThemedText>
+        </View>
+      ) : null}
+
+      {resetLinkLabel && onResetPress ? (
+        <TouchableOpacity
+          style={styles.secondaryBtn}
+          onPress={onResetPress}
+          activeOpacity={0.75}
+        >
+          <Feather name="rotate-ccw" size={16} color={themeColors.primary} />
+          <ThemedText style={styles.secondaryBtnText}>{resetLinkLabel}</ThemedText>
+        </TouchableOpacity>
+      ) : null}
+    </View>
+  );
+};
 
 export default SupportTicketDetailView;

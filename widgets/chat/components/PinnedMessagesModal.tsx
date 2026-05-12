@@ -1,7 +1,7 @@
 import type { ChatChannelMessage } from "@/api/types/chatChannels";
-import { Colors } from "@/constants/design-tokens";
+import { useThemeColors } from "@/hooks/useThemeColors";
 import { Feather } from "@expo/vector-icons";
-import React from "react";
+import React, { useMemo } from "react";
 import {
   FlatList,
   Modal,
@@ -41,6 +41,109 @@ export function PinnedMessagesModal({
   messages,
   onUnpin,
 }: Props) {
+  const colors = useThemeColors();
+  const s = useMemo(
+    () =>
+      StyleSheet.create({
+        backdrop: {
+          flex: 1,
+          backgroundColor: "rgba(0,0,0,0.55)",
+          justifyContent: "flex-end",
+        },
+        sheet: {
+          maxHeight: "72%",
+          backgroundColor: colors.background,
+          borderTopLeftRadius: 20,
+          borderTopRightRadius: 20,
+          borderWidth: 1,
+          borderColor: colors.border,
+          paddingBottom: 24,
+        },
+        header: {
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+          paddingHorizontal: 20,
+          paddingVertical: 16,
+          borderBottomWidth: 1,
+          borderBottomColor: colors.border,
+        },
+        headerTitleRow: { flexDirection: "row", alignItems: "center" },
+        title: {
+          fontSize: 18,
+          fontWeight: "600",
+          color: colors.brightText,
+        },
+        titleSpaced: { marginLeft: 10, marginRight: 10 },
+        countBadge: {
+          minWidth: 24,
+          height: 22,
+          paddingHorizontal: 8,
+          borderRadius: 11,
+          backgroundColor: colors.cardBackground,
+          alignItems: "center",
+          justifyContent: "center",
+        },
+        countText: { fontSize: 12, fontWeight: "600", color: colors.primary },
+        closeBtn: { padding: 4 },
+        list: { padding: 16, paddingBottom: 24 },
+        pinRow: {
+          flexDirection: "row",
+          alignItems: "stretch",
+          backgroundColor: colors.cardBackground,
+          borderRadius: 12,
+          borderWidth: 1,
+          borderColor: colors.border,
+          overflow: "hidden",
+        },
+        unpinBtn: {
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          paddingHorizontal: 12,
+          paddingVertical: 8,
+          minWidth: 72,
+        },
+        unpinLabel: {
+          fontSize: 11,
+          fontWeight: "500",
+          color: colors.reject,
+          marginTop: 4,
+        },
+        pinAccent: {
+          width: 4,
+          backgroundColor: colors.primary,
+        },
+        pinBody: { flex: 1, padding: 12, gap: 4 },
+        pinAuthor: {
+          fontSize: 13,
+          fontWeight: "600",
+          color: colors.brightText,
+        },
+        pinContent: {
+          fontSize: 14,
+          color: colors.text,
+          lineHeight: 20,
+        },
+        pinMeta: {
+          fontSize: 11,
+          color: colors.secondary,
+          marginTop: 4,
+        },
+        empty: {
+          padding: 40,
+          alignItems: "center",
+          gap: 12,
+        },
+        emptyText: {
+          fontSize: 14,
+          color: colors.secondary,
+          textAlign: "center",
+        },
+      }),
+    [colors]
+  );
+
   return (
     <Modal
       visible={visible}
@@ -52,19 +155,19 @@ export function PinnedMessagesModal({
         <Pressable style={s.sheet} onPress={(e) => e.stopPropagation()}>
           <View style={s.header}>
             <View style={s.headerTitleRow}>
-              <Feather name="bookmark" size={20} color={Colors.primary} />
+              <Feather name="bookmark" size={20} color={colors.primary} />
               <Text style={[s.title, s.titleSpaced]}>Pinned</Text>
               <View style={s.countBadge}>
                 <Text style={s.countText}>{messages.length}</Text>
               </View>
             </View>
             <Pressable onPress={onClose} hitSlop={12} style={s.closeBtn}>
-              <Feather name="x" size={22} color={Colors.text} />
+              <Feather name="x" size={22} color={colors.text} />
             </Pressable>
           </View>
           {messages.length === 0 ? (
             <View style={s.empty}>
-              <Feather name="info" size={32} color={Colors.secondary} />
+              <Feather name="info" size={32} color={colors.secondary} />
               <Text style={s.emptyText}>No pinned messages in this chat</Text>
             </View>
           ) : (
@@ -94,7 +197,7 @@ export function PinnedMessagesModal({
                     accessibilityRole="button"
                     accessibilityLabel="Unpin message"
                   >
-                    <Feather name="x-circle" size={20} color={Colors.reject} />
+                    <Feather name="x-circle" size={20} color={colors.reject} />
                     <Text style={s.unpinLabel}>Unpin</Text>
                   </TouchableOpacity>
                 </View>
@@ -106,101 +209,3 @@ export function PinnedMessagesModal({
     </Modal>
   );
 }
-
-const s = StyleSheet.create({
-  backdrop: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.55)",
-    justifyContent: "flex-end",
-  },
-  sheet: {
-    maxHeight: "72%",
-    backgroundColor: Colors.background,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    paddingBottom: 24,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
-  },
-  headerTitleRow: { flexDirection: "row", alignItems: "center" },
-  title: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: Colors.brightText,
-  },
-  titleSpaced: { marginLeft: 10, marginRight: 10 },
-  countBadge: {
-    minWidth: 24,
-    height: 22,
-    paddingHorizontal: 8,
-    borderRadius: 11,
-    backgroundColor: Colors.cardBackground,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  countText: { fontSize: 12, fontWeight: "600", color: Colors.primary },
-  closeBtn: { padding: 4 },
-  list: { padding: 16, paddingBottom: 24 },
-  pinRow: {
-    flexDirection: "row",
-    alignItems: "stretch",
-    backgroundColor: Colors.cardBackground,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    overflow: "hidden",
-  },
-  unpinBtn: {
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    minWidth: 72,
-  },
-  unpinLabel: {
-    fontSize: 11,
-    fontWeight: "500",
-    color: Colors.reject,
-    marginTop: 4,
-  },
-  pinAccent: {
-    width: 4,
-    backgroundColor: Colors.primary,
-  },
-  pinBody: { flex: 1, padding: 12, gap: 4 },
-  pinAuthor: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: Colors.brightText,
-  },
-  pinContent: {
-    fontSize: 14,
-    color: Colors.text,
-    lineHeight: 20,
-  },
-  pinMeta: {
-    fontSize: 11,
-    color: Colors.secondary,
-    marginTop: 4,
-  },
-  empty: {
-    padding: 40,
-    alignItems: "center",
-    gap: 12,
-  },
-  emptyText: {
-    fontSize: 14,
-    color: Colors.secondary,
-    textAlign: "center",
-  },
-});

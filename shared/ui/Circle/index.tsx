@@ -1,11 +1,12 @@
-import { Colors } from "@/constants/design-tokens";
+import { useThemeColors } from "@/hooks/useThemeColors";
+import { useThemedStyles } from "@/hooks/useThemedStyles";
+
 import { ReactNode } from "react";
 import {
-  StyleProp,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-  ViewStyle,
+    StyleProp,
+    TouchableOpacity,
+    View,
+    ViewStyle
 } from "react-native";
 import { GestureDetector } from "react-native-gesture-handler";
 
@@ -20,7 +21,7 @@ interface CircleProps {
 }
 
 const Circle = ({
-  color = Colors.primary,
+  color,
   size = 50,
   fluid = false,
   gesture,
@@ -28,18 +29,30 @@ const Circle = ({
   children,
   style,
 }: CircleProps) => {
+  const themeColors = useThemeColors();
+  const fillColor = color ?? themeColors.primary;
+  const styles = useThemedStyles((c) => ({
+
+  circle: {
+    justifyContent: "center",
+    alignItems: "center",
+    overflow: "hidden",
+  },
+
+}));
+
   const circleStyle: ViewStyle = fluid
     ? {
         width: "100%",
         aspectRatio: 1,
         borderRadius: 9999,
-        backgroundColor: color,
+        backgroundColor: fillColor,
       }
     : {
         width: size,
         height: size,
         borderRadius: size / 2,
-        backgroundColor: color,
+        backgroundColor: fillColor,
       };
 
   const content = (
@@ -60,13 +73,5 @@ const Circle = ({
 
   return content;
 };
-
-const styles = StyleSheet.create({
-  circle: {
-    justifyContent: "center",
-    alignItems: "center",
-    overflow: "hidden",
-  },
-});
 
 export default Circle;

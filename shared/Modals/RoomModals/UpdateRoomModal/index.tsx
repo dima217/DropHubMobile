@@ -1,4 +1,5 @@
-import { Colors } from "@/constants/design-tokens";
+import { useThemedStyles } from "@/hooks/useThemedStyles";
+
 import { ThemedText } from "@/shared/core/ThemedText";
 import TextInput from "@/shared/TextInput";
 import React, { useEffect, useState } from "react";
@@ -24,6 +25,63 @@ const UpdateRoomModal: React.FC<UpdateRoomModalProps> = ({
   onClose,
   onUpdate,
 }) => {
+  const styles = useThemedStyles((c) => ({
+
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    paddingHorizontal: 20,
+  },
+  container: {
+    backgroundColor: c.background,
+    borderRadius: 12,
+    padding: 20,
+    maxHeight: "80%",
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: "600",
+    marginBottom: 16,
+  },
+  singleFileContainer: {
+    marginBottom: 16,
+  },
+  label: {
+    fontSize: 14,
+    marginBottom: 4,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: c.border,
+    borderRadius: 8,
+    padding: 8,
+    fontSize: 14,
+  },
+  buttonsRow: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    gap: 12,
+  },
+  buttonCancel: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    backgroundColor: c.border,
+    borderRadius: 30,
+  },
+  buttonUpdate: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    backgroundColor: c.primary,
+    borderRadius: 30,
+  },
+  buttonText: {
+    color: c.brightText,
+    fontWeight: "600",
+  },
+
+}));
+
   const [singleOwner, setSingleOwner] = useState(owner);
 
   useEffect(() => {
@@ -64,60 +122,5 @@ const UpdateRoomModal: React.FC<UpdateRoomModalProps> = ({
     </Modal>
   );
 };
-
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "center",
-    paddingHorizontal: 20,
-  },
-  container: {
-    backgroundColor: Colors.background,
-    borderRadius: 12,
-    padding: 20,
-    maxHeight: "80%",
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: "600",
-    marginBottom: 16,
-  },
-  singleFileContainer: {
-    marginBottom: 16,
-  },
-  label: {
-    fontSize: 14,
-    marginBottom: 4,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 8,
-    padding: 8,
-    fontSize: 14,
-  },
-  buttonsRow: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
-    gap: 12,
-  },
-  buttonCancel: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    backgroundColor: Colors.border,
-    borderRadius: 30,
-  },
-  buttonUpdate: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    backgroundColor: Colors.primary,
-    borderRadius: 30,
-  },
-  buttonText: {
-    color: Colors.brightText,
-    fontWeight: "600",
-  },
-});
 
 export default UpdateRoomModal;

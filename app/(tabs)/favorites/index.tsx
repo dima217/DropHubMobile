@@ -1,4 +1,6 @@
-import { Colors } from "@/constants/design-tokens";
+import { useThemedStyles } from "@/hooks/useThemedStyles";
+import { useThemeColors } from "@/hooks/useThemeColors";
+
 import Header from "@/shared/Header";
 import View from "@/shared/View";
 import { FavoritesSection } from "@/widgets/favorites/FavoritesSection";
@@ -7,6 +9,15 @@ import React from "react";
 import { StyleSheet, TouchableOpacity } from "react-native";
 
 const FavoritesScreen = () => {
+  const themeColors = useThemeColors();
+  const styles = useThemedStyles((c) => ({
+
+  tagButton: {
+    padding: 4,
+  },
+
+}));
+
   return (
     <View>
       <Header title="Избранное" />
@@ -16,18 +27,12 @@ const FavoritesScreen = () => {
             onPress={() => onOpenGlobalTags()}
             style={styles.tagButton}
           >
-            <Feather name="tag" size={20} color={Colors.primary} />
+            <Feather name="tag" size={20} color={themeColors.primary} />
           </TouchableOpacity>
         )}
       />
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  tagButton: {
-    padding: 4,
-  },
-});
 
 export default FavoritesScreen;

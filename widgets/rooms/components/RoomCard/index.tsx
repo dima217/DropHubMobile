@@ -1,6 +1,8 @@
 import { Friend } from "@/api/types/friend";
 import { AccessRole, RoomItem } from "@/api/types/room";
-import { Colors } from "@/constants/design-tokens";
+import { useThemedStyles } from "@/hooks/useThemedStyles";
+import { useThemeColors } from "@/hooks/useThemeColors";
+
 import { ThemedText } from "@/shared/core/ThemedText";
 import GradientView from "@/shared/Gradient";
 import { useI18n } from "@/shared/localization";
@@ -31,6 +33,109 @@ const formatBytes = (bytes: number): string => {
 };
 
 const RoomCard = ({ room, friends, onPress, notificationCount = 0, onRefresh }: RoomCardProps) => {
+  const themeColors = useThemeColors();
+  const styles = useThemedStyles((c) => ({
+
+  container: {
+    backgroundColor: c.cardBackground,
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+    position: "relative",
+  },
+  containerArchived: {
+    opacity: 0.85,
+  },
+  archivedBadge: {
+    backgroundColor: c.secondary,
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  archivedText: {
+    color: c.brightText,
+    fontSize: 11,
+    fontWeight: "600",
+  },
+  notificationBadge: {
+    position: "absolute",
+    top: 12,
+    right: 12,
+    backgroundColor: c.primary,
+    borderRadius: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    zIndex: 1,
+  },
+  notificationText: {
+    color: c.brightText,
+    fontSize: 11,
+    fontWeight: "600",
+  },
+  content: {
+    gap: 8,
+  },
+  header: {
+    marginBottom: 4,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  roomName: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: c.brightText,
+  },
+  roomNameArchived: {
+    color: c.secondary,
+  },
+  headerRight: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  participantsContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 4,
+  },
+  avatarWrapper: {
+    marginRight: -8,
+  },
+  avatarOverlap: {
+    marginLeft: -8,
+  },
+  moreAvatars: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: c.inactive,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 2,
+    borderColor: c.cardBackground,
+  },
+  moreText: {
+    fontSize: 10,
+    color: c.brightText,
+    fontWeight: "600",
+  },
+  infoContainer: {
+    marginTop: 4,
+  },
+  fileInfo: {
+    fontSize: 14,
+    color: c.text,
+  },
+  description: {
+    fontSize: 12,
+    color: c.secondary,
+    marginTop: 4,
+    lineHeight: 16,
+  },
+
+}));
+
   const { tl } = useI18n();
   const router = useRouter();
   const participants = room.participantsDetails || [];
@@ -62,7 +167,7 @@ const RoomCard = ({ room, friends, onPress, notificationCount = 0, onRefresh }: 
   return (
     <TouchableOpacity onPress={onPress}>
     <GradientView
-      colors={[Colors.border, Colors.cardBackground]}
+      colors={[themeColors.border, themeColors.cardBackground]}
       locations={[0, 0.5]}
       style={(room.archived ? [styles.container, styles.containerArchived] : styles.container) as ViewStyle}
     >
@@ -151,105 +256,4 @@ const RoomCard = ({ room, friends, onPress, notificationCount = 0, onRefresh }: 
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: Colors.cardBackground,
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 12,
-    position: "relative",
-  },
-  containerArchived: {
-    opacity: 0.85,
-  },
-  archivedBadge: {
-    backgroundColor: Colors.secondary,
-    borderRadius: 8,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-  },
-  archivedText: {
-    color: Colors.brightText,
-    fontSize: 11,
-    fontWeight: "600",
-  },
-  notificationBadge: {
-    position: "absolute",
-    top: 12,
-    right: 12,
-    backgroundColor: Colors.primary,
-    borderRadius: 12,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    zIndex: 1,
-  },
-  notificationText: {
-    color: Colors.brightText,
-    fontSize: 11,
-    fontWeight: "600",
-  },
-  content: {
-    gap: 8,
-  },
-  header: {
-    marginBottom: 4,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  roomName: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: Colors.brightText,
-  },
-  roomNameArchived: {
-    color: Colors.secondary,
-  },
-  headerRight: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  participantsContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 4,
-  },
-  avatarWrapper: {
-    marginRight: -8,
-  },
-  avatarOverlap: {
-    marginLeft: -8,
-  },
-  moreAvatars: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: Colors.inactive,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 2,
-    borderColor: Colors.cardBackground,
-  },
-  moreText: {
-    fontSize: 10,
-    color: Colors.brightText,
-    fontWeight: "600",
-  },
-  infoContainer: {
-    marginTop: 4,
-  },
-  fileInfo: {
-    fontSize: 14,
-    color: Colors.text,
-  },
-  description: {
-    fontSize: 12,
-    color: Colors.secondary,
-    marginTop: 4,
-    lineHeight: 16,
-  },
-});
-
 export default RoomCard;
-

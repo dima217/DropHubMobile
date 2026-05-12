@@ -1,4 +1,6 @@
-import { Colors } from "@/constants/design-tokens";
+import { useThemedStyles } from "@/hooks/useThemedStyles";
+import { useThemeColors } from "@/hooks/useThemeColors";
+
 import { ThemedText } from "@/shared/core/ThemedText";
 import { Feather } from "@expo/vector-icons";
 import React from "react";
@@ -24,6 +26,61 @@ const ChatInput: React.FC<ChatInputProps> = ({
   onSend,
   isConnected,
 }) => {
+  const themeColors = useThemeColors();
+  const styles = useThemedStyles((c) => ({
+
+  container: {
+    backgroundColor: c.background,
+    borderTopWidth: 1,
+    borderTopColor: c.border,
+  },
+  inputRow: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    gap: 10,
+  },
+  inputContainer: {
+    flex: 1,
+    minHeight: 44,
+    maxHeight: 100,
+    backgroundColor: c.border,
+    borderRadius: 22,
+    paddingHorizontal: 16,
+    paddingVertical: Platform.OS === "ios" ? 10 : 8,
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "transparent",
+  },
+  textInput: {
+    color: c.text,
+    fontSize: 15,
+    padding: 0,
+    margin: 0,
+    maxHeight: 80,
+    minHeight: 24,
+    textAlignVertical: "center",
+  },
+  sendButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: c.primary,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 0,
+  },
+  sendButtonDisabled: {
+    backgroundColor: c.inactive,
+  },
+  connectionStatus: {
+    fontSize: 11,
+    color: c.secondary,
+    textAlign: "center",
+    marginTop: 6,
+  },
+
+}));
+
   const insets = useSafeAreaInsets();
   const canSend = messageText.trim().length > 0 && isConnected;
 
@@ -43,7 +100,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
             value={messageText}
             onChangeText={onMessageTextChange}
             placeholder="Type a message..."
-            placeholderTextColor={Colors.secondary}
+            placeholderTextColor={themeColors.secondary}
             style={styles.textInput}
             multiline
             maxLength={1000}
@@ -65,7 +122,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
           <Feather
             name="send"
             size={18}
-            color={canSend ? Colors.brightText : Colors.secondary}
+            color={canSend ? themeColors.brightText : themeColors.secondary}
           />
         </TouchableOpacity>
       </View>
@@ -78,57 +135,4 @@ const ChatInput: React.FC<ChatInputProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: Colors.background,
-    borderTopWidth: 1,
-    borderTopColor: Colors.border,
-  },
-  inputRow: {
-    flexDirection: "row",
-    alignItems: "flex-end",
-    gap: 10,
-  },
-  inputContainer: {
-    flex: 1,
-    minHeight: 44,
-    maxHeight: 100,
-    backgroundColor: Colors.border,
-    borderRadius: 22,
-    paddingHorizontal: 16,
-    paddingVertical: Platform.OS === "ios" ? 10 : 8,
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: "transparent",
-  },
-  textInput: {
-    color: Colors.text,
-    fontSize: 15,
-    padding: 0,
-    margin: 0,
-    maxHeight: 80,
-    minHeight: 24,
-    textAlignVertical: "center",
-  },
-  sendButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: Colors.primary,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 0,
-  },
-  sendButtonDisabled: {
-    backgroundColor: Colors.inactive,
-  },
-  connectionStatus: {
-    fontSize: 11,
-    color: Colors.secondary,
-    textAlign: "center",
-    marginTop: 6,
-  },
-});
-
 export default ChatInput;
-

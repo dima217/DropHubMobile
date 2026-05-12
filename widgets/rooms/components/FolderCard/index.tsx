@@ -1,4 +1,6 @@
-import { Colors } from '@/constants/design-tokens';
+import { useThemedStyles } from "@/hooks/useThemedStyles";
+import { useThemeColors } from "@/hooks/useThemeColors";
+
 import { ThemedText } from '@/shared/core/ThemedText';
 import SharedUsersPreview from '@/shared/ui/SharedUsersPreview';
 import ActionMenu from '@/shared/ui/ActionMenu';
@@ -47,6 +49,98 @@ const FolderCard: React.FC<FolderCardProps> = ({
   tagColors = {},
   sharedWith = [],
 }) => {
+  const themeColors = useThemeColors();
+  const styles = useThemedStyles((c) => ({
+
+  container: {
+    backgroundColor: c.cardBackground,
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: c.border,
+  },
+  containerSelected: {
+    borderColor: c.primary,
+    backgroundColor: c.inactive,
+  },
+  containerDisabled: {
+    opacity: 0.5,
+  },
+  content: {
+    gap: 8,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  iconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 8,
+    backgroundColor: c.inactive,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  infoContainer: {
+    flex: 1,
+    gap: 2,
+  },
+  folderName: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: c.brightText,
+  },
+  folderNameDisabled: {
+    color: c.secondary,
+  },
+  tagsRow: {
+    flexDirection: 'row',
+    marginTop: 2,
+    marginBottom: 2,
+  },
+  tagBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: `${c.secondary}20`,
+    borderWidth: 1,
+    borderColor: c.secondary,
+    borderRadius: 6,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    marginRight: 4,
+  },
+  tagBadgeText: {
+    fontSize: 10,
+    color: c.secondary,
+    fontWeight: '600',
+  },
+  folderMeta: {
+    fontSize: 12,
+    color: c.secondary,
+  },
+  favoriteIndicator: {
+    backgroundColor: c.cardBackground,
+    borderRadius: 12,
+    padding: 4,
+  },
+  selectedIndicator: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: c.cardBackground,
+    borderRadius: 12,
+    padding: 4,
+  },
+  nameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+
+}));
+
   const primaryTagColor = tags.length > 0
     ? tags.map((t) => tagColors[t]).find(Boolean) || undefined
     : undefined;
@@ -76,7 +170,7 @@ const FolderCard: React.FC<FolderCardProps> = ({
             <Feather
               name="folder"
               size={24}
-                color={disabled ? Colors.secondary : Colors.primary}
+                color={disabled ? themeColors.secondary : themeColors.primary}
             />
           </View>
           <View style={styles.infoContainer}>
@@ -137,100 +231,11 @@ const FolderCard: React.FC<FolderCardProps> = ({
 
       {isSelected && (
         <View style={styles.selectedIndicator}>
-          <Feather name="check-circle" size={20} color={Colors.primary} />
+          <Feather name="check-circle" size={20} color={themeColors.primary} />
         </View>
       )}
     </Pressable>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: Colors.cardBackground,
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 8,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  containerSelected: {
-    borderColor: Colors.primary,
-    backgroundColor: Colors.inactive,
-  },
-  containerDisabled: {
-    opacity: 0.5,
-  },
-  content: {
-    gap: 8,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  iconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 8,
-    backgroundColor: Colors.inactive,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  infoContainer: {
-    flex: 1,
-    gap: 2,
-  },
-  folderName: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: Colors.brightText,
-  },
-  folderNameDisabled: {
-    color: Colors.secondary,
-  },
-  tagsRow: {
-    flexDirection: 'row',
-    marginTop: 2,
-    marginBottom: 2,
-  },
-  tagBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: `${Colors.secondary}20`,
-    borderWidth: 1,
-    borderColor: Colors.secondary,
-    borderRadius: 6,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    marginRight: 4,
-  },
-  tagBadgeText: {
-    fontSize: 10,
-    color: Colors.secondary,
-    fontWeight: '600',
-  },
-  folderMeta: {
-    fontSize: 12,
-    color: Colors.secondary,
-  },
-  favoriteIndicator: {
-    backgroundColor: Colors.cardBackground,
-    borderRadius: 12,
-    padding: 4,
-  },
-  selectedIndicator: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    backgroundColor: Colors.cardBackground,
-    borderRadius: 12,
-    padding: 4,
-  },
-  nameRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-});
 
 export default FolderCard;

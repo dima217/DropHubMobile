@@ -1,7 +1,7 @@
 import { useGetFavoritesQuery } from "@/api/favorites";
 import { useGetStorageInfoQuery } from "@/api/storageApi";
 import type { StorageItem } from "@/api/types/storage";
-import { Colors } from "@/constants/design-tokens";
+import { useThemeColors } from "@/hooks/useThemeColors";
 import { ThemedText } from "@/shared/core/ThemedText";
 import { StorageSection } from "@/widgets/storage/components/StorageSection";
 import {
@@ -26,6 +26,38 @@ type FavoritesSectionProps = {
 export function FavoritesSection({ renderHeaderActions }: FavoritesSectionProps) {
   const { data: favorites, isLoading: isFavoritesLoading } = useGetFavoritesQuery();
   const { data: storageInfo, isLoading: isStorageLoading } = useGetStorageInfoQuery();
+  const colors = useThemeColors();
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        center: {
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          paddingTop: 100,
+        },
+        emptyContainer: {
+          padding: 40,
+          alignItems: "center",
+        },
+        emptyTitle: {
+          color: colors.secondary,
+          fontSize: 16,
+          fontWeight: "600",
+          marginBottom: 4,
+        },
+        emptySubtext: {
+          color: colors.secondary,
+          fontSize: 13,
+          textAlign: "center",
+        },
+        emptyText: {
+          color: colors.secondary,
+          fontSize: 14,
+        },
+      }),
+    [colors]
+  );
 
   const storageId = storageInfo?.id ?? "";
 
@@ -62,7 +94,7 @@ export function FavoritesSection({ renderHeaderActions }: FavoritesSectionProps)
   if (loading) {
     return (
       <RNView style={styles.center}>
-        <ActivityIndicator size="large" color={Colors.primary} />
+        <ActivityIndicator size="large" color={colors.primary} />
       </RNView>
     );
   }
@@ -81,7 +113,7 @@ export function FavoritesSection({ renderHeaderActions }: FavoritesSectionProps)
         <Feather
           name="star"
           size={48}
-          color={Colors.secondary}
+          color={colors.secondary}
           style={{ marginBottom: 12 }}
         />
         <ThemedText style={styles.emptyTitle}>Нет избранных элементов</ThemedText>
@@ -110,31 +142,3 @@ export function FavoritesSection({ renderHeaderActions }: FavoritesSectionProps)
     />
   );
 }
-
-const styles = StyleSheet.create({
-  center: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingTop: 100,
-  },
-  emptyContainer: {
-    padding: 40,
-    alignItems: "center",
-  },
-  emptyTitle: {
-    color: Colors.secondary,
-    fontSize: 16,
-    fontWeight: "600",
-    marginBottom: 4,
-  },
-  emptySubtext: {
-    color: Colors.secondary,
-    fontSize: 13,
-    textAlign: "center",
-  },
-  emptyText: {
-    color: Colors.secondary,
-    fontSize: 14,
-  },
-});

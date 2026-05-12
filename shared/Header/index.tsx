@@ -1,10 +1,12 @@
 import D from "@/assets/images/D.svg";
+import { useThemeColors } from "@/hooks/useThemeColors";
 import { useI18n } from "@/shared/localization";
 import { useRouter } from "expo-router";
 import { ReactNode, useState } from "react";
-import { Pressable, StyleSheet, View } from "react-native";
+import { Pressable, View } from "react-native";
 import ExitConfirmationModal from "../Modals/ExitConfirmationModal";
 import { ThemedText } from "../core/ThemedText";
+import createHeaderStyles from "./styles";
 
 type HeaderProps = {
   title?: string;
@@ -13,9 +15,18 @@ type HeaderProps = {
   rightAction?: ReactNode;
 };
 
-const Header = ({ title, confirmOnExit = false, onBackPress, rightAction }: HeaderProps) => {
+const Header = ({
+  title,
+  confirmOnExit = false,
+  onBackPress,
+  rightAction,
+}: HeaderProps) => {
   const { tl } = useI18n();
   const router = useRouter();
+
+  const colors = useThemeColors();
+  const styles = createHeaderStyles(colors);
+
   const [isModalVisible, setIsModalVisible] = useState(false);
 
   const goBack = () => {
@@ -55,18 +66,14 @@ const Header = ({ title, confirmOnExit = false, onBackPress, rightAction }: Head
       </Pressable>
 
       {title && (
-        <ThemedText
-          type="subtitle"
-          style={styles.title}
-          pointerEvents="none"
-        >
+        <ThemedText type="subtitle" style={styles.title} pointerEvents="none">
           {tl(title)}
         </ThemedText>
       )}
 
       {rightAction || (
         <Pressable onPress={() => {}}>
-          <D width={22} height={22} />
+          <D width={22} height={22} fill="#AAAA" />
         </Pressable>
       )}
 
@@ -82,17 +89,3 @@ const Header = ({ title, confirmOnExit = false, onBackPress, rightAction }: Head
 };
 
 export default Header;
-
-const styles = StyleSheet.create({
-  container: {
-    width: "100%",
-    backgroundColor: "transparent",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  title: {
-    color: "#fff",
-    textAlign: "center",
-  },
-});

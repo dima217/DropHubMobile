@@ -1,4 +1,5 @@
-import { Colors } from '@/constants/design-tokens';
+import { useThemedStyles } from "@/hooks/useThemedStyles";
+
 import { ThemedText } from '@/shared/core/ThemedText';
 import { ActionMenuItemData } from '@/shared/ui/ActionMenu/ActionMenuItem';
 import React from 'react';
@@ -14,6 +15,26 @@ const MultiSelectBar: React.FC<MultiSelectBarProps> = ({
   selectedCount,
   menuItems = [],
 }) => {
+  const styles = useThemedStyles((c) => ({
+
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: c.cardBackground,
+    borderBottomWidth: 1,
+    borderBottomColor: c.border,
+  },
+  countText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: c.primary,
+  },
+
+}));
+
   return (
     <View style={styles.container}>
       <ThemedText style={styles.countText}>
@@ -26,23 +47,4 @@ const MultiSelectBar: React.FC<MultiSelectBarProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: Colors.cardBackground,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
-  },
-  countText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: Colors.primary,
-  },
-});
-
 export default MultiSelectBar;
-

@@ -1,6 +1,7 @@
-import { Colors } from "@/constants/design-tokens";
+import { useThemeColors } from "@/hooks/useThemeColors";
 import { NetworkProvider, useNetwork } from "@/providers/NetworkProvider";
 import { PushNotificationsController } from "@/providers/PushNotificationsController";
+import { ThemeProvider } from "@/providers/ThemeProvider";
 import { persistor, store } from "@/store/store";
 import { NoInternetScreen } from "@/widgets/internet/NoInternetScreen";
 import { Stack } from "expo-router";
@@ -12,6 +13,7 @@ import { PersistGate } from "redux-persist/integration/react";
 
 function LayoutContent() {
   const { networkError } = useNetwork();
+  const colors = useThemeColors();
 
   if (networkError) {
     return <NoInternetScreen />;
@@ -21,7 +23,7 @@ function LayoutContent() {
     <Stack
       screenOptions={{
         contentStyle: {
-          backgroundColor: Colors.background,
+          backgroundColor: colors.background,
         },
         headerShown: false,
       }}
@@ -36,15 +38,17 @@ function LayoutContent() {
 export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <NetworkProvider>
-        <Provider store={store}>
-          <PersistGate loading={null} persistor={persistor}>
-            <PushNotificationsController />
-            <LayoutContent />
-            <StatusBar style="auto" />
-          </PersistGate>
-        </Provider>
-      </NetworkProvider>
+      <ThemeProvider>
+        <NetworkProvider>
+          <Provider store={store}>
+            <PersistGate loading={null} persistor={persistor}>
+              <PushNotificationsController />
+              <LayoutContent />
+              <StatusBar style="auto" />
+            </PersistGate>
+          </Provider>
+        </NetworkProvider>
+      </ThemeProvider>
     </GestureHandlerRootView>
   );
 }

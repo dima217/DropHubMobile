@@ -1,4 +1,6 @@
-import { Colors } from "@/constants/design-tokens";
+import { useThemedStyles } from "@/hooks/useThemedStyles";
+import { useThemeColors } from "@/hooks/useThemeColors";
+
 import { ThemedText } from "@/shared/core/ThemedText";
 import BaseModal from "@/shared/Modals/BaseModal";
 import FriendCard from "@/shared/Modals/RoomModals/ui/FriendCard";
@@ -30,6 +32,29 @@ const ManageUsersModal: React.FC<ManageUsersModalProps> = ({
   isLoading = false,
   onConfirm,
 }) => {
+  const themeColors = useThemeColors();
+  const styles = useThemedStyles((c) => ({
+
+  content: {
+    width: "100%",
+    marginBottom: 10,
+  },
+  usersList: {
+    maxHeight: 300,
+  },
+  emptyText: {
+    fontSize: 12,
+    color: c.secondary,
+    textAlign: "center",
+    paddingVertical: 20,
+  },
+  loadingContainer: {
+    paddingVertical: 20,
+    alignItems: "center",
+  },
+
+}));
+
   const [selectedUserIds, setSelectedUserIds] = useState<Set<number>>(new Set());
 
   const toggleUser = (userId: number) => {
@@ -102,7 +127,7 @@ const ManageUsersModal: React.FC<ManageUsersModalProps> = ({
                   isSelected={isSelected}
                   onToggle={toggleUser}
                   disabled={isLoading}
-                  selectionColor={mode === "add" ? Colors.primary : Colors.reject}
+                  selectionColor={mode === "add" ? themeColors.primary : themeColors.reject}
                 />
               );
             })}
@@ -111,32 +136,12 @@ const ManageUsersModal: React.FC<ManageUsersModalProps> = ({
 
         {isLoading && (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="small" color={Colors.primary} />
+            <ActivityIndicator size="small" color={themeColors.primary} />
           </View>
         )}
       </View>
     </BaseModal>
   );
 };
-
-const styles = StyleSheet.create({
-  content: {
-    width: "100%",
-    marginBottom: 10,
-  },
-  usersList: {
-    maxHeight: 300,
-  },
-  emptyText: {
-    fontSize: 12,
-    color: Colors.secondary,
-    textAlign: "center",
-    paddingVertical: 20,
-  },
-  loadingContainer: {
-    paddingVertical: 20,
-    alignItems: "center",
-  },
-});
 
 export default ManageUsersModal;

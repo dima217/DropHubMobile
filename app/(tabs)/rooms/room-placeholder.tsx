@@ -1,4 +1,6 @@
-import { Colors } from "@/constants/design-tokens";
+import { useThemedStyles } from "@/hooks/useThemedStyles";
+import { useThemeColors } from "@/hooks/useThemeColors";
+
 import { ThemedText } from "@/shared/core/ThemedText";
 import Header from "@/shared/Header";
 import WaveButton from "@/shared/ui/animated/WaveButton";
@@ -12,6 +14,54 @@ interface RoomPlaceholderProps {
 }
 
 const RoomPlaceholder: React.FC<RoomPlaceholderProps> = ({ onAddFiles }) => {
+  const themeColors = useThemeColors();
+  const styles = useThemedStyles((c) => ({
+
+  container: {
+    flex: 1,
+  },
+  content: {
+    flex: 1,
+    paddingTop: "16%",
+    alignItems: "center",
+    gap: 30,
+  },
+  textContainer: {
+    alignItems: "center",
+    gap: 12,
+    marginBottom: "20%",
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: "bold",
+    color: c.brightText,
+    textAlign: "center",
+    lineHeight: 36,
+  },
+  subtitle: {
+    fontSize: 18,
+    color: c.text,
+    textAlign: "center",
+  },
+  description: {
+    fontSize: 14,
+    color: c.secondary,
+    textAlign: "center",
+    lineHeight: 20,
+    marginTop: 8,
+  },
+  hintContainer: {
+    marginTop: 20,
+    marginBottom: 20,
+  },
+  hint: {
+    fontSize: 12,
+    color: c.secondary,
+    textAlign: "center",
+  },
+
+}));
+
   const router = useRouter();
 
   const handleAddFiles = () => {
@@ -39,7 +89,7 @@ const RoomPlaceholder: React.FC<RoomPlaceholderProps> = ({ onAddFiles }) => {
 
         <WaveButton
           onPress={handleAddFiles}
-          color={Colors.primary}
+          color={themeColors.primary}
           icon="plus"
           size={100}
         />
@@ -54,50 +104,4 @@ const RoomPlaceholder: React.FC<RoomPlaceholderProps> = ({ onAddFiles }) => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  content: {
-    flex: 1,
-    paddingTop: "16%",
-    alignItems: "center",
-    gap: 30,
-  },
-  textContainer: {
-    alignItems: "center",
-    gap: 12,
-    marginBottom: "20%",
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: Colors.brightText,
-    textAlign: "center",
-    lineHeight: 36,
-  },
-  subtitle: {
-    fontSize: 18,
-    color: Colors.text,
-    textAlign: "center",
-  },
-  description: {
-    fontSize: 14,
-    color: Colors.secondary,
-    textAlign: "center",
-    lineHeight: 20,
-    marginTop: 8,
-  },
-  hintContainer: {
-    marginTop: 20,
-    marginBottom: 20,
-  },
-  hint: {
-    fontSize: 12,
-    color: Colors.secondary,
-    textAlign: "center",
-  },
-});
-
 export default RoomPlaceholder;
-

@@ -1,6 +1,6 @@
 import type { ChatChannelMessage } from "@/api/types/chatChannels";
-import { Colors } from "@/constants/design-tokens";
-import React, { useEffect, useRef } from "react";
+import { useThemeColors } from "@/hooks/useThemeColors";
+import React, { useEffect, useMemo, useRef } from "react";
 import { FlatList, Keyboard, Platform, StyleSheet, Text, View } from "react-native";
 import { MessageItem } from "./MessageItem";
 import { TypingIndicator } from "./TypingIndicator";
@@ -36,6 +36,17 @@ export function MessageList({
 }: Props) {
   const flatRef = useRef<FlatList>(null);
   const initialScrollForChannelRef = useRef(true);
+  const colors = useThemeColors();
+  const s = useMemo(
+    () =>
+      StyleSheet.create({
+        container: { flex: 1 },
+        listContent: { padding: 16, paddingBottom: 8 },
+        center: { flex: 1, justifyContent: "center", alignItems: "center" },
+        empty: { color: colors.secondary, fontSize: 14 },
+      }),
+    [colors]
+  );
 
   useEffect(() => {
     initialScrollForChannelRef.current = true;
@@ -128,10 +139,3 @@ export function MessageList({
     </View>
   );
 }
-
-const s = StyleSheet.create({
-  container: { flex: 1 },
-  listContent: { padding: 16, paddingBottom: 8 },
-  center: { flex: 1, justifyContent: "center", alignItems: "center" },
-  empty: { color: Colors.secondary, fontSize: 14 },
-});

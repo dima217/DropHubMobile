@@ -1,7 +1,9 @@
 import { useGetFriendsQuery } from "@/api/friendApi";
 import { useAddUsersToRoomMutation, useCreateRoomMutation } from "@/api/roomApi";
 import { AccessRole } from "@/api/types/room";
-import { Colors } from "@/constants/design-tokens";
+import { useThemedStyles } from "@/hooks/useThemedStyles";
+import { useThemeColors } from "@/hooks/useThemeColors";
+
 import { ThemedText } from "@/shared/core/ThemedText";
 import BaseModal from "@/shared/Modals/BaseModal";
 import TextInput from "@/shared/TextInput";
@@ -20,6 +22,82 @@ const CreateRoomModal: React.FC<CreateRoomModalProps> = ({
   onClose,
   onSuccess,
 }) => {
+  const themeColors = useThemeColors();
+  const styles = useThemedStyles((c) => ({
+
+  content: {
+    width: "100%",
+    marginBottom: 10,
+  },
+  friendsSection: {
+    marginTop: 16,
+    width: "100%",
+  },
+  sectionTitle: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: c.text,
+    marginBottom: 12,
+  },
+  loadingContainer: {
+    paddingVertical: 20,
+    alignItems: "center",
+  },
+  emptyText: {
+    fontSize: 12,
+    color: c.secondary,
+    textAlign: "center",
+    paddingVertical: 20,
+  },
+  friendsList: {
+    maxHeight: 200,
+  },
+  friendItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    backgroundColor: c.inactive,
+    marginBottom: 8,
+    gap: 12,
+  },
+  friendItemSelected: {
+    backgroundColor: c.cardBackground,
+    borderWidth: 1,
+    borderColor: c.primary,
+  },
+  friendText: {
+    flex: 1,
+    fontSize: 14,
+    color: c.text,
+  },
+  friendTextSelected: {
+    color: c.brightText,
+    fontWeight: "600",
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: c.secondary,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "transparent",
+  },
+  checkboxSelected: {
+    backgroundColor: c.primary,
+    borderColor: c.primary,
+  },
+  checkmark: {
+    color: c.brightText,
+    fontSize: 12,
+    fontWeight: "bold",
+  },
+
+}));
+
   const [username, setUsername] = useState("");
   const [error, setError] = useState("");
   const [createRoom, { isLoading: isCreatingRoom }] = useCreateRoomMutation();
@@ -135,7 +213,7 @@ const CreateRoomModal: React.FC<CreateRoomModalProps> = ({
           </ThemedText>
           {friendsLoading ? (
             <View style={styles.loadingContainer}>
-              <ActivityIndicator size="small" color={Colors.primary} />
+              <ActivityIndicator size="small" color={themeColors.primary} />
             </View>
           ) : friends.length === 0 ? (
             <ThemedText style={styles.emptyText}>
@@ -155,7 +233,7 @@ const CreateRoomModal: React.FC<CreateRoomModalProps> = ({
                   <FriendCard
                     key={friendId}
                     id={friendId}
-                    selectionColor={Colors.primary}
+                    selectionColor={themeColors.primary}
                     firstName={friend.friendProfile.firstName}
                     avatarUrl={friend.friendProfile.avatarUrl}
                     isSelected={isSelected}
@@ -172,78 +250,4 @@ const CreateRoomModal: React.FC<CreateRoomModalProps> = ({
     );
   };
 
-  const styles = StyleSheet.create({
-  content: {
-    width: "100%",
-    marginBottom: 10,
-  },
-  friendsSection: {
-    marginTop: 16,
-    width: "100%",
-  },
-  sectionTitle: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: Colors.text,
-    marginBottom: 12,
-  },
-  loadingContainer: {
-    paddingVertical: 20,
-    alignItems: "center",
-  },
-  emptyText: {
-    fontSize: 12,
-    color: Colors.secondary,
-    textAlign: "center",
-    paddingVertical: 20,
-  },
-  friendsList: {
-    maxHeight: 200,
-  },
-  friendItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    borderRadius: 12,
-    backgroundColor: Colors.inactive,
-    marginBottom: 8,
-    gap: 12,
-  },
-  friendItemSelected: {
-    backgroundColor: Colors.cardBackground,
-    borderWidth: 1,
-    borderColor: Colors.primary,
-  },
-  friendText: {
-    flex: 1,
-    fontSize: 14,
-    color: Colors.text,
-  },
-  friendTextSelected: {
-    color: Colors.brightText,
-    fontWeight: "600",
-  },
-  checkbox: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 2,
-    borderColor: Colors.secondary,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "transparent",
-  },
-  checkboxSelected: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
-  },
-  checkmark: {
-    color: Colors.brightText,
-    fontSize: 12,
-    fontWeight: "bold",
-  },
-});
-
 export default CreateRoomModal;
-

@@ -1,8 +1,8 @@
-import { Colors } from "@/constants/design-tokens";
 import TextInput from "@/shared/TextInput";
-import React from "react";
+import { useThemeColors } from "@/hooks/useThemeColors";
+import React, { useMemo } from "react";
 import { ScrollView } from "react-native";
-import { styles } from "../../styles";
+import { createSupportTicketModalStyles } from "../../styles";
 
 type Props = {
   mode: "auth" | "anonymous";
@@ -26,7 +26,13 @@ const CreateSupportTicketFormFields: React.FC<Props> = ({
   onContactEmail,
   disabled,
   scrollMaxHeight,
-}) => (
+}) => {
+  const colors = useThemeColors();
+  const styles = useMemo(
+    () => createSupportTicketModalStyles(colors),
+    [colors]
+  );
+  return (
   <ScrollView
     style={[styles.scroll, { maxHeight: scrollMaxHeight }]}
     contentContainerStyle={styles.scrollContent}
@@ -38,7 +44,7 @@ const CreateSupportTicketFormFields: React.FC<Props> = ({
       value={title}
       onChangeText={onTitle}
       placeholder="Кратко, в чём суть"
-      placeholderTextColor={Colors.secondary}
+      placeholderTextColor={colors.secondary}
       editable={!disabled}
     />
     <TextInput
@@ -46,7 +52,7 @@ const CreateSupportTicketFormFields: React.FC<Props> = ({
       value={details}
       onChangeText={onDetails}
       placeholder="Подробности"
-      placeholderTextColor={Colors.secondary}
+      placeholderTextColor={colors.secondary}
       multiline
       editable={!disabled}
     />
@@ -56,7 +62,7 @@ const CreateSupportTicketFormFields: React.FC<Props> = ({
         value={contactEmail}
         onChangeText={onContactEmail}
         placeholder="you@example.com"
-        placeholderTextColor={Colors.secondary}
+        placeholderTextColor={colors.secondary}
         keyboardType="email-address"
         autoCapitalize="none"
         editable={!disabled}
@@ -64,5 +70,5 @@ const CreateSupportTicketFormFields: React.FC<Props> = ({
     ) : null}
   </ScrollView>
 );
-
+}
 export default CreateSupportTicketFormFields;

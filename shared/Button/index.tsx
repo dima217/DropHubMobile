@@ -4,7 +4,7 @@ import type { StyleProp, TextStyle, ViewStyle } from "react-native";
 
 import ActivityIndicator from "../ui/ActivityIndicator";
 
-import { Colors } from "@/constants/design-tokens";
+import { useThemeColors } from "@/hooks/useThemeColors";
 import { useI18n } from "@/shared/localization";
 import { styles } from "./styles";
 
@@ -30,6 +30,7 @@ const Button = ({
   textStyle,
 }: ButtonProps) => {
   const { tl } = useI18n();
+  const colors = useThemeColors();
   const isDisabled = disabled || loading;
 
   return (
@@ -37,20 +38,20 @@ const Button = ({
       disabled={isDisabled}
       style={[
         styles.container,
-        { backgroundColor: buttonColor ?? Colors.primary },
-        isDisabled && { backgroundColor: Colors.secondary },
+        { backgroundColor: buttonColor ?? colors.primary },
+        isDisabled && { backgroundColor: colors.secondary },
         style,
       ]}
       onPress={onPress}
     >
       {loading ? (
-        <ActivityIndicator size="small" color={Colors.inactive} />
+        <ActivityIndicator size="small" color={colors.inactive} />
       ) : (
         <Text
           style={[
             styles.buttonText,
-            { color: textColor ?? Colors.text },
-            isDisabled && { color: Colors.inactive },
+            { color: textColor ?? colors.text },
+            isDisabled && { color: colors.inactive },
             textStyle,
           ]}
         >

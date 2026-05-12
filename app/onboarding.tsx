@@ -1,14 +1,81 @@
-import { Colors } from "@/constants/design-tokens";
 import Button from "@/shared/Button";
+import { useThemedStyles } from "@/hooks/useThemedStyles";
 import { ThemedText } from "@/shared/core/ThemedText";
 import GoogleSignInButton from "@/shared/ui/GoogleSignInButton";
 import RadialGradientBackground from "@/shared/ui/RadialGradientBackground";
 import View from "@/shared/View";
 import { useRouter } from "expo-router";
-import { View as RNView, StyleSheet } from "react-native";
+import { View as RNView } from "react-native";
 
 export default function OnboardingScreen() {
   const router = useRouter();
+
+  const styles = useThemedStyles((c) => ({
+    gradientContainer: {
+      flex: 1,
+    },
+    transparentView: {
+      backgroundColor: "transparent",
+      overflow: "visible",
+    },
+    content: {
+      position: "absolute",
+      bottom: 50,
+      left: 0,
+      right: 0,
+      paddingHorizontal: 16,
+      paddingTop: 32,
+      gap: 32,
+      alignItems: "center",
+    },
+    titleBlock: {
+      gap: 16,
+    },
+    radialContainer: {
+      height: "100%",
+      width: "160%",
+      position: "absolute",
+      right: "-20%",
+      top: 0,
+      overflow: "visible",
+    },
+    moonWrapper: {
+      position: "absolute",
+      width: 400,
+      height: 400,
+      borderRadius: 200,
+      right: 40,
+      top: 80,
+      overflow: "hidden",
+    },
+    moonContainer: {
+      width: "100%",
+      height: "100%",
+    },
+    buttonWrapper: {
+      gap: 16,
+      width: "100%",
+    },
+    skipButton: {
+      backgroundColor: c.grey,
+    },
+    subtitle: {
+      fontSize: 32,
+      fontWeight: "600",
+      lineHeight: 45,
+    },
+    title: {
+      fontSize: 16,
+      fontWeight: "500",
+      lineHeight: 34,
+    },
+    description: {
+      fontSize: 14,
+      fontWeight: "400",
+      lineHeight: 20,
+      color: c.secondary,
+    },
+  }));
 
   return (
       <View style={styles.transparentView}>
@@ -46,71 +113,4 @@ export default function OnboardingScreen() {
         </RNView>
       </View>
   );
-};
-
-const styles = StyleSheet.create({
-  gradientContainer: {
-    flex: 1,    
-  },
-  transparentView: {
-    backgroundColor: "transparent",
-    overflow: "visible",
-  },
-  content: {
-    position: "absolute",
-    bottom: 50,
-    left: 0,
-    right: 0,
-    paddingHorizontal: 16,
-    paddingTop: 32,
-    gap: 32,
-    alignItems: "center",
-  },
-  titleBlock: {
-    gap: 16,
-  },
-  radialContainer: {
-    height: "100%",
-    width: "160%",
-    position: "absolute",
-    right: "-20%",
-    top: 0,
-    overflow: "visible",
-  },
-  moonWrapper: {
-    position: "absolute",
-    width: 400,
-    height: 400,
-    borderRadius: 200,
-    right: 40,
-    top: 80,
-    overflow: "hidden",
-  },
-  moonContainer: {
-    width: "100%",
-    height: "100%",
-  },
-  buttonWrapper: {
-    gap: 16,
-    width: "100%",
-  },
-  skipButton: {
-    backgroundColor: Colors.grey,
-  },
-  subtitle: {
-    fontSize: 32,
-    fontWeight: "600",
-    lineHeight: 45,
-  },
-  title: {
-    fontSize: 16,
-    fontWeight: "500",
-    lineHeight: 34,
-  },
-  description: {
-    fontSize: 14,
-    fontWeight: "400",
-    lineHeight: 20,
-    color: Colors.secondary,
-  },
-});
+}

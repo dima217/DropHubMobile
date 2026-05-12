@@ -1,5 +1,7 @@
 import { useGetRoomDetailsQuery } from "@/api/roomApi";
-import { Colors } from "@/constants/design-tokens";
+import { useThemedStyles } from "@/hooks/useThemedStyles";
+import { useThemeColors } from "@/hooks/useThemeColors";
+
 import { useAutoMarkRoomFileNotificationsRead } from "@/hooks/data/useAutoMarkNotificationsOnView";
 import { getUserIdFromAccessToken } from "@/services/auth/getUserIdFromAccessToken";
 import Header from "@/shared/Header";
@@ -23,6 +25,33 @@ import {
 import { useSelector } from "react-redux";
 
 const RoomChatScreen = () => {
+  const themeColors = useThemeColors();
+  const styles = useThemedStyles((c) => ({
+
+  container: {
+    flex: 1,
+    backgroundColor: c.background,
+  },
+  flex: {
+    flex: 1,
+  },
+  pinBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingVertical: 4,
+    paddingHorizontal: 4,
+  },
+  pinBadge: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: c.primary,
+    minWidth: 18,
+    textAlign: "center",
+  },
+
+}));
+
   const { roomId } = useLocalSearchParams<{ roomId: string }>();
   useAutoMarkRoomFileNotificationsRead(roomId);
   const user = useSelector((state: RootState) => state.auth.user);
@@ -79,7 +108,7 @@ const RoomChatScreen = () => {
         style={styles.pinBtn}
         hitSlop={10}
       >
-        <Feather name="bookmark" size={20} color={Colors.primary} />
+        <Feather name="bookmark" size={20} color={themeColors.primary} />
         {pinnedMessages.length > 0 ? (
           <Text style={styles.pinBadge}>{pinnedMessages.length}</Text>
         ) : null}
@@ -134,29 +163,5 @@ const RoomChatScreen = () => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.background,
-  },
-  flex: {
-    flex: 1,
-  },
-  pinBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    paddingVertical: 4,
-    paddingHorizontal: 4,
-  },
-  pinBadge: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: Colors.primary,
-    minWidth: 18,
-    textAlign: "center",
-  },
-});
 
 export default RoomChatScreen;

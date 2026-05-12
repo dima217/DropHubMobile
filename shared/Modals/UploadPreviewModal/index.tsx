@@ -1,4 +1,6 @@
-import { Colors } from "@/constants/design-tokens";
+import { useThemedStyles } from "@/hooks/useThemedStyles";
+import { useThemeColors } from "@/hooks/useThemeColors";
+
 import { ThemedText } from "@/shared/core/ThemedText";
 import type { PendingUploadFile } from "@/shared/types/pendingUpload";
 import TextInput from "@/shared/TextInput";
@@ -42,6 +44,100 @@ const UploadPreviewModal: React.FC<UploadPreviewModalProps> = ({
   existingNames = [],
   quota,
 }) => {
+  const themeColors = useThemeColors();
+  const styles = useThemedStyles((c) => ({
+
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    paddingHorizontal: 20,
+  },
+  container: {
+    backgroundColor: c.background,
+    borderRadius: 12,
+    padding: 20,
+    maxHeight: "80%",
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: "600",
+    marginBottom: 16,
+  },
+  fileList: {
+    marginBottom: 16,
+  },
+  fileRow: {
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: c.border,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: 8,
+  },
+  fileName: {
+    fontSize: 14,
+    flex: 1,
+  },
+  fileSize: {
+    fontSize: 12,
+    color: c.secondary,
+  },
+  singleFileContainer: {
+    marginBottom: 16,
+  },
+  label: {
+    fontSize: 14,
+    marginBottom: 4,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: c.border,
+    borderRadius: 8,
+    padding: 8,
+    fontSize: 14,
+  },
+  fileSizeSingle: {
+    fontSize: 12,
+    color: c.secondary,
+    marginTop: 4,
+  },
+  conflictText: {
+    fontSize: 12,
+    color: c.reject,
+    marginTop: 6,
+  },
+  buttonsRow: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    gap: 12,
+  },
+  buttonCancel: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    backgroundColor: c.border,
+    borderRadius: 30,
+  },
+  buttonUpload: {
+    minWidth: 100,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    backgroundColor: c.primary,
+    borderRadius: 30,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  buttonDisabled: {
+    opacity: 0.7,
+  },
+  buttonText: {
+    color: c.brightText,
+    fontWeight: "600",
+  },
+
+}));
+
   const [singleFileName, setSingleFileName] = useState(
     files.length === 1 ? files[0].fileName : ""
   );
@@ -161,7 +257,7 @@ const UploadPreviewModal: React.FC<UploadPreviewModalProps> = ({
               disabled={isUploadDisabled}
             >
               {submitting ? (
-                <ActivityIndicator color={Colors.brightText} />
+                <ActivityIndicator color={themeColors.brightText} />
               ) : (
                 <ThemedText style={styles.buttonText}>Upload</ThemedText>
               )}
@@ -172,96 +268,5 @@ const UploadPreviewModal: React.FC<UploadPreviewModalProps> = ({
     </Modal>
   );
 };
-
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "center",
-    paddingHorizontal: 20,
-  },
-  container: {
-    backgroundColor: Colors.background,
-    borderRadius: 12,
-    padding: 20,
-    maxHeight: "80%",
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: "600",
-    marginBottom: 16,
-  },
-  fileList: {
-    marginBottom: 16,
-  },
-  fileRow: {
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    gap: 8,
-  },
-  fileName: {
-    fontSize: 14,
-    flex: 1,
-  },
-  fileSize: {
-    fontSize: 12,
-    color: Colors.secondary,
-  },
-  singleFileContainer: {
-    marginBottom: 16,
-  },
-  label: {
-    fontSize: 14,
-    marginBottom: 4,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 8,
-    padding: 8,
-    fontSize: 14,
-  },
-  fileSizeSingle: {
-    fontSize: 12,
-    color: Colors.secondary,
-    marginTop: 4,
-  },
-  conflictText: {
-    fontSize: 12,
-    color: Colors.reject,
-    marginTop: 6,
-  },
-  buttonsRow: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
-    gap: 12,
-  },
-  buttonCancel: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    backgroundColor: Colors.border,
-    borderRadius: 30,
-  },
-  buttonUpload: {
-    minWidth: 100,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    backgroundColor: Colors.primary,
-    borderRadius: 30,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  buttonDisabled: {
-    opacity: 0.7,
-  },
-  buttonText: {
-    color: Colors.brightText,
-    fontWeight: "600",
-  },
-});
 
 export default UploadPreviewModal;

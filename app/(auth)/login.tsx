@@ -1,4 +1,5 @@
-import { Colors } from "@/constants/design-tokens";
+import { useThemedStyles } from "@/hooks/useThemedStyles";
+
 import { ThemedText } from "@/shared/core/ThemedText";
 import Header from "@/shared/Header";
 import PasswordChangedModal from "@/shared/Modals/PasswordChangedModal";
@@ -9,6 +10,36 @@ import { Href, useLocalSearchParams, useRouter } from "expo-router";
 import { View as RNView, StyleSheet } from "react-native";
 
 const Login = () => {
+  const styles = useThemedStyles((c) => ({
+
+  container: {
+    flex: 1,
+    marginTop: "20%",
+    alignItems: "center",
+  },
+  iconContainer: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: 15,
+    marginBottom: 50,
+  },
+  loginText: {
+    fontSize: 26,
+    color: c.brightText,
+    lineHeight: 50,
+  },
+  innerContainer: {
+    display: "flex",
+    flexDirection: "column",
+    marginTop: "2%",
+    gap: 10,
+    width: "100%",
+    alignItems: "center",
+  },
+
+}));
+
   const router = useRouter();
   const params = useLocalSearchParams();
   
@@ -46,31 +77,3 @@ const Login = () => {
 };
 
 export default Login;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    marginTop: "20%",
-    alignItems: "center",
-  },
-  iconContainer: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    gap: 15,
-    marginBottom: 50,
-  },
-  loginText: {
-    fontSize: 26,
-    color: Colors.brightText,
-    lineHeight: 50,
-  },
-  innerContainer: {
-    display: "flex",
-    flexDirection: "column",
-    marginTop: "2%",
-    gap: 10,
-    width: "100%",
-    alignItems: "center",
-  },
-});

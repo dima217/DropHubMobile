@@ -1,7 +1,7 @@
-import { Colors } from "@/constants/design-tokens";
+import { useThemeColors } from "@/hooks/useThemeColors";
 import { ThemedText } from "@/shared/core/ThemedText";
 import { Feather } from "@expo/vector-icons";
-import React from "react";
+import React, { useMemo } from "react";
 import { View as RNView, StyleSheet, TouchableOpacity } from "react-native";
 
 interface SearchHistoryProps {
@@ -13,6 +13,34 @@ export const SearchHistory: React.FC<SearchHistoryProps> = ({
   history,
   onSelectQuery,
 }) => {
+  const colors = useThemeColors();
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        historyContainer: {},
+        historyTitle: {
+          fontSize: 14,
+          color: colors.secondary,
+          marginBottom: 8,
+        },
+        historyItem: {
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 8,
+          paddingVertical: 8,
+          paddingHorizontal: 12,
+          backgroundColor: colors.cardBackground,
+          borderRadius: 8,
+          marginBottom: 4,
+        },
+        historyText: {
+          fontSize: 14,
+          color: colors.text,
+        },
+      }),
+    [colors]
+  );
+
   if (history.length === 0) return null;
 
   return (
@@ -23,36 +51,10 @@ export const SearchHistory: React.FC<SearchHistoryProps> = ({
           style={styles.historyItem}
           onPress={() => onSelectQuery(item)}
         >
-          <Feather name="clock" size={16} color={Colors.secondary} />
+          <Feather name="clock" size={16} color={colors.secondary} />
           <ThemedText style={styles.historyText}>{item}</ThemedText>
         </TouchableOpacity>
       ))}
     </RNView>
   );
 };
-
-const styles = StyleSheet.create({
-  historyContainer: {
-    
-  },
-  historyTitle: {
-    fontSize: 14,
-    color: Colors.secondary,
-    marginBottom: 8,
-  },
-  historyItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    backgroundColor: Colors.cardBackground,
-    borderRadius: 8,
-    marginBottom: 4,
-  },
-  historyText: {
-    fontSize: 14,
-    color: Colors.text,
-  },
-});
-

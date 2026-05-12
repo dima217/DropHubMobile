@@ -1,4 +1,5 @@
-import { Colors } from "@/constants/design-tokens";
+import { useThemedStyles } from "@/hooks/useThemedStyles";
+
 import { TagColorMap, setTagColor } from "@/store/slices/tagColorsSlice";
 import { RootState } from "@/store/store";
 import React, { useMemo, useState } from "react";
@@ -30,6 +31,23 @@ const TagsModal: React.FC<TagsModalProps> = ({
   canAdd = true,
   allStorageTags = [],
 }) => {
+  const styles = useThemedStyles((c) => ({
+
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "flex-end",
+  },
+  container: {
+    backgroundColor: c.background,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    maxHeight: "80%",
+    padding: 20,
+  },
+
+}));
+
   const [newTag, setNewTag] = useState("");
   const [editingTag, setEditingTag] = useState<string | null>(null);
 
@@ -88,18 +106,3 @@ const TagsModal: React.FC<TagsModalProps> = ({
 };
 
 export default TagsModal;
-
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    justifyContent: "flex-end",
-  },
-  container: {
-    backgroundColor: Colors.background,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    maxHeight: "80%",
-    padding: 20,
-  },
-});

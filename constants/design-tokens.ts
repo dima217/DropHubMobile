@@ -1,22 +1,10 @@
 import { Platform } from "react-native";
 
-export const Colors = {
-  primary: "#2788E6",
-  gradientPrimary: "#8BB8FF",
-  text: "#FFFFFFB3",
-  brightText: "#FFFF",
-  secondary: "#8B868F",
-  inactive: "#1A1A1A",
-  background: "#060D18",
-  tab: "#232323",
-  border: "#232540",
-  cardBackground: "#171A29",
-  listBackground: "#21253A",
-  grey: "#404349",
-  gradient: ["#1A1A1A", "#242424"] as const,
-  buttonGradient: ["#2788E6", "#8BB8FF"] as const,
-  reject: "#ff4a75",
-};
+export { darkColors, lightColors } from "./colorPalettes";
+export type { AppColors } from "./colorPalettes";
+
+/** @deprecated Prefer useThemeColors() — static palette for legacy StyleSheet modules. */
+export { darkColors as Colors } from "./colorPalettes";
 
 export const Fonts = Platform.select({
   ios: {

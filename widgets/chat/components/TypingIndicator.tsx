@@ -1,5 +1,5 @@
-import { Colors } from "@/constants/design-tokens";
-import React, { useEffect, useRef } from "react";
+import { useThemeColors } from "@/hooks/useThemeColors";
+import React, { useEffect, useMemo, useRef } from "react";
 import { View, Text, Animated, StyleSheet } from "react-native";
 import { getUserName } from "../lib/users";
 
@@ -9,6 +9,28 @@ interface Props {
 
 export function TypingIndicator({ userIds }: Props) {
   const anim = useRef(new Animated.Value(0)).current;
+  const colors = useThemeColors();
+  const s = useMemo(
+    () =>
+      StyleSheet.create({
+        container: {
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 8,
+          paddingVertical: 4,
+          paddingLeft: 32,
+        },
+        dots: { flexDirection: "row", gap: 2 },
+        dot: {
+          width: 4,
+          height: 4,
+          borderRadius: 2,
+          backgroundColor: colors.secondary,
+        },
+        text: { fontSize: 12, color: colors.secondary },
+      }),
+    [colors]
+  );
 
   useEffect(() => {
     const loop = Animated.loop(
@@ -49,21 +71,3 @@ export function TypingIndicator({ userIds }: Props) {
     </View>
   );
 }
-
-const s = StyleSheet.create({
-  container: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    paddingVertical: 4,
-    paddingLeft: 32,
-  },
-  dots: { flexDirection: "row", gap: 2 },
-  dot: {
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: Colors.secondary,
-  },
-  text: { fontSize: 12, color: Colors.secondary },
-});

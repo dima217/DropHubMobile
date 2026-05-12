@@ -1,9 +1,11 @@
-import { Colors } from "@/constants/design-tokens";
+import { useThemeColors } from "@/hooks/useThemeColors";
+import { useThemedStyles } from "@/hooks/useThemedStyles";
+
 import GradientView from "@/shared/Gradient";
 import { ThemedText } from "@/shared/core/ThemedText";
 import { Ionicons } from "@expo/vector-icons";
 import { ReactNode } from "react";
-import { StyleSheet, TouchableOpacity, View } from "react-native";
+import { TouchableOpacity, View } from "react-native";
 
 interface ProfileSectionProps {
   icon: ReactNode;
@@ -20,6 +22,36 @@ const ProfileSection = ({
   isNested,
   isLast,
 }: ProfileSectionProps) => {
+  const themeColors = useThemeColors();
+  const styles = useThemedStyles((c) => ({
+    container: {
+      display: "flex",
+      flexDirection: "row",
+      width: "100%",
+      height: 85,
+      justifyContent: "space-between",
+      alignItems: "center",
+    },
+    iconContainer: {
+      width: 40,
+      height: 40,
+    },
+    iconGradientContainer: {
+      alignItems: "center",
+      justifyContent: "center",
+      borderRadius: 20,
+    },
+    itemBorder: {
+      borderBottomWidth: 1,
+      borderColor: c.inactive,
+    },
+    content: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 10,
+    },
+  }));
+
   return (
     <TouchableOpacity
       style={[styles.container, !isLast ? styles.itemBorder : ""]}
@@ -34,39 +66,10 @@ const ProfileSection = ({
         <ThemedText>{title}</ThemedText>
       </View>
       {isNested && (
-        <Ionicons name="arrow-forward" size={24} color={Colors.border} />
+        <Ionicons name="arrow-forward" size={24} color={themeColors.border} />
       )}
     </TouchableOpacity>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    display: "flex",
-    flexDirection: "row",
-    width: "100%",
-    height: 85,
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  iconContainer: {
-    width: 40,
-    height: 40,
-  },
-  iconGradientContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 20,
-  },
-  itemBorder: {
-    borderBottomWidth: 1,
-    borderColor: Colors.inactive,
-  },
-  content: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
-});
 
 export default ProfileSection;

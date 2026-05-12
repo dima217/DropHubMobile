@@ -1,11 +1,11 @@
 import { useGetFriendsQuery } from "@/api/friendApi";
 import { useGetStorageInfoQuery } from "@/api/storageApi";
 import { SearchResourceType } from "@/api/types/search";
-import { Colors } from "@/constants/design-tokens";
+import { useThemeColors } from "@/hooks/useThemeColors";
 import { ThemedText } from "@/shared/core/ThemedText";
 import { RootState } from "@/store/store";
 import { Feather } from "@expo/vector-icons";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   View as RNView,
   ScrollView,
@@ -50,6 +50,49 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
   );
 
   const tags = storageInfo?.tags ?? [];
+  const colors = useThemeColors();
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        wrapper: {
+          gap: 12,
+        },
+        resourceRow: {
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 8,
+        },
+        resourceLabel: {
+          fontSize: 14,
+          color: colors.secondary,
+        },
+        resourceChips: {
+          flexDirection: "row",
+          gap: 8,
+        },
+        chip: {
+          paddingHorizontal: 12,
+          paddingVertical: 6,
+          borderRadius: 16,
+          borderWidth: 1,
+          borderColor: colors.border,
+          backgroundColor: colors.cardBackground,
+        },
+        chipActive: {
+          backgroundColor: colors.primary,
+          borderColor: colors.primary,
+        },
+        chipText: {
+          fontSize: 12,
+          color: colors.text,
+        },
+        chipTextActive: {
+          color: colors.brightText,
+          fontWeight: "500",
+        },
+      }),
+    [colors]
+  );
 
   return (
     <RNView style={styles.wrapper}>
@@ -121,42 +164,3 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
     </RNView>
   );
 };
-
-const styles = StyleSheet.create({
-  wrapper: {
-    gap: 12,
-  },
-  resourceRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  resourceLabel: {
-    fontSize: 14,
-    color: Colors.secondary,
-  },
-  resourceChips: {
-    flexDirection: "row",
-    gap: 8,
-  },
-  chip: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    backgroundColor: Colors.cardBackground,
-  },
-  chipActive: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
-  },
-  chipText: {
-    fontSize: 12,
-    color: Colors.text,
-  },
-  chipTextActive: {
-    color: Colors.brightText,
-    fontWeight: "500",
-  },
-});

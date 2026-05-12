@@ -1,6 +1,8 @@
 import { useGetByRoomsListQuery } from "@/api/roomApi";
 import { RoomItem } from "@/api/types/room";
-import { Colors } from "@/constants/design-tokens";
+import { useThemedStyles } from "@/hooks/useThemedStyles";
+import { useThemeColors } from "@/hooks/useThemeColors";
+
 import AccountDetails from "@/shared/AccountDetails";
 import View from "@/shared/View";
 import SearchButton from "@/shared/SearchButton";
@@ -22,6 +24,26 @@ const isRoomActive = (room: RoomItem): boolean => {
 };
 
 const Home = () => {
+  const themeColors = useThemeColors();
+  const styles = useThemedStyles((c) => ({
+
+  container: {
+    flex: 1,
+  },
+  accountDetailsContainer: {
+    paddingTop: 20,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  scrollContent: {
+    paddingBottom: 100,
+  },
+
+}));
+
   const { data: rooms, isLoading } = useGetByRoomsListQuery();
   
   const activeRoomsCount = useMemo(() => {
@@ -32,7 +54,7 @@ const Home = () => {
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={Colors.primary} />
+        <ActivityIndicator size="large" color={themeColors.primary} />
       </View>
     );
   }
@@ -54,22 +76,5 @@ const Home = () => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  accountDetailsContainer: {
-    paddingTop: 20,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  scrollContent: {
-    paddingBottom: 100,
-  },
-});
 
 export default Home;

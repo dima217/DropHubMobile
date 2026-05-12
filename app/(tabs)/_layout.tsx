@@ -1,4 +1,4 @@
-import { Colors } from "@/constants/design-tokens";
+import { useAppTheme } from "@/providers/ThemeProvider";
 import { useI18n } from "@/shared/localization";
 import AuthChecker from "@/services/auth/AuthChecker";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
@@ -8,13 +8,19 @@ import { View } from "react-native";
 
 export default function TabLayout() {
   const { tl } = useI18n();
+  const { colors, colorScheme } = useAppTheme();
+  const blurTint = colorScheme === "light" ? "light" : "dark";
+  const blurBg =
+    colorScheme === "light"
+      ? "rgba(255, 255, 255, 0.92)"
+      : "rgba(36, 35, 35, 0.95)";
   return (
     <>
       <AuthChecker />
       <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: Colors.primary,
+        tabBarActiveTintColor: colors.primary,
         tabBarStyle: {
           bottom: 16,
           marginHorizontal: 16,
@@ -39,10 +45,10 @@ export default function TabLayout() {
           >
             <BlurView
               intensity={70}
-              tint="dark"
+              tint={blurTint}
               style={{
                 flex: 1,
-                backgroundColor: "rgba(36, 35, 35, 0.95)",
+                backgroundColor: blurBg,
               }}
             />
           </View>

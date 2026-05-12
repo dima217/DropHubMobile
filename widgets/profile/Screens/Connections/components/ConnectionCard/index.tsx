@@ -1,4 +1,5 @@
-import { Colors } from "@/constants/design-tokens";
+import { useThemedStyles } from "@/hooks/useThemedStyles";
+
 import { ThemedText } from "@/shared/core/ThemedText";
 import Avatar from "@/widgets/profile/components/ProfileCard/ui/Avatar";
 import React from "react";
@@ -15,6 +16,20 @@ const ConnectionCard = ({
   firstName,
   onPress,
 }: ConnectionCardProps) => {
+  const styles = useThemedStyles((c) => ({
+
+  container: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 50,
+    backgroundColor: c.cardBackground,
+  },
+
+}));
+
   return (
     <TouchableOpacity onPress={onPress} style={styles.container}>
       <Avatar
@@ -26,17 +41,5 @@ const ConnectionCard = ({
     </TouchableOpacity>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 50,
-    backgroundColor: Colors.cardBackground,
-  },
-});
 
 export default ConnectionCard;

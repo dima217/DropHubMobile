@@ -1,5 +1,7 @@
 import { useGetStorageInfoQuery } from "@/api/storageApi";
-import { Colors } from "@/constants/design-tokens";
+import { useThemedStyles } from "@/hooks/useThemedStyles";
+import { useThemeColors } from "@/hooks/useThemeColors";
+
 import { ThemedText } from "@/shared/core/ThemedText";
 import ProgressBar from "@/shared/ui/animated/ProgressBar";
 import {
@@ -22,6 +24,68 @@ interface StorageCardProps {
 }
 
 const StorageCard = React.memo(({ activeRoomsCount = 0 }: StorageCardProps) => {
+  const themeColors = useThemeColors();
+  const styles = useThemedStyles((c) => ({
+
+  storageCard: {
+    backgroundColor: c.cardBackground,
+    borderRadius: 20,
+    padding: 20,
+    marginTop: 20,
+    borderWidth: 1,
+    borderColor: c.border,
+  },
+  storageCardTitle: {
+    color: c.text,
+    marginBottom: 8,
+  },
+  storageCardValue: {
+    color: c.brightText,
+    marginBottom: 4,
+  },
+  storageCardSubtitle: {
+    color: c.secondary,
+    marginBottom: 16,
+  },
+  storageLoading: {
+    marginVertical: 20,
+    alignSelf: "flex-start",
+  },
+  roomsSection: {
+    marginTop: 24,
+    paddingTop: 24,
+    borderTopWidth: 1,
+    borderTopColor: c.border,
+  },
+  roomsTitle: {
+    color: c.text,
+    marginBottom: 8,
+  },
+  roomsValue: {
+    color: c.primary,
+    fontSize: 32,
+    fontWeight: "700",
+  },
+  sharedButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginTop: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    backgroundColor: c.background,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: c.border,
+  },
+  sharedButtonText: {
+    color: c.primary,
+    fontSize: 14,
+    fontWeight: "600",
+  },
+
+}));
+
   const router = useRouter();
   const { data: storageInfo, isLoading, isError } = useGetStorageInfoQuery();
 
@@ -55,7 +119,7 @@ const StorageCard = React.memo(({ activeRoomsCount = 0 }: StorageCardProps) => {
         <>
           <ActivityIndicator
             size="small"
-            color={Colors.primary}
+            color={themeColors.primary}
             style={styles.storageLoading}
           />
           <ThemedText type="small" style={styles.storageCardSubtitle}>
@@ -98,7 +162,7 @@ const StorageCard = React.memo(({ activeRoomsCount = 0 }: StorageCardProps) => {
         style={styles.sharedButton}
         onPress={() => router.push("/(tabs)/shared")}
       >
-        <Feather name="share-2" size={20} color={Colors.primary} />
+        <Feather name="share-2" size={20} color={themeColors.primary} />
         <ThemedText style={styles.sharedButtonText}>Общие ресурсы</ThemedText>
       </TouchableOpacity>
     </Animated.View>
@@ -107,64 +171,4 @@ const StorageCard = React.memo(({ activeRoomsCount = 0 }: StorageCardProps) => {
 
 StorageCard.displayName = "StorageCard";
 
-const styles = StyleSheet.create({
-  storageCard: {
-    backgroundColor: Colors.cardBackground,
-    borderRadius: 20,
-    padding: 20,
-    marginTop: 20,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  storageCardTitle: {
-    color: Colors.text,
-    marginBottom: 8,
-  },
-  storageCardValue: {
-    color: Colors.brightText,
-    marginBottom: 4,
-  },
-  storageCardSubtitle: {
-    color: Colors.secondary,
-    marginBottom: 16,
-  },
-  storageLoading: {
-    marginVertical: 20,
-    alignSelf: "flex-start",
-  },
-  roomsSection: {
-    marginTop: 24,
-    paddingTop: 24,
-    borderTopWidth: 1,
-    borderTopColor: Colors.border,
-  },
-  roomsTitle: {
-    color: Colors.text,
-    marginBottom: 8,
-  },
-  roomsValue: {
-    color: Colors.primary,
-    fontSize: 32,
-    fontWeight: "700",
-  },
-  sharedButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    marginTop: 16,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    backgroundColor: Colors.background,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  sharedButtonText: {
-    color: Colors.primary,
-    fontSize: 14,
-    fontWeight: "600",
-  },
-});
-
 export default StorageCard;
-

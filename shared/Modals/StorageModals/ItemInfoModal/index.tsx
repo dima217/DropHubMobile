@@ -1,15 +1,17 @@
 import { StorageItem } from "@/api/types/storage";
-import { Colors } from "@/constants/design-tokens";
+import { useDebouncedStorageItemNote } from "@/hooks/useDebouncedStorageItemNote";
+import { useThemeColors } from "@/hooks/useThemeColors";
+import { useThemedStyles } from "@/hooks/useThemedStyles";
 import { ThemedText } from "@/shared/core/ThemedText";
+import { Feather } from "@expo/vector-icons";
 import React from "react";
 import {
   Modal,
-  StyleSheet,
+  ScrollView,
+  TextInput,
   TouchableOpacity,
   View,
-  ScrollView,
 } from "react-native";
-import { Feather } from "@expo/vector-icons";
 
 interface ItemInfoModalProps {
   visible: boolean;
@@ -25,39 +27,129 @@ const formatBytes = (bytes: number): string => {
   return `${(bytes / Math.pow(k, i)).toFixed(1)} ${sizes[i]}`;
 };
 
-const formatDate = (dateString: string | null): string => {
-  if (!dateString) return "Не указано";
-  const date = new Date(dateString);
-  return date.toLocaleDateString("ru-RU", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-};
-
 const ItemInfoModal: React.FC<ItemInfoModalProps> = ({
   visible,
   item,
   onClose,
 }) => {
+  const themeColors = useThemeColors();
+  const { note, setNote, flush } = useDebouncedStorageItemNote(
+    item?.id ?? null
+  );
+
+  const styles = useThemedStyles((c) => ({
+    overlay: {
+      flex: 1,
+      backgroundColor: "rgba(0, 0, 0, 0.5)",
+      justifyContent: "flex-end",
+    },
+    container: {
+      backgroundColor: c.background,
+      borderTopLeftRadius: 20,
+      borderTopRightRadius: 20,
+      maxHeight: "80%",
+      padding: 20,
+    },
+    header: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 20,
+    },
+    title: {
+      fontSize: 20,
+      fontWeight: "600",
+      color: c.brightText,
+    },
+    closeButton: {
+      padding: 4,
+    },
+    content: {
+      maxHeight: 400,
+    },
+    infoRow: {
+      marginBottom: 16,
+    },
+    label: {
+      fontSize: 14,
+      color: c.secondary,
+      marginBottom: 4,
+    },
+    value: {
+      fontSize: 16,
+      color: c.brightText,
+    },
+    valueSmall: {
+      fontSize: 12,
+      color: c.secondary,
+    },
+    tagsContainer: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      gap: 8,
+      marginTop: 4,
+    },
+    tag: {
+      backgroundColor: c.cardBackground,
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: 12,
+    },
+    tagText: {
+      fontSize: 12,
+      color: c.primary,
+    },
+    noTags: {
+      fontSize: 14,
+      color: c.secondary,
+      fontStyle: "italic",
+    },
+    noteHint: {
+      fontSize: 12,
+      color: c.secondary,
+      marginBottom: 8,
+      lineHeight: 17,
+    },
+    noteInput: {
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 12,
+      padding: 12,
+      color: c.brightText,
+      minHeight: 100,
+      maxHeight: 160,
+      textAlignVertical: "top",
+      fontSize: 15,
+      backgroundColor: c.cardBackground,
+    },
+  }));
+
+  const handleClose = async () => {
+    await flush();
+    onClose();
+  };
+
   if (!item) return null;
 
   return (
-    <Modal visible={visible} animationType="slide" transparent>
+    <Modal
+      visible={visible}
+      animationType="slide"
+      transparent
+      onRequestClose={() => void handleClose()}
+    >
       <View style={styles.overlay}>
         <View style={styles.container}>
           <View style={styles.header}>
             <ThemedText style={styles.title}>
               Информация {item.isDirectory ? "о папке" : "о файле"}
             </ThemedText>
-            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <Feather name="x" size={24} color={Colors.brightText} />
+            <TouchableOpacity onPress={() => void handleClose()} style={styles.closeButton}>
+              <Feather name="x" size={24} color={themeColors.brightText} />
             </TouchableOpacity>
           </View>
 
-          <ScrollView style={styles.content}>
+          <ScrollView style={styles.content} keyboardShouldPersistTaps="handled">
             <View style={styles.infoRow}>
               <ThemedText style={styles.label}>Название:</ThemedText>
               <ThemedText style={styles.value}>{item.name}</ThemedText>
@@ -122,6 +214,21 @@ const ItemInfoModal: React.FC<ItemInfoModalProps> = ({
               <ThemedText style={styles.label}>ID:</ThemedText>
               <ThemedText style={styles.valueSmall}>{item.id}</ThemedText>
             </View>
+
+            <View style={styles.infoRow}>
+              <ThemedText style={styles.label}>Мои заметки</ThemedText>
+              <ThemedText style={styles.noteHint}>
+                Только на этом устройстве, без синхронизации с сервером.
+              </ThemedText>
+              <TextInput
+                style={styles.noteInput}
+                value={note}
+                onChangeText={setNote}
+                placeholder="Напишите заметку для себя…"
+                placeholderTextColor={themeColors.secondary}
+                multiline
+              />
+            </View>
           </ScrollView>
         </View>
       </View>
@@ -129,74 +236,4 @@ const ItemInfoModal: React.FC<ItemInfoModalProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    justifyContent: "flex-end",
-  },
-  container: {
-    backgroundColor: Colors.background,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    maxHeight: "80%",
-    padding: 20,
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: "600",
-    color: Colors.brightText,
-  },
-  closeButton: {
-    padding: 4,
-  },
-  content: {
-    maxHeight: 400,
-  },
-  infoRow: {
-    marginBottom: 16,
-  },
-  label: {
-    fontSize: 14,
-    color: Colors.secondary,
-    marginBottom: 4,
-  },
-  value: {
-    fontSize: 16,
-    color: Colors.brightText,
-  },
-  valueSmall: {
-    fontSize: 12,
-    color: Colors.secondary,
-  },
-  tagsContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-    marginTop: 4,
-  },
-  tag: {
-    backgroundColor: Colors.cardBackground,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-  },
-  tagText: {
-    fontSize: 12,
-    color: Colors.primary,
-  },
-  noTags: {
-    fontSize: 14,
-    color: Colors.secondary,
-    fontStyle: "italic",
-  },
-});
-
 export default ItemInfoModal;
-

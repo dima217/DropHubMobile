@@ -1,8 +1,8 @@
-import { Colors } from "@/constants/design-tokens";
-import { ThemedText } from "@/shared/core/ThemedText";
 import { Friend } from "@/api/types/friend";
+import { useThemeColors } from "@/hooks/useThemeColors";
+import { ThemedText } from "@/shared/core/ThemedText";
 import { Feather } from "@expo/vector-icons";
-import React from "react";
+import React, { useMemo } from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { MIME_TYPE_OPTIONS } from "./mimeTypes";
 
@@ -49,6 +49,43 @@ export const SearchFilterButtons: React.FC<SearchFilterButtonsProps> = ({
   onPressTag,
   onPressCreator,
 }) => {
+  const colors = useThemeColors();
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        row: {
+          flexDirection: "row",
+          gap: 10,
+          flexWrap: "wrap",
+        },
+        button: {
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 6,
+          paddingVertical: 10,
+          paddingHorizontal: 14,
+          borderRadius: 20,
+          borderWidth: 1,
+          borderColor: colors.border,
+          backgroundColor: colors.cardBackground,
+        },
+        buttonActive: {
+          backgroundColor: colors.primary,
+          borderColor: colors.primary,
+        },
+        buttonText: {
+          fontSize: 14,
+          color: colors.text,
+          maxWidth: 120,
+        },
+        buttonTextActive: {
+          color: colors.brightText,
+          fontWeight: "500",
+        },
+      }),
+    [colors]
+  );
+
   const hasType = selectedMimeTypes.length > 0;
   const hasTag = selectedTags.length > 0;
   const hasCreator = selectedCreatorId != null;
@@ -73,7 +110,7 @@ export const SearchFilterButtons: React.FC<SearchFilterButtonsProps> = ({
         <Feather
           name="chevron-down"
           size={16}
-          color={hasType ? Colors.brightText : Colors.secondary}
+          color={hasType ? colors.brightText : colors.secondary}
         />
       </TouchableOpacity>
 
@@ -91,7 +128,7 @@ export const SearchFilterButtons: React.FC<SearchFilterButtonsProps> = ({
         <Feather
           name="chevron-down"
           size={16}
-          color={hasTag ? Colors.brightText : Colors.secondary}
+          color={hasTag ? colors.brightText : colors.secondary}
         />
       </TouchableOpacity>
 
@@ -109,41 +146,9 @@ export const SearchFilterButtons: React.FC<SearchFilterButtonsProps> = ({
         <Feather
           name="chevron-down"
           size={16}
-          color={hasCreator ? Colors.brightText : Colors.secondary}
+          color={hasCreator ? colors.brightText : colors.secondary}
         />
       </TouchableOpacity>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  row: {
-    flexDirection: "row",
-    gap: 10,
-    flexWrap: "wrap",
-  },
-  button: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    backgroundColor: Colors.cardBackground,
-  },
-  buttonActive: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
-  },
-  buttonText: {
-    fontSize: 14,
-    color: Colors.text,
-    maxWidth: 120,
-  },
-  buttonTextActive: {
-    color: Colors.brightText,
-    fontWeight: "500",
-  },
-});

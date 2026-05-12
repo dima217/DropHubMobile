@@ -1,5 +1,7 @@
-import { Colors, Fonts } from "@/constants/design-tokens";
+import { Fonts } from "@/constants/design-tokens";
+import { useThemeColors } from "@/hooks/useThemeColors";
 import { useI18n } from "@/shared/localization";
+import { useMemo } from "react";
 import { StyleSheet, Text, type TextProps } from "react-native";
 
 export type ThemedTextProps = TextProps & {
@@ -26,7 +28,58 @@ export function ThemedText({
   ...rest
 }: ThemedTextProps) {
   const { tl } = useI18n();
-  const localizedChildren = typeof children === "string" ? tl(children) : children;
+  const colors = useThemeColors();
+  const typeStyles = useMemo(
+    () =>
+      StyleSheet.create({
+        default: {
+          fontSize: 16,
+          lineHeight: 24,
+        },
+        defaultSemiBold: {
+          fontSize: 16,
+          lineHeight: 24,
+          fontWeight: "600",
+        },
+        title: {
+          fontSize: 24,
+          fontWeight: "600",
+          lineHeight: 36,
+        },
+        subtitle: {
+          fontSize: 16,
+          fontWeight: "500",
+          lineHeight: 28,
+        },
+        megaTitle: {
+          fontSize: 26,
+          color: colors.brightText,
+          lineHeight: 50,
+        },
+        link: {
+          lineHeight: 24,
+          fontSize: 14,
+          color: colors.primary,
+        },
+        medium: {
+          fontSize: 12,
+        },
+        small: {
+          fontSize: 10,
+        },
+        error: {
+          width: "90%",
+          color: "red",
+          fontSize: 14,
+          marginTop: 4,
+          marginBottom: 8,
+        },
+      }),
+    [colors]
+  );
+
+  const localizedChildren =
+    typeof children === "string" ? tl(children) : children;
 
   if (highlightLastWord && typeof children === "string") {
     const words = tl(children).trim().split(" ");
@@ -36,14 +89,14 @@ export function ThemedText({
     return (
       <Text
         style={[
-          { color: Colors.text, fontFamily: Fonts[fontFamilyType] },
+          { color: colors.text, fontFamily: Fonts[fontFamilyType] },
           typeStyles[type],
           style,
         ]}
         {...rest}
       >
         {restText ? restText + " " : ""}
-        <Text style={{ color: Colors.primary }}>{lastWord}</Text>
+        <Text style={{ color: colors.primary }}>{lastWord}</Text>
       </Text>
     );
   }
@@ -51,7 +104,7 @@ export function ThemedText({
   return (
     <Text
       style={[
-        { color: Colors.text, fontFamily: Fonts[fontFamilyType] },
+        { color: colors.text, fontFamily: Fonts[fontFamilyType] },
         typeStyles[type],
         style,
       ]}
@@ -61,48 +114,3 @@ export function ThemedText({
     </Text>
   );
 }
-
-const typeStyles = StyleSheet.create({
-  default: {
-    fontSize: 16,
-    lineHeight: 24,
-  },
-  defaultSemiBold: {
-    fontSize: 16,
-    lineHeight: 24,
-    fontWeight: "600",
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "600",
-    lineHeight: 36,
-  },
-  subtitle: {
-    fontSize: 16,
-    fontWeight: "500",
-    lineHeight: 28,
-  },
-  megaTitle: {
-    fontSize: 26,
-    color: Colors.brightText,
-    lineHeight: 50,
-  },
-  link: {
-    lineHeight: 24,
-    fontSize: 14,
-    color: Colors.primary,
-  },
-  medium: {
-    fontSize: 12,
-  },
-  small: {
-    fontSize: 10,
-  },
-  error: {
-    width: "90%",
-    color: "red",
-    fontSize: 14,
-    marginTop: 4,
-    marginBottom: 8,
-  },
-});
