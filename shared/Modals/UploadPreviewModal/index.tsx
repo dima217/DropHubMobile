@@ -1,5 +1,6 @@
 import { useThemedStyles } from "@/hooks/useThemedStyles";
 import { useThemeColors } from "@/hooks/useThemeColors";
+import { useI18n } from "@/shared/localization";
 
 import { ThemedText } from "@/shared/core/ThemedText";
 import type { PendingUploadFile } from "@/shared/types/pendingUpload";
@@ -45,6 +46,7 @@ const UploadPreviewModal: React.FC<UploadPreviewModalProps> = ({
   quota,
 }) => {
   const themeColors = useThemeColors();
+  const { tl } = useI18n();
   const styles = useThemedStyles((c) => ({
 
   overlay: {
@@ -177,11 +179,13 @@ const UploadPreviewModal: React.FC<UploadPreviewModalProps> = ({
       const free = storageFreeBytes(quota.maxBytes, quota.usedBytes);
       if (totalBytes > free) {
         Alert.alert(
-          "Недостаточно места",
+          tl("Недостаточно места"),
           `Выбранные файлы (${formatBytes(
-            totalBytes
+            totalBytes,
+            tl
           )}) не помещаются в свободное место (${formatBytes(
-            free
+            free,
+            tl
           )}). Удалите часть файлов или освободите место в хранилище.`
         );
         return;
@@ -215,7 +219,7 @@ const UploadPreviewModal: React.FC<UploadPreviewModalProps> = ({
                 <View style={styles.fileRow}>
                   <ThemedText style={styles.fileName}>{item.fileName}</ThemedText>
                   <ThemedText style={styles.fileSize}>
-                    {formatBytes(item.fileSize)}
+                    {formatBytes(item.fileSize, tl)}
                   </ThemedText>
                 </View>
               )}
@@ -232,7 +236,7 @@ const UploadPreviewModal: React.FC<UploadPreviewModalProps> = ({
               />
               {files[0] ? (
                 <ThemedText style={styles.fileSizeSingle}>
-                  {formatBytes(files[0].fileSize)}
+                  {formatBytes(files[0].fileSize, tl)}
                 </ThemedText>
               ) : null}
               {hasSingleNameConflict ? (

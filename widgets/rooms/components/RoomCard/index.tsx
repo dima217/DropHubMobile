@@ -7,6 +7,7 @@ import { ThemedText } from "@/shared/core/ThemedText";
 import GradientView from "@/shared/Gradient";
 import { useI18n } from "@/shared/localization";
 import ManageUsersModal from "@/shared/Modals/RoomModals/ManageUsersModal";
+import { formatBytes } from "@/widgets/storage/utils/storageQuota";
 import UpdateRoomModal from "@/shared/Modals/RoomModals/UpdateRoomModal";
 import ActionMenu from "@/shared/ui/ActionMenu";
 import Avatar from "@/widgets/profile/components/ProfileCard/ui/Avatar";
@@ -23,14 +24,6 @@ interface RoomCardProps {
   notificationCount?: number;
   onRefresh?: () => void;
 }
-
-const formatBytes = (bytes: number): string => {
-  if (bytes === 0) return "0 B";
-  const k = 1024;
-  const sizes = ["B", "KB", "MB", "GB", "TB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return `${(bytes / Math.pow(k, i)).toFixed(1)} ${sizes[i]}`;
-};
 
 const RoomCard = ({ room, friends, onPress, notificationCount = 0, onRefresh }: RoomCardProps) => {
   const themeColors = useThemeColors();
@@ -228,7 +221,7 @@ const RoomCard = ({ room, friends, onPress, notificationCount = 0, onRefresh }: 
 
         <View style={styles.infoContainer}>
           <ThemedText style={styles.fileInfo}>
-            {tl("Files")} {fileCount} • {formatBytes(totalSize)}
+            {tl("Files")} {fileCount} • {formatBytes(totalSize, tl)}
           </ThemedText>
         </View>
 

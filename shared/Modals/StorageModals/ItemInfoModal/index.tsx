@@ -2,7 +2,9 @@ import { StorageItem } from "@/api/types/storage";
 import { useDebouncedStorageItemNote } from "@/hooks/useDebouncedStorageItemNote";
 import { useThemeColors } from "@/hooks/useThemeColors";
 import { useThemedStyles } from "@/hooks/useThemedStyles";
+import { useI18n } from "@/shared/localization";
 import { ThemedText } from "@/shared/core/ThemedText";
+import { formatBytes } from "@/widgets/storage/utils/storageQuota";
 import { Feather } from "@expo/vector-icons";
 import React from "react";
 import {
@@ -19,20 +21,13 @@ interface ItemInfoModalProps {
   onClose: () => void;
 }
 
-const formatBytes = (bytes: number): string => {
-  if (bytes === 0) return "0 B";
-  const k = 1024;
-  const sizes = ["B", "KB", "MB", "GB", "TB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return `${(bytes / Math.pow(k, i)).toFixed(1)} ${sizes[i]}`;
-};
-
 const ItemInfoModal: React.FC<ItemInfoModalProps> = ({
   visible,
   item,
   onClose,
 }) => {
   const themeColors = useThemeColors();
+  const { tl } = useI18n();
   const { note, setNote, flush } = useDebouncedStorageItemNote(
     item?.id ?? null
   );
@@ -160,7 +155,7 @@ const ItemInfoModal: React.FC<ItemInfoModalProps> = ({
                 <View style={styles.infoRow}>
                   <ThemedText style={styles.label}>Размер:</ThemedText>
                   <ThemedText style={styles.value}>
-                    {formatBytes(item.fileMeta.size)}
+                    {formatBytes(item.fileMeta.size, tl)}
                   </ThemedText>
                 </View>
                 <View style={styles.infoRow}>

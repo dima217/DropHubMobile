@@ -1,15 +1,20 @@
 const UNITS = ["Б", "КиБ", "МиБ", "ГиБ", "ТиБ"] as const;
 
-/** Форматирует размер в байтах (двоичные единицы, как у `maxBytes` на бэкенде). */
-export function formatBytes(bytes: number): string {
-  if (!Number.isFinite(bytes) || bytes <= 0) return "0 Б";
+/** Форматирует размер в байтах (двоичные единицы, как у `maxBytes` на бэкенде).
+ *  Передайте `tl` из `useI18n()` для перевода единиц измерения. */
+export function formatBytes(bytes: number, tl?: (text: string) => string): string {
+  if (!Number.isFinite(bytes) || bytes <= 0) {
+    const unit = tl ? tl("Б") : "Б";
+    return `0 ${unit}`;
+  }
   const i = Math.min(
     UNITS.length - 1,
     Math.floor(Math.log(bytes) / Math.log(1024))
   );
   const value = bytes / 1024 ** i;
   const rounded = i === 0 ? Math.round(value) : Math.round(value * 10) / 10;
-  return `${rounded} ${UNITS[i]}`;
+  const unit = tl ? tl(UNITS[i]) : UNITS[i];
+  return `${rounded} ${unit}`;
 }
 
 export function storageFreeBytes(maxBytes: number, usedBytes: number): number {

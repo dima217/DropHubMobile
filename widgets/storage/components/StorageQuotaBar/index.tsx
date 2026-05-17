@@ -77,13 +77,13 @@ export const StorageQuotaBar: React.FC<StorageQuotaBarProps> = ({
     <RNView style={styles.wrap}>
       <RNView style={styles.row}>
         <ThemedText style={styles.label} numberOfLines={1}>
-          {tl("Хранилище")}: {formatBytes(used)} {tl("из")} {formatBytes(maxBytes)}
+          {tl("Хранилище")}: {formatBytes(used, tl)} {tl("из")} {formatBytes(maxBytes, tl)}
         </ThemedText>
         <ThemedText
           style={[styles.free, nearFull && styles.freeWarn]}
           numberOfLines={1}
         >
-          {tl("свободно")} {formatBytes(free)}
+          {tl("свободно")} {formatBytes(free, tl)}
         </ThemedText>
       </RNView>
       <RNView style={styles.track}>

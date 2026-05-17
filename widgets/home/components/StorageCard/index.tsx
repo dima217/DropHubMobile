@@ -4,13 +4,10 @@ import { useThemeColors } from "@/hooks/useThemeColors";
 import { useI18n } from "@/shared/localization";
 
 import { ThemedText } from "@/shared/core/ThemedText";
-import ProgressBar from "@/shared/ui/animated/ProgressBar";
-import {
-  formatBytes,
-  storageUsedFraction,
-} from "@/widgets/storage/utils/storageQuota";
-import React, { useMemo } from "react";
-import { ActivityIndicator, StyleSheet, TouchableOpacity } from "react-native";
+import { StorageQuotaBar } from "@/widgets/storage/components/StorageQuotaBar";
+import { formatBytes } from "@/widgets/storage/utils/storageQuota";
+import React from "react";
+import { ActivityIndicator, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 import Animated, {
@@ -94,10 +91,6 @@ const StorageCard = React.memo(({ activeRoomsCount = 0 }: StorageCardProps) => {
   const usedBytes = storageInfo?.usedBytes ?? 0;
   const maxBytes = storageInfo?.maxBytes ?? 0;
 
-  const progress = useMemo(() => {
-    if (!maxBytes || maxBytes <= 0) return 0;
-    return Math.round(storageUsedFraction(usedBytes, maxBytes) * 1000) / 10;
-  }, [usedBytes, maxBytes]);
   const opacity = useSharedValue(0);
   const translateY = useSharedValue(20);
 
@@ -127,7 +120,6 @@ const StorageCard = React.memo(({ activeRoomsCount = 0 }: StorageCardProps) => {
           <ThemedText type="small" style={styles.storageCardSubtitle}>
             {tl("Загрузка…")}
           </ThemedText>
-          <ProgressBar progress={0} />
         </>
       ) : isError || !storageInfo?.id ? (
         <>
@@ -137,17 +129,13 @@ const StorageCard = React.memo(({ activeRoomsCount = 0 }: StorageCardProps) => {
           <ThemedText type="small" style={styles.storageCardSubtitle}>
             {tl("Не удалось загрузить данные хранилища")}
           </ThemedText>
-          <ProgressBar progress={0} />
         </>
       ) : (
         <>
           <ThemedText type="megaTitle" style={styles.storageCardValue}>
-            {formatBytes(usedBytes)}
+            {formatBytes(usedBytes, tl)}
           </ThemedText>
-          <ThemedText type="small" style={styles.storageCardSubtitle}>
-            {tl("из")} {formatBytes(maxBytes)} {tl("занято")}
-          </ThemedText>
-          <ProgressBar progress={progress} />
+          <StorageQuotaBar usedBytes={usedBytes} maxBytes={maxBytes} />
         </>
       )}
       
