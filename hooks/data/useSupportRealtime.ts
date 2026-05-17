@@ -4,7 +4,10 @@ import { useWebSocket } from "../websocket/useWebSocket";
 
 type TicketUpdatedPayload = { ticketId?: string };
 
-const SUPPORT_TICKET_EVENTS = ["support.ticket.updated", "support.ticket.created"] as const;
+const SUPPORT_TICKET_EVENTS = [
+  "support.ticket.updated",
+  "support.ticket.created",
+] as const;
 
 export function useSupportAuthRealtime(
   accessToken: string | null | undefined,
@@ -93,4 +96,3 @@ export function useSupportAnonymousTicketRealtime(
     };
   }, [enabled, isConnected, ticketId, token, emit, on, off]);
 }
-

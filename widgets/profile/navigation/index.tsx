@@ -4,6 +4,7 @@ import Support from "@/assets/images/Support.svg";
 import { useThemeColors } from "@/hooks/useThemeColors";
 import { syncFcmTokenToBackend } from "@/services/push/syncFcmTokenToBackend";
 import { secureStore } from "@/services/secureStore";
+import { useI18n } from "@/shared/localization";
 import LogoutConfirmationModal from "@/shared/Modals/LogoutConfirmationModal";
 import { clearAuth } from "@/store/slices/authSlice";
 import { Feather } from "@expo/vector-icons";
@@ -27,6 +28,7 @@ export const useProfileMenuItems = (): {
   const dispatch = useDispatch();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const { secondary } = useThemeColors();
+  const { tl } = useI18n();
 
   const handleLogoutClick = () => {
     console.log("Logout clicked");
@@ -52,42 +54,42 @@ export const useProfileMenuItems = (): {
   const items: MenuItem[] = [
     {
       id: "favorites",
-      title: "Избранное",
+      title: tl("Избранное"),
       icon: <Settings />, // TODO: Replace with Heart icon
       href: "/(tabs)/favorites",
       isNested: true,
     },
     {
       id: "trash",
-      title: "Trash",
+      title: tl("Корзина"),
       icon: <Feather name="trash" size={24} color={secondary} />,
       href: "/(tabs)/trash",
       isNested: true,
     },
     {
       id: "notifications",
-      title: "Notifications",
+      title: tl("Notifications"),
       icon: <Feather name="bell" size={24} color={secondary} />,
       href: "/(tabs)/profile/notifications",
       isNested: true,
     },
     {
       id: "support",
-      title: "Support",
+      title: tl("Поддержка"),
       icon: <Support />,
       href: "/(tabs)/profile/support",
       isNested: true,
     },
     {
       id: "settings",
-      title: "Account Settings",
+      title: tl("Account Settings"),
       icon: <Settings />,
       href: "/(tabs)/profile/settings",
       isNested: true,
     },
     {
       id: "logout",
-      title: "Log Out",
+      title: tl("Log Out"),
       icon: <SignOut />,
       onPress: handleLogoutClick,
     },

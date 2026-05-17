@@ -4,6 +4,7 @@ import { useThemeColors } from "@/hooks/useThemeColors";
 import type { AppNotification } from "@/api/types/notification";
 import { PushNotificationDataType } from "@/constants/pushNotifications";
 import Header from "@/shared/Header";
+import { useI18n } from "@/shared/localization";
 import View from "@/shared/View";
 import { ThemedText } from "@/shared/core/ThemedText";
 import { Href, useRouter } from "expo-router";
@@ -40,6 +41,7 @@ function navigateByNotification(router: ReturnType<typeof useRouter>, item: AppN
 
 export default function NotificationsScreen() {
   const colors = useThemeColors();
+  const { tl } = useI18n();
   const router = useRouter();
   const [offset, setOffset] = useState(0);
   const [items, setItems] = useState<AppNotification[]>([]);
@@ -192,14 +194,14 @@ export default function NotificationsScreen() {
           isLoading ? (
             <ActivityIndicator style={styles.loader} color={colors.primary} />
           ) : (
-            <ThemedText style={styles.empty}>No notifications yet.</ThemedText>
+            <ThemedText style={styles.empty}>{tl("No notifications yet.")}</ThemedText>
           )
         }
         ListFooterComponent={
           isFetching && offset > 0 ? (
             <ActivityIndicator style={styles.loader} color={colors.primary} />
           ) : isMarkingRead ? (
-            <ThemedText style={styles.syncText}>Updating...</ThemedText>
+            <ThemedText style={styles.syncText}>{tl("Updating...")}</ThemedText>
           ) : null
         }
       />

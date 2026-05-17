@@ -1,6 +1,7 @@
 import Header from "@/shared/Header";
 import { useThemedStyles } from "@/hooks/useThemedStyles";
 import { useThemeColors } from "@/hooks/useThemeColors";
+import { useI18n } from "@/shared/localization";
 import CreateSupportTicketModal from "@/shared/Modals/SupportModals/CreateSupportTicketModal";
 import View from "@/shared/View";
 import { ThemedText } from "@/shared/core/ThemedText";
@@ -18,6 +19,7 @@ import {
 
 export default function SupportListScreen() {
   const colors = useThemeColors();
+  const { tl } = useI18n();
   const router = useRouter();
   const {
     accessToken,
@@ -47,7 +49,7 @@ export default function SupportListScreen() {
     return (
       <View>
         <Header title="Поддержка" />
-        <ThemedText style={styles.centerMsg}>Нет авторизации.</ThemedText>
+        <ThemedText style={styles.centerMsg}>{tl("Нет авторизации.")}</ThemedText>
       </View>
     );
   }
@@ -60,7 +62,7 @@ export default function SupportListScreen() {
           <TouchableOpacity
             onPress={() => setFormOpen(true)}
             hitSlop={12}
-            accessibilityLabel="Новое обращение"
+            accessibilityLabel={tl("Новое обращение")}
           >
             <Feather name="plus-circle" size={26} color={colors.primary} />
           </TouchableOpacity>
@@ -79,9 +81,9 @@ export default function SupportListScreen() {
         )}
         ListHeaderComponent={
           <RNView style={styles.listIntro}>
-            <ThemedText style={styles.introTitle}>Мои обращения</ThemedText>
+            <ThemedText style={styles.introTitle}>{tl("Мои обращения")}</ThemedText>
             <ThemedText style={styles.introHint}>
-              Статусы обновляются автоматически. Откройте карточку для деталей.
+              {tl("Статусы обновляются автоматически. Откройте карточку для деталей.")}
             </ThemedText>
           </RNView>
         }
@@ -89,7 +91,7 @@ export default function SupportListScreen() {
           isLoading ? (
             <ActivityIndicator color={colors.primary} style={styles.loader} />
           ) : (
-            <ThemedText style={styles.empty}>Пока нет обращений — нажмите +</ThemedText>
+            <ThemedText style={styles.empty}>{tl("Пока нет обращений — нажмите +")}</ThemedText>
           )
         }
         contentContainerStyle={styles.listContent}

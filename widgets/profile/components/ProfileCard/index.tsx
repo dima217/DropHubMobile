@@ -38,7 +38,7 @@ const ProfileCard = () => {
   if (!profile) {
     return (
       <GradientView style={styles.container}>
-        <ThemedText>Loading...</ThemedText>
+        <ThemedText>{tl("Loading...")}</ThemedText>
       </GradientView>
     );
   }

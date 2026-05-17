@@ -2,6 +2,7 @@ import { ThemedText } from "@/shared/core/ThemedText";
 import { useThemedStyles } from "@/hooks/useThemedStyles";
 import { useThemeColors } from "@/hooks/useThemeColors";
 import Header from "@/shared/Header";
+import { useI18n } from "@/shared/localization";
 import View from "@/shared/View";
 import { useSupportTicketDetailScreen } from "@/widgets/support/hooks/useSupportTicketDetailScreen";
 import SupportTicketDetailView from "@/widgets/support/components/SupportTicketDetailView";
@@ -11,6 +12,7 @@ import { ActivityIndicator, ScrollView } from "react-native";
 
 export default function SupportTicketDetailScreen() {
   const colors = useThemeColors();
+  const { tl } = useI18n();
   const router = useRouter();
   const { ticketId } = useLocalSearchParams<{ ticketId: string }>();
   const rawId = typeof ticketId === "string" ? ticketId : ticketId?.[0];
@@ -27,7 +29,7 @@ export default function SupportTicketDetailScreen() {
     <View>
       <Header title="Обращение" onBackPress={() => router.back()} />
       {!enabled ? (
-        <ThemedText style={styles.centerMsg}>Нет данных.</ThemedText>
+        <ThemedText style={styles.centerMsg}>{tl("Нет данных.")}</ThemedText>
       ) : isLoading && !ticket ? (
         <ActivityIndicator color={colors.primary} style={styles.loader} />
       ) : ticket ? (
@@ -38,7 +40,7 @@ export default function SupportTicketDetailScreen() {
           <SupportTicketDetailView ticket={ticket} isFetching={isFetching} />
         </ScrollView>
       ) : (
-        <ThemedText style={styles.centerMsg}>Обращение не найдено.</ThemedText>
+        <ThemedText style={styles.centerMsg}>{tl("Обращение не найдено.")}</ThemedText>
       )}
     </View>
   );

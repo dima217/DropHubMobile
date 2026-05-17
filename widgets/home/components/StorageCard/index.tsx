@@ -1,6 +1,7 @@
 import { useGetStorageInfoQuery } from "@/api/storageApi";
 import { useThemedStyles } from "@/hooks/useThemedStyles";
 import { useThemeColors } from "@/hooks/useThemeColors";
+import { useI18n } from "@/shared/localization";
 
 import { ThemedText } from "@/shared/core/ThemedText";
 import ProgressBar from "@/shared/ui/animated/ProgressBar";
@@ -86,6 +87,7 @@ const StorageCard = React.memo(({ activeRoomsCount = 0 }: StorageCardProps) => {
 
 }));
 
+  const { tl } = useI18n();
   const router = useRouter();
   const { data: storageInfo, isLoading, isError } = useGetStorageInfoQuery();
 
@@ -113,7 +115,7 @@ const StorageCard = React.memo(({ activeRoomsCount = 0 }: StorageCardProps) => {
   return (
     <Animated.View style={[styles.storageCard, animatedStyle]}>
       <ThemedText type="subtitle" style={styles.storageCardTitle}>
-        Хранилище
+        {tl("Хранилище")}
       </ThemedText>
       {isLoading ? (
         <>
@@ -123,7 +125,7 @@ const StorageCard = React.memo(({ activeRoomsCount = 0 }: StorageCardProps) => {
             style={styles.storageLoading}
           />
           <ThemedText type="small" style={styles.storageCardSubtitle}>
-            Загрузка…
+            {tl("Загрузка…")}
           </ThemedText>
           <ProgressBar progress={0} />
         </>
@@ -133,7 +135,7 @@ const StorageCard = React.memo(({ activeRoomsCount = 0 }: StorageCardProps) => {
             —
           </ThemedText>
           <ThemedText type="small" style={styles.storageCardSubtitle}>
-            Не удалось загрузить данные хранилища
+            {tl("Не удалось загрузить данные хранилища")}
           </ThemedText>
           <ProgressBar progress={0} />
         </>
@@ -143,7 +145,7 @@ const StorageCard = React.memo(({ activeRoomsCount = 0 }: StorageCardProps) => {
             {formatBytes(usedBytes)}
           </ThemedText>
           <ThemedText type="small" style={styles.storageCardSubtitle}>
-            из {formatBytes(maxBytes)} занято
+            {tl("из")} {formatBytes(maxBytes)} {tl("занято")}
           </ThemedText>
           <ProgressBar progress={progress} />
         </>
@@ -151,7 +153,7 @@ const StorageCard = React.memo(({ activeRoomsCount = 0 }: StorageCardProps) => {
       
       <Animated.View style={styles.roomsSection}>
         <ThemedText type="subtitle" style={styles.roomsTitle}>
-          Активных комнат
+          {tl("Активных комнат")}
         </ThemedText>
         <ThemedText type="title" style={styles.roomsValue}>
           {activeRoomsCount}
@@ -163,7 +165,7 @@ const StorageCard = React.memo(({ activeRoomsCount = 0 }: StorageCardProps) => {
         onPress={() => router.push("/(tabs)/shared")}
       >
         <Feather name="share-2" size={20} color={themeColors.primary} />
-        <ThemedText style={styles.sharedButtonText}>Общие ресурсы</ThemedText>
+        <ThemedText style={styles.sharedButtonText}>{tl("Общие ресурсы")}</ThemedText>
       </TouchableOpacity>
     </Animated.View>
   );

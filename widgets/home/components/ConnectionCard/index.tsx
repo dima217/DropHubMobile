@@ -1,5 +1,6 @@
 import { useThemedStyles } from "@/hooks/useThemedStyles";
 import { useThemeColors } from "@/hooks/useThemeColors";
+import { useI18n } from "@/shared/localization";
 
 import { ThemedText } from "@/shared/core/ThemedText";
 import { Feather } from "@expo/vector-icons";
@@ -54,6 +55,7 @@ const ConnectionCard = React.memo(() => {
 
 }));
 
+  const { tl } = useI18n();
   const router = useRouter();
   const scale = useSharedValue(1);
   const rotate = useSharedValue(0);
@@ -111,10 +113,10 @@ const ConnectionCard = React.memo(() => {
             <Feather name="user-plus" size={32} color={themeColors.primary} />
           </Animated.View>
           <ThemedText type="subtitle" style={styles.connectionTitle}>
-            Добавить коннект
+            {tl("Добавить коннект")}
           </ThemedText>
           <ThemedText type="small" style={styles.connectionSubtitle}>
-            Расширьте свою сеть и начните сотрудничать
+            {tl("Расширьте свою сеть и начните сотрудничать")}
           </ThemedText>
         </LinearGradient>
       </Animated.View>
