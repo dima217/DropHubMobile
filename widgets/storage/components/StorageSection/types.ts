@@ -20,6 +20,13 @@ export interface StorageSectionOptions {
   menuOptionsAtVirtualRoot?: StorageItemMenuOptions;
   redirectMoveToStorageTab?: boolean;
   consumePendingMoveOnTabFocus?: boolean;
+  /**
+   * When true, breadcrumbs and quota bar are embedded as the FlatList's
+   * ListHeaderComponent instead of being fixed above the list.
+   * This allows scrolling up to reach the breadcrumbs row (useful on the
+   * search screen where the outer container is not scrollable).
+   */
+  scrollableHeader?: boolean;
 }
 
 export type ResolvedStorageSectionOptions = StorageSectionOptions & {

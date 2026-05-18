@@ -1,10 +1,12 @@
+import { StorageItem } from "@/api/types/storage";
 import { useThemeColors } from "@/hooks/useThemeColors";
 import ConversionPickerModal from "@/shared/Modals/ConversionPickerModal";
 import MultiSelectBar from "@/shared/ui/MultiSelectBar";
 import PreviewToggleSwitch from "@/shared/ui/PreviewToggleSwitch";
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import {
   ActivityIndicator,
+  FlatList,
   View as RNView,
   View,
 } from "react-native";
@@ -96,6 +98,60 @@ export function StorageSectionLayout({ vm }: Props) {
     handleBatchTagsSubmit,
   } = vm;
 
+  const flatListRef = useRef<FlatList<StorageItem>>(null);
+
+  useEffect(() => {
+    if (options.scrollableHeader && itemsInCurrentFolder.length > 0) {
+      flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+    }
+  }, [itemsInCurrentFolder]);
+
+  const showQuotaBar =
+    (sharedContext?.quota && sharedContext.quota.maxBytes > 0) ||
+    (!sharedContext && storageInfo && storageInfo.maxBytes > 0);
+
+  const quotaBar = showQuotaBar ? (
+    <StorageQuotaBar
+      usedBytes={
+        sharedContext?.quota
+          ? sharedContext.quota.usedBytes
+          : storageInfo?.usedBytes ?? 0
+      }
+      maxBytes={
+        sharedContext?.quota
+          ? sharedContext.quota.maxBytes
+          : storageInfo?.maxBytes ?? 0
+      }
+    />
+  ) : null;
+
+  const headerRow = (
+    <View style={styles.headerRow}>
+      {options.showBreadcrumbs && (
+        <StorageBreadcrumbs
+          path={externalData?.path ?? path}
+          onNavigate={handleNavigateWithBatchGuard}
+        />
+      )}
+      {options.showPreviewToggle && (
+        <PreviewToggleSwitch
+          isEnabled={previewEnabled}
+          onToggle={setPreviewEnabled}
+        />
+      )}
+      {options.showGlobalTagsButton && renderHeaderActions?.({
+        onOpenGlobalTags: () => setGlobalTagsModalVisible(true),
+      })}
+    </View>
+  );
+
+  const scrollableListHeader = options.scrollableHeader ? (
+    <>
+      {headerRow}
+      {quotaBar}
+    </>
+  ) : undefined;
+
   return (
     <View style={styles.container}>
       {isLoading && (
@@ -122,42 +178,17 @@ export function StorageSectionLayout({ vm }: Props) {
             />
           )}
 
-          <View style={styles.headerRow}>
-            {options.showBreadcrumbs && (
-              <StorageBreadcrumbs
-                path={externalData?.path ?? path}
-                onNavigate={handleNavigateWithBatchGuard}
-              />
-            )}
-            {options.showPreviewToggle && (
-              <PreviewToggleSwitch
-                isEnabled={previewEnabled}
-                onToggle={setPreviewEnabled}
-              />
-            )}
-            {options.showGlobalTagsButton && renderHeaderActions?.({
-              onOpenGlobalTags: () => setGlobalTagsModalVisible(true),
-            })}
-          </View>
-
-          {(sharedContext?.quota && sharedContext.quota.maxBytes > 0) ||
-          (!sharedContext && storageInfo && storageInfo.maxBytes > 0) ? (
-            <StorageQuotaBar
-              usedBytes={
-                sharedContext?.quota
-                  ? sharedContext.quota.usedBytes
-                  : storageInfo?.usedBytes ?? 0
-              }
-              maxBytes={
-                sharedContext?.quota
-                  ? sharedContext.quota.maxBytes
-                  : storageInfo?.maxBytes ?? 0
-              }
-            />
-          ) : null}
+          {!options.scrollableHeader && (
+            <>
+              {headerRow}
+              {quotaBar}
+            </>
+          )}
 
           <StorageItemList
+            ref={flatListRef}
             items={itemsInCurrentFolder}
+            listHeader={scrollableListHeader}
             previewEnabled={previewEnabled}
             favoriteItemIds={favoriteItemIds}
             previewUrls={previewUrls}

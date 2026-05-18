@@ -115,6 +115,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
             showGlobalTagsButton: false,
             rootLabel: "Результаты поиска",
             initialItems: storageItems,
+            scrollableHeader: true,
           }}
           menuOptions={storageMenuOptions}
         />

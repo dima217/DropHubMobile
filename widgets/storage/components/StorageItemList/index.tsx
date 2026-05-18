@@ -9,6 +9,8 @@ import React from "react";
 import { FlatList, StyleSheet } from "react-native";
 import { useSelector } from "react-redux";
 
+export type StorageItemListHandle = Pick<FlatList<StorageItem>, "scrollToOffset">;
+
 const mapStorageItemToFile = (
   item: StorageItem,
   previewUrl?: string
@@ -68,9 +70,14 @@ interface StorageItemListProps {
   multiSelect?: StorageItemListMultiSelect;
   /** Не показывать меню по элементу (режим выбора папки назначения и т.п.). */
   suppressMenus?: boolean;
+  /** Content rendered above the list items (breadcrumbs, quota bar, etc.) when scrollableHeader mode is active. */
+  listHeader?: React.ReactNode;
 }
 
-export const StorageItemList: React.FC<StorageItemListProps> = ({
+export const StorageItemList = React.forwardRef<
+  FlatList<StorageItem>,
+  StorageItemListProps
+>(({
   items,
   previewEnabled = false,
   favoriteItemIds,
@@ -82,7 +89,8 @@ export const StorageItemList: React.FC<StorageItemListProps> = ({
   getItemAuthor,
   multiSelect,
   suppressMenus = false,
-}) => {
+  listHeader,
+}, ref) => {
   const tagColors = useSelector(
     (state: RootState) => (state.tagColors as { colors: TagColorMap }).colors
   );
@@ -168,13 +176,17 @@ export const StorageItemList: React.FC<StorageItemListProps> = ({
 
   return (
     <FlatList
+      ref={ref}
       data={items}
       keyExtractor={(item) => item.id}
       renderItem={renderItem}
+      ListHeaderComponent={listHeader ? () => <>{listHeader}</> : undefined}
       contentContainerStyle={styles.listContent}
     />
   );
-};
+});
+
+StorageItemList.displayName = "StorageItemList";
 
 const styles = StyleSheet.create({
   listContent: {
