@@ -5,6 +5,7 @@ import { useThemedStyles } from "@/hooks/useThemedStyles";
 import { useThemeColors } from "@/hooks/useThemeColors";
 
 import { ThemedText } from "@/shared/core/ThemedText";
+import { useI18n } from "@/shared/localization";
 import BaseModal from "@/shared/Modals/BaseModal";
 import TextInput from "@/shared/TextInput";
 import React, { useState } from "react";
@@ -23,6 +24,7 @@ const CreateRoomModal: React.FC<CreateRoomModalProps> = ({
   onSuccess,
 }) => {
   const themeColors = useThemeColors();
+  const { tl } = useI18n();
   const styles = useThemedStyles((c) => ({
 
   content: {
@@ -209,7 +211,7 @@ const CreateRoomModal: React.FC<CreateRoomModalProps> = ({
         />
         <View style={styles.friendsSection}>
           <ThemedText style={styles.sectionTitle}>
-            Add Friends (Optional)
+            {tl("Add Friends (Optional)")}
           </ThemedText>
           {friendsLoading ? (
             <View style={styles.loadingContainer}>
@@ -217,7 +219,7 @@ const CreateRoomModal: React.FC<CreateRoomModalProps> = ({
             </View>
           ) : friends.length === 0 ? (
             <ThemedText style={styles.emptyText}>
-              No friends available
+              {tl("No friends available")}
             </ThemedText>
           ) : (
             <ScrollView 

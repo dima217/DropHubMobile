@@ -1,4 +1,5 @@
 import { ThemedText } from "@/shared/core/ThemedText";
+import { useI18n } from "@/shared/localization";
 import PasswordInput from "@/shared/PasswordInput";
 import { Controller, useFormContext } from "react-hook-form";
 import { StyleSheet, View } from "react-native";
@@ -8,6 +9,7 @@ const PasswordScreen = () => {
     control,
     formState: { errors },
   } = useFormContext();
+  const { tl } = useI18n();
 
   const getErrorMessage = (field: string): string | undefined => {
     const error = errors[field];
@@ -21,11 +23,10 @@ const PasswordScreen = () => {
     <View style={styles.stepContainer}>
       <View style={styles.infoContainer}>
         <ThemedText type="megaTitle" style={styles.title}>
-          Create Password
+          {tl("Create Password")}
         </ThemedText>
         <ThemedText type="medium" style={styles.subtitle}>
-          The password must contain at least 8 characters, 1 special character
-          and 1 uppercase letter
+          {tl("The password must contain at least 8 characters, 1 special character and 1 uppercase letter")}
         </ThemedText>
       </View>
       <View style={styles.inputWrapper}>

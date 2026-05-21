@@ -1,4 +1,5 @@
 import { ThemedText } from "@/shared/core/ThemedText";
+import { useI18n } from "@/shared/localization";
 import TextInput from "@/shared/TextInput";
 import { useRouter } from "expo-router";
 import { Controller, useFormContext } from "react-hook-form";
@@ -9,6 +10,7 @@ const CodeScreen = () => {
     control,
     formState: { errors },
   } = useFormContext();
+  const { tl } = useI18n();
   const router = useRouter();
 
   const getErrorMessage = (field: string): string | undefined => {
@@ -23,11 +25,10 @@ const CodeScreen = () => {
     <View style={styles.stepContainer}>
       <View style={styles.infoContainer}>
         <ThemedText type="megaTitle" style={styles.title}>
-          Verify Email
+          {tl("Verify Email")}
         </ThemedText>
         <ThemedText type="medium">
-          We&apos;ve sent you a 6-digit code via email. If you haven&apos;t
-          received the code, please request it again or check your spam folder
+          {tl("We've sent you a 6-digit code via email. If you haven't received the code, please request it again or check your spam folder")}
         </ThemedText>
       </View>
       <View style={styles.inputWrapper}>

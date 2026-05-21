@@ -1,14 +1,17 @@
-import Button from "@/shared/Button";
 import { useThemedStyles } from "@/hooks/useThemedStyles";
+import { useAppTheme } from "@/providers/ThemeProvider";
+import Button from "@/shared/Button";
 import { ThemedText } from "@/shared/core/ThemedText";
+import { useI18n } from "@/shared/localization";
 import GoogleSignInButton from "@/shared/ui/GoogleSignInButton";
 import RadialGradientBackground from "@/shared/ui/RadialGradientBackground";
-import View from "@/shared/View";
 import { useRouter } from "expo-router";
 import { View as RNView } from "react-native";
 
 export default function OnboardingScreen() {
   const router = useRouter();
+  const { colorScheme } = useAppTheme();
+  const { tl } = useI18n();
 
   const styles = useThemedStyles((c) => ({
     gradientContainer: {
@@ -78,8 +81,11 @@ export default function OnboardingScreen() {
   }));
 
   return (
-      <View style={styles.transparentView}>
-        <RadialGradientBackground style={styles.radialContainer} opacities={[0.8, 0.0]} />
+      <RNView style={{flex: 1}}>
+        <RadialGradientBackground
+          style={styles.radialContainer}
+          opacities={colorScheme === "dark" ? [0.8, 0.0] : [1.0, 0.55, 0.0]}
+        />
         <RNView style={styles.moonWrapper}>
           <RadialGradientBackground 
             style={styles.moonContainer} 
@@ -96,21 +102,20 @@ export default function OnboardingScreen() {
         <RNView style={styles.content}>
           <RNView style={styles.titleBlock}>
             <ThemedText style={styles.title}>
-              WORK SPACE
+              {tl("WORK SPACE")}
             </ThemedText>
             <ThemedText style={styles.subtitle}>
-            Share Without
-            Interference
+              {tl("Share Without Interference")}
             </ThemedText>
             <ThemedText style={styles.description}>
-              DropHub is a workspace for your dreams. It is a place where you can share your ideas with others and get feedback on them.
+              {tl("DropHub is a workspace for your dreams. It is a place where you can share your ideas with others and get feedback on them.")}
             </ThemedText>
           </RNView>
           <RNView style={styles.buttonWrapper}>
             <GoogleSignInButton />
-            <Button title="Skip" style={styles.skipButton} onPress={() => router.replace("/(auth)/login")} />
+            <Button title={tl("Skip")} style={styles.skipButton} onPress={() => router.replace("/(auth)/login")} />
           </RNView>
         </RNView>
-      </View>
+      </RNView>
   );
 }

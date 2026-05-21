@@ -9,6 +9,7 @@ import { useDispatch } from "react-redux";
 
 import AuthPrompt from "@/shared/ui/AuthPrompt";
 import GoogleSignInButton from "@/shared/ui/GoogleSignInButton";
+import { useI18n } from "@/shared/localization";
 import Button from "../../../shared/Button";
 import EmailInput from "../../../shared/EmailInput";
 import PasswordInput from "../../../shared/PasswordInput";
@@ -20,6 +21,7 @@ interface LoginData {
 }
 
 const LoginForm = () => {
+  const { tl } = useI18n();
   const { handleSubmit, control } = useForm<LoginData>({
     defaultValues: {
       email: "",
@@ -128,7 +130,7 @@ const LoginForm = () => {
 
       {apiError && (
         <ThemedText type="error" style={styles.apiErrorText}>
-          {apiError}
+          {tl(apiError)}
         </ThemedText>
       )}
 

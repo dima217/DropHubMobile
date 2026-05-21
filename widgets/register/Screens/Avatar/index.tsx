@@ -1,5 +1,6 @@
 import { useGetDefaultsAvatarsQuery } from "@/api/avatarApi";
 import { ThemedText } from "@/shared/core/ThemedText";
+import { useI18n } from "@/shared/localization";
 import MediaUploader from "@/shared/MediaUploader/components/MediaUploader";
 import ActivityIndicator from "@/shared/ui/ActivityIndicator";
 import Circle from "@/shared/ui/Circle";
@@ -23,6 +24,7 @@ import { Grid } from "./ui/Grid";
 
 const AvatarScreen = () => {
   const { control } = useFormContext();
+  const { tl } = useI18n();
 
   const { data: avatars, isLoading, isError } = useGetDefaultsAvatarsQuery();
 
@@ -33,7 +35,7 @@ const AvatarScreen = () => {
       render={({ field: { value, onChange } }) => (
         <View style={styles.stepContainer}>
           <View style={styles.innerContainer}>
-            <ThemedText type="megaTitle">Avatar</ThemedText>
+            <ThemedText type="megaTitle">{tl("Avatar")}</ThemedText>
           </View>
 
           <View style={styles.mediaContainer}>
@@ -47,14 +49,14 @@ const AvatarScreen = () => {
 
           <View style={styles.innerContainer}>
             <ThemedText type="medium">
-              Choose an avatar or set your own
+              {tl("Choose an avatar or set your own")}
             </ThemedText>
           </View>
 
           {isLoading && <ActivityIndicator />}
 
           {isError && (
-            <ThemedText type="small">Failed to load avatars</ThemedText>
+            <ThemedText type="small">{tl("Failed to load avatars")}</ThemedText>
           )}
 
           {avatars && (

@@ -4,9 +4,8 @@ import React from "react";
 import {
   View as RNView,
   StyleProp,
-  StyleSheet,
   ViewProps,
-  ViewStyle,
+  ViewStyle
 } from "react-native";
 
 interface CustomViewProps extends ViewProps {

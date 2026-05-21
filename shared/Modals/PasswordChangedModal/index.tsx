@@ -1,4 +1,5 @@
 import BaseModal from "@/shared/Modals/BaseModal";
+import { useI18n } from "@/shared/localization";
 import React from "react";
 
 interface PasswordChangedModalProps {
@@ -10,11 +11,12 @@ const PasswordChangedModal: React.FC<PasswordChangedModalProps> = ({
   isVisible,
   onClose,
 }) => {
+  const { tl } = useI18n();
   return (
     <BaseModal
       isVisible={isVisible}
-      title="Пароль изменён"
-      message="Ваш пароль был успешно обновлён. Теперь вы можете войти с новым паролем 🔐"
+      title={tl("Пароль изменён")}
+      message={tl("Ваш пароль был успешно обновлён. Теперь вы можете войти с новым паролем 🔐")}
       onClose={onClose}
       buttons={[
         {

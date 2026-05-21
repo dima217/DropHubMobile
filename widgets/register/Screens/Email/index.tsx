@@ -1,6 +1,6 @@
-//import { useTranslation } from "@/hooks/useTranslation";
 import { ThemedText } from "@/shared/core/ThemedText";
 import EmailInput from "@/shared/EmailInput";
+import { useI18n } from "@/shared/localization";
 import TextInput from "@/shared/TextInput";
 import { useRouter } from "expo-router";
 
@@ -12,7 +12,7 @@ const EmailScreen = () => {
     control,
     formState: { errors },
   } = useFormContext();
-  //const { t } = useTranslation();
+  const { tl } = useI18n();
   const router = useRouter();
 
   const getErrorMessage = (field: string): string | undefined => {
@@ -26,7 +26,7 @@ const EmailScreen = () => {
   return (
     <View style={styles.stepContainer}>
       <ThemedText type="megaTitle" style={styles.title}>
-        Sign Up
+        {tl("Sign Up")}
       </ThemedText>
       <View style={styles.inputWrapper}>
         <Controller

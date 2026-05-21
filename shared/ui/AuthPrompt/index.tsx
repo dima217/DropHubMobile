@@ -1,6 +1,7 @@
 import { useThemedStyles } from "@/hooks/useThemedStyles";
 
 import { ThemedText } from "@/shared/core/ThemedText";
+import { useI18n } from "@/shared/localization";
 import React from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
@@ -17,6 +18,7 @@ const AuthPrompt: React.FC<AuthPromptProps> = ({
   actionText,
   textType = "link",
 }) => {
+  const { tl } = useI18n();
   const styles = useThemedStyles((c) => ({
 
   container: {
@@ -40,11 +42,11 @@ const AuthPrompt: React.FC<AuthPromptProps> = ({
   return (
     <View style={styles.container}>
       <ThemedText type={textType} style={styles.baseText}>
-        {promptText}
+        {tl(promptText)}
       </ThemedText>
       <Pressable onPress={onPressAction} style={{ padding: 0 }}>
         <ThemedText type={textType} style={styles.highlightText}>
-          {actionText}
+          {tl(actionText)}
         </ThemedText>
       </Pressable>
     </View>

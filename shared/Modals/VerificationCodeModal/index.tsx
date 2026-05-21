@@ -1,4 +1,5 @@
 import BaseModal from "@/shared/Modals/BaseModal";
+import { useI18n } from "@/shared/localization";
 import React from "react";
 
 interface VerificationCodeModalProps {
@@ -12,11 +13,12 @@ const VerificationCodeModal: React.FC<VerificationCodeModalProps> = ({
   email,
   onClose,
 }) => {
+  const { tl } = useI18n();
   return (
     <BaseModal
       isVisible={isVisible}
-      title="Код подтверждения отправлен"
-      message={`Код был отправлен на ${email}`}
+      title={tl("Код подтверждения отправлен")}
+      message={`${tl("Код был отправлен на")} ${email}`}
       onClose={onClose}
       buttons={[
         {

@@ -79,7 +79,7 @@ const FormWrapper = <T extends Record<string, any>>({
       <Button
         style={[styles.button, style]}
         onPress={handleSubmit}
-        title={"Next"}
+        title={buttonText ?? "Next"}
       />
     </FormProvider>
   );

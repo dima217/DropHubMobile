@@ -1,8 +1,8 @@
-import { useThemedStyles } from "@/hooks/useThemedStyles";
 import { useThemeColors } from "@/hooks/useThemeColors";
+import { useThemedStyles } from "@/hooks/useThemedStyles";
 
 import React from "react";
-import { StyleProp, StyleSheet, View, ViewStyle } from "react-native";
+import { StyleProp, View, ViewStyle } from "react-native";
 import Svg, { Defs, RadialGradient, Rect, Stop } from "react-native-svg";
 
 interface RadialGradientBackgroundProps {
@@ -37,7 +37,6 @@ const RadialGradientBackground: React.FC<RadialGradientBackgroundProps> = ({
     flex: 1,
     overflow: "hidden",
   },
-
 }));
 
   const colorsArray = colors.slice(0, 3);

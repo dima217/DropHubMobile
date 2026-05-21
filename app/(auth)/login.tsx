@@ -2,6 +2,7 @@ import { useThemedStyles } from "@/hooks/useThemedStyles";
 
 import { ThemedText } from "@/shared/core/ThemedText";
 import Header from "@/shared/Header";
+import { useI18n } from "@/shared/localization";
 import PasswordChangedModal from "@/shared/Modals/PasswordChangedModal";
 import AuthPrompt from "@/shared/ui/AuthPrompt";
 import View from "@/shared/View";
@@ -10,6 +11,7 @@ import { Href, useLocalSearchParams, useRouter } from "expo-router";
 import { View as RNView, StyleSheet } from "react-native";
 
 const Login = () => {
+  const { tl } = useI18n();
   const styles = useThemedStyles((c) => ({
 
   container: {
@@ -54,7 +56,7 @@ const Login = () => {
       />
       <RNView style={styles.container}>
         <RNView style={styles.iconContainer}>
-          <ThemedText style={styles.loginText}>Sign In</ThemedText>
+          <ThemedText style={styles.loginText}>{tl("Sign In")}</ThemedText>
         </RNView>
         <LoginForm />
         <RNView style={styles.innerContainer}>

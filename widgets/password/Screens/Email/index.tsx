@@ -1,5 +1,5 @@
-//import { useTranslation } from "@/hooks/useTranslation";
 import { ThemedText } from "@/shared/core/ThemedText";
+import { useI18n } from "@/shared/localization";
 import EmailInput from "@/shared/EmailInput";
 
 import { Controller, useFormContext } from "react-hook-form";
@@ -10,7 +10,7 @@ const ResetPasswordEmailScreen = () => {
     control,
     formState: { errors },
   } = useFormContext();
-  //const { t } = useTranslation();
+  const { tl } = useI18n();
 
   const getErrorMessage = (field: string): string | undefined => {
     const error = errors[field];
@@ -24,10 +24,10 @@ const ResetPasswordEmailScreen = () => {
     <View style={styles.stepContainer}>
       <View style={styles.infoContainer}>
         <ThemedText type="megaTitle" style={styles.title}>
-            Reset Password
+          {tl("Reset Password")}
         </ThemedText>
         <ThemedText type="medium">
-            Enter your email to receive a password reset code
+          {tl("Enter your email to receive a password reset code")}
         </ThemedText>
       </View>
       <View style={styles.inputWrapper}>
