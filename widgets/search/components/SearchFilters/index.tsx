@@ -3,6 +3,7 @@ import { useGetStorageInfoQuery } from "@/api/storageApi";
 import { SearchResourceType } from "@/api/types/search";
 import { useThemeColors } from "@/hooks/useThemeColors";
 import { ThemedText } from "@/shared/core/ThemedText";
+import { useI18n } from "@/shared/localization";
 import { RootState } from "@/store/store";
 import { Feather } from "@expo/vector-icons";
 import React, { useMemo, useState } from "react";
@@ -39,6 +40,7 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
   selectedTags,
   onTagToggle,
 }) => {
+  const { tl } = useI18n();
   const [typeModalVisible, setTypeModalVisible] = useState(false);
   const [tagModalVisible, setTagModalVisible] = useState(false);
   const [creatorModalVisible, setCreatorModalVisible] = useState(false);
@@ -97,16 +99,16 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
   return (
     <RNView style={styles.wrapper}>
       <RNView style={styles.resourceRow}>
-        <ThemedText style={styles.resourceLabel}>Ресурс:</ThemedText>
+        <ThemedText style={styles.resourceLabel}>{tl("Ресурс:")}</ThemedText>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.resourceChips}
         >
           {[
-            { value: SearchResourceType.ALL, label: "Все" },
-            { value: SearchResourceType.ROOM, label: "Комнаты" },
-            { value: SearchResourceType.STORAGE, label: "Хранилище" },
+            { value: SearchResourceType.ALL, label: tl("Все") },
+            { value: SearchResourceType.ROOM, label: tl("Rooms") },
+            { value: SearchResourceType.STORAGE, label: tl("Storage") },
           ].map(({ value, label }) => (
             <TouchableOpacity
               key={value}

@@ -2,7 +2,7 @@ import type { ChatChannelMessage } from "@/api/types/chatChannels";
 import { useThemeColors } from "@/hooks/useThemeColors";
 import React, { useMemo, useState } from "react";
 import { View, Text, TouchableOpacity, Pressable, StyleSheet } from "react-native";
-import { getUserName } from "../lib/users";
+import { useResolveChatUserName } from "../lib/ChatUserNamesContext";
 
 interface Props {
   message: ChatChannelMessage;
@@ -41,6 +41,7 @@ export function MessageItem({
   readBy,
   replyMsg,
 }: Props) {
+  const resolveUserName = useResolveChatUserName();
   const colors = useThemeColors();
   const st = useMemo(
     () =>
@@ -172,7 +173,7 @@ export function MessageItem({
       ? "System"
       : isOwn
         ? "You"
-        : message.sender_display_name || getUserName(message.sender_id);
+        : resolveUserName(message.sender_id, message.sender_display_name);
 
   if (isSystem) {
     return (
@@ -194,7 +195,7 @@ export function MessageItem({
           </View>
           <Text style={st.replyCtxText} numberOfLines={1}>
             <Text style={st.replyCtxName}>
-              {replyMsg.sender_display_name || getUserName(replyMsg.sender_id)}
+              {resolveUserName(replyMsg.sender_id, replyMsg.sender_display_name)}
             </Text>
             <Text style={st.replySep}> · </Text>
             <Text style={st.replySnippet}>

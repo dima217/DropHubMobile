@@ -11,7 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { getUserName } from "../lib/users";
+import { useResolveChatUserName } from "../lib/ChatUserNamesContext";
 
 function formatTime(iso?: string) {
   if (!iso) return "";
@@ -41,6 +41,7 @@ export function PinnedMessagesModal({
   messages,
   onUnpin,
 }: Props) {
+  const resolveUserName = useResolveChatUserName();
   const colors = useThemeColors();
   const s = useMemo(
     () =>
@@ -181,7 +182,7 @@ export function PinnedMessagesModal({
                   <View style={s.pinAccent} />
                   <View style={s.pinBody}>
                     <Text style={s.pinAuthor}>
-                      {item.sender_display_name || getUserName(item.sender_id)}
+                      {resolveUserName(item.sender_id, item.sender_display_name)}
                     </Text>
                     <Text style={s.pinContent} numberOfLines={6}>
                       {item.deleted_at ? "(deleted)" : item.content}

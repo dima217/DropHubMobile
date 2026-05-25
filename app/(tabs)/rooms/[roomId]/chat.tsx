@@ -10,8 +10,10 @@ import { RootState } from "@/store/store";
 import { MessageInput } from "@/widgets/chat/components/MessageInput";
 import { MessageList } from "@/widgets/chat/components/MessageList";
 import { PinnedMessagesModal } from "@/widgets/chat/components/PinnedMessagesModal";
+import { useChatUserNamesMap } from "@/widgets/chat/hooks/useChatUserNamesMap";
 import { useChat } from "@/widgets/chat/hooks/useChat";
 import { useWebSocket } from "@/widgets/chat/hooks/useWebSocket";
+import { ChatUserNamesProvider } from "@/widgets/chat/lib/ChatUserNamesContext";
 import { Feather } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
 import React, { useCallback, useMemo, useState } from "react";
@@ -72,6 +74,17 @@ const RoomChatScreen = () => {
     return getUserIdFromAccessToken(accessToken) ?? "";
   }, [user?.id, accessToken]);
 
+  const userNamesMap = useChatUserNamesMap(roomDetails, user);
+
+  const senderDisplayName = useMemo(() => {
+    const fromProfile = user?.firstName?.trim();
+    if (fromProfile) return fromProfile;
+    const fromEmail = user?.email?.split("@")[0]?.trim();
+    if (fromEmail) return fromEmail;
+    if (currentUserId) return userNamesMap.get(currentUserId);
+    return undefined;
+  }, [user?.firstName, user?.email, currentUserId, userNamesMap]);
+
   const shouldConnectWs = Boolean(currentUserId && roomId);
 
   useWebSocket(shouldConnectWs);
@@ -91,7 +104,7 @@ const RoomChatScreen = () => {
     pinnedMessages,
     typingUserIds,
     readReceipts,
-  } = useChat(currentUserId, { boundChannelId });
+  } = useChat(currentUserId, { boundChannelId, senderDisplayName });
 
   const handleSend = useCallback(
     (content: string) => {
@@ -126,41 +139,43 @@ const RoomChatScreen = () => {
   }
 
   return (
-    <View style={styles.container}>
-      <Header title="Chat" rightAction={pinHeaderAction} />
-      <PinnedMessagesModal
-        visible={pinsOpen}
-        onClose={() => setPinsOpen(false)}
-        messages={pinnedMessages}
-        onUnpin={togglePin}
-      />
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
-        style={styles.flex}
-      >
-        <MessageList
-          channelId={boundChannelId}
-          messages={messages}
-          currentUserId={currentUserId}
-          loading={loadingMessages}
-          onReaction={toggleReaction}
-          onReply={setReplyTo}
-          onEdit={editMessage}
-          onDelete={deleteMessage}
-          onPin={togglePin}
-          onRead={sendRead}
-          typingUserIds={typingUserIds}
-          readReceipts={readReceipts}
+    <ChatUserNamesProvider namesById={userNamesMap}>
+      <View style={styles.container}>
+        <Header title="Chat" rightAction={pinHeaderAction} />
+        <PinnedMessagesModal
+          visible={pinsOpen}
+          onClose={() => setPinsOpen(false)}
+          messages={pinnedMessages}
+          onUnpin={togglePin}
         />
-        <MessageInput
-          onSend={handleSend}
-          onTyping={sendTyping}
-          replyTo={replyTo}
-          onCancelReply={() => setReplyTo(null)}
-        />
-      </KeyboardAvoidingView>
-    </View>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
+          style={styles.flex}
+        >
+          <MessageList
+            channelId={boundChannelId}
+            messages={messages}
+            currentUserId={currentUserId}
+            loading={loadingMessages}
+            onReaction={toggleReaction}
+            onReply={setReplyTo}
+            onEdit={editMessage}
+            onDelete={deleteMessage}
+            onPin={togglePin}
+            onRead={sendRead}
+            typingUserIds={typingUserIds}
+            readReceipts={readReceipts}
+          />
+          <MessageInput
+            onSend={handleSend}
+            onTyping={sendTyping}
+            replyTo={replyTo}
+            onCancelReply={() => setReplyTo(null)}
+          />
+        </KeyboardAvoidingView>
+      </View>
+    </ChatUserNamesProvider>
   );
 };
 

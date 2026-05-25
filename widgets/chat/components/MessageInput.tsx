@@ -12,7 +12,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { getUserName } from "../lib/users";
+import { useResolveChatUserName } from "../lib/ChatUserNamesContext";
 
 const EMOJI_GROUPS: Record<string, string[]> = {
   Smileys: ["😀", "😂", "🥲", "😊", "😍", "🤔"],
@@ -33,6 +33,7 @@ export function MessageInput({
   replyTo,
   onCancelReply,
 }: Props) {
+  const resolveUserName = useResolveChatUserName();
   const themeColors = useThemeColors();
   const [text, setText] = useState("");
   const [showEmoji, setShowEmoji] = useState(false);
@@ -182,7 +183,7 @@ export function MessageInput({
             <Text style={s.replyLabel}>
               Reply to{" "}
               <Text style={s.replyName}>
-                {replyTo.sender_display_name || getUserName(replyTo.sender_id)}
+                {resolveUserName(replyTo.sender_id, replyTo.sender_display_name)}
               </Text>
             </Text>
             <Text style={s.replyPreview} numberOfLines={2}>

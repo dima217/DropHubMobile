@@ -11,10 +11,13 @@ type ReadReceipts = Map<string, Set<string>>;
 export type UseChatOptions = {
   /** When set (e.g. room screen), this channel stays active and updates on navigation. */
   boundChannelId?: string | null;
+  /** Shown on optimistic outgoing messages until the server echoes back. */
+  senderDisplayName?: string;
 };
 
 export function useChat(userId: string, options?: UseChatOptions) {
   const boundChannelId = options?.boundChannelId ?? null;
+  const senderDisplayName = options?.senderDisplayName;
   const skipChannelsList = Boolean(boundChannelId);
 
   const [channels, setChannels] = useState<ChatChannel[]>([]);
@@ -409,6 +412,7 @@ export function useChat(userId: string, options?: UseChatOptions) {
         channel_id: activeChannelId,
         sender_id: userId,
         sender_type: "user",
+        sender_display_name: senderDisplayName,
         content: content.trim(),
         content_type: "text",
         created_at: new Date().toISOString(),
@@ -429,7 +433,7 @@ export function useChat(userId: string, options?: UseChatOptions) {
         reply_to: replyTo?.message_id,
       });
     },
-    [activeChannelId, userId, replyTo]
+    [activeChannelId, userId, replyTo, senderDisplayName]
   );
 
   const editMessage = useCallback(

@@ -1,5 +1,6 @@
 import { useThemeColors } from "@/hooks/useThemeColors";
 import { ThemedText } from "@/shared/core/ThemedText";
+import { useI18n } from "@/shared/localization";
 import { Feather } from "@expo/vector-icons";
 import React, { useMemo } from "react";
 import {
@@ -27,6 +28,7 @@ export const SearchFilterTagModal: React.FC<SearchFilterTagModalProps> = ({
   onToggle,
   onClose,
 }) => {
+  const { tl } = useI18n();
   const colors = useThemeColors();
   const styles = useMemo(
     () =>
@@ -123,7 +125,7 @@ export const SearchFilterTagModal: React.FC<SearchFilterTagModalProps> = ({
       >
         <View style={styles.sheet} onStartShouldSetResponder={() => true}>
           <View style={styles.header}>
-            <ThemedText style={styles.title}>Теги</ThemedText>
+            <ThemedText style={styles.title}>{tl("Теги")}</ThemedText>
             <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
               <Feather name="x" size={24} color={colors.brightText} />
             </TouchableOpacity>
@@ -134,7 +136,7 @@ export const SearchFilterTagModal: React.FC<SearchFilterTagModalProps> = ({
             showsVerticalScrollIndicator={false}
           >
             {tags.length === 0 ? (
-              <ThemedText style={styles.empty}>Нет доступных тегов</ThemedText>
+              <ThemedText style={styles.empty}>{tl("Нет доступных тегов")}</ThemedText>
             ) : (
               tags.map((tag) => {
                 const isSelected = selectedTags.includes(tag);

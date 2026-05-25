@@ -2,6 +2,7 @@ import { useGetFriendsQuery } from "@/api/friendApi";
 import { Friend } from "@/api/types/friend";
 import { useThemeColors } from "@/hooks/useThemeColors";
 import { ThemedText } from "@/shared/core/ThemedText";
+import { useI18n } from "@/shared/localization";
 import ActivityIndicator from "@/shared/ui/ActivityIndicator";
 import { Feather } from "@expo/vector-icons";
 import { Image } from "expo-image";
@@ -36,6 +37,7 @@ export const SearchFilterCreatorModal: React.FC<SearchFilterCreatorModalProps> =
   onSelect,
   onClose,
 }) => {
+  const { tl } = useI18n();
   const { data: friends = [], isLoading } = useGetFriendsQuery(undefined, {
     skip: !visible,
   });
@@ -181,7 +183,7 @@ export const SearchFilterCreatorModal: React.FC<SearchFilterCreatorModalProps> =
       >
         <View style={styles.sheet} onStartShouldSetResponder={() => true}>
           <View style={styles.header}>
-            <ThemedText style={styles.title}>Автор</ThemedText>
+            <ThemedText style={styles.title}>{tl("Creator")}</ThemedText>
             <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
               <Feather name="x" size={24} color={colors.brightText} />
             </TouchableOpacity>
@@ -197,7 +199,7 @@ export const SearchFilterCreatorModal: React.FC<SearchFilterCreatorModalProps> =
             <TextInput
               value={searchQuery}
               onChangeText={setSearchQuery}
-              placeholder="Поиск по имени..."
+              placeholder={tl("Поиск по имени...")}
               placeholderTextColor={colors.secondary}
               style={styles.searchInput}
             />
@@ -216,7 +218,7 @@ export const SearchFilterCreatorModal: React.FC<SearchFilterCreatorModalProps> =
               style={styles.clearButton}
               onPress={handleClear}
             >
-              <ThemedText style={styles.clearButtonText}>Сбросить выбор</ThemedText>
+              <ThemedText style={styles.clearButtonText}>{tl("Сбросить выбор")}</ThemedText>
             </TouchableOpacity>
           )}
 
@@ -262,8 +264,8 @@ export const SearchFilterCreatorModal: React.FC<SearchFilterCreatorModalProps> =
                 <View style={styles.empty}>
                   <ThemedText style={styles.emptyText}>
                     {searchQuery.trim()
-                      ? "Никого не найдено"
-                      : "У вас пока нет друзей"}
+                      ? tl("Никого не найдено")
+                      : tl("У вас пока нет друзей")}
                   </ThemedText>
                 </View>
               }

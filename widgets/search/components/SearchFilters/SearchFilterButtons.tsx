@@ -1,6 +1,7 @@
 import { Friend } from "@/api/types/friend";
 import { useThemeColors } from "@/hooks/useThemeColors";
 import { ThemedText } from "@/shared/core/ThemedText";
+import { useI18n } from "@/shared/localization";
 import { Feather } from "@expo/vector-icons";
 import React, { useMemo } from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
@@ -16,16 +17,19 @@ interface SearchFilterButtonsProps {
   onPressCreator: () => void;
 }
 
-function getTypeButtonLabel(selected: string[]): string {
-  if (selected.length === 0) return "Type";
+function getTypeButtonLabel(
+  selected: string[],
+  tl: (text: string) => string
+): string {
+  if (selected.length === 0) return tl("Type");
   const first = MIME_TYPE_OPTIONS.find((o) => o.value === selected[0]);
-  const name = first ? first.label : selected[0];
+  const name = first ? tl(first.label) : selected[0];
   if (selected.length === 1) return name;
   return `${name} +${selected.length - 1}`;
 }
 
-function getTagButtonLabel(selected: string[]): string {
-  if (selected.length === 0) return "Tag";
+function getTagButtonLabel(selected: string[], tl: (text: string) => string): string {
+  if (selected.length === 0) return tl("Tag");
   const first = selected[0];
   if (selected.length === 1) return `#${first}`;
   return `#${first} +${selected.length - 1}`;
@@ -33,11 +37,12 @@ function getTagButtonLabel(selected: string[]): string {
 
 function getCreatorButtonLabel(
   selectedCreatorId: number | undefined,
-  friends: Friend[]
+  friends: Friend[],
+  tl: (text: string) => string
 ): string {
-  if (selectedCreatorId == null) return "Creator";
+  if (selectedCreatorId == null) return tl("Creator");
   const friend = friends.find((f) => f.friendProfile.id === selectedCreatorId);
-  return friend?.friendProfile.firstName ?? "Creator";
+  return friend?.friendProfile.firstName ?? tl("Creator");
 }
 
 export const SearchFilterButtons: React.FC<SearchFilterButtonsProps> = ({
@@ -49,6 +54,7 @@ export const SearchFilterButtons: React.FC<SearchFilterButtonsProps> = ({
   onPressTag,
   onPressCreator,
 }) => {
+  const { tl } = useI18n();
   const colors = useThemeColors();
   const styles = useMemo(
     () =>
@@ -90,9 +96,9 @@ export const SearchFilterButtons: React.FC<SearchFilterButtonsProps> = ({
   const hasTag = selectedTags.length > 0;
   const hasCreator = selectedCreatorId != null;
 
-  const typeLabel = getTypeButtonLabel(selectedMimeTypes);
-  const tagLabel = getTagButtonLabel(selectedTags);
-  const creatorLabel = getCreatorButtonLabel(selectedCreatorId, friends);
+  const typeLabel = getTypeButtonLabel(selectedMimeTypes, tl);
+  const tagLabel = getTagButtonLabel(selectedTags, tl);
+  const creatorLabel = getCreatorButtonLabel(selectedCreatorId, friends, tl);
 
   return (
     <View style={styles.row}>

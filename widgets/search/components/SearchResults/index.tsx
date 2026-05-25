@@ -7,6 +7,7 @@ import {
 import { StorageItem } from "@/api/types/storage";
 import { useThemeColors } from "@/hooks/useThemeColors";
 import { ThemedText } from "@/shared/core/ThemedText";
+import { useI18n } from "@/shared/localization";
 import FileCard from "@/widgets/rooms/components/FileCard";
 import FolderCard from "@/widgets/rooms/components/FolderCard";
 import { StorageSection } from "@/widgets/storage/components/StorageSection";
@@ -53,6 +54,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
   searchQuery,
   resourceType,
 }) => {
+  const { tl } = useI18n();
   const router = useRouter();
   const colors = useThemeColors();
   const styles = useMemo(
@@ -99,7 +101,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
       return (
         <RNView style={styles.emptyContainer}>
           <ThemedText style={styles.emptyText}>
-            {searchQuery ? "Ничего не найдено" : "Введите запрос для поиска"}
+            {searchQuery ? tl("Ничего не найдено") : tl("Введите запрос для поиска")}
           </ThemedText>
         </RNView>
       );
@@ -113,7 +115,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
             showPreviewToggle: true,
             showFAB: true,
             showGlobalTagsButton: false,
-            rootLabel: "Результаты поиска",
+            rootLabel: tl("Результаты поиска"),
             initialItems: storageItems,
             scrollableHeader: true,
           }}
@@ -212,7 +214,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
       ListEmptyComponent={
         <RNView style={styles.emptyContainer}>
           <ThemedText style={styles.emptyText}>
-            {searchQuery ? "Ничего не найдено" : "Введите запрос для поиска"}
+            {searchQuery ? tl("Ничего не найдено") : tl("Введите запрос для поиска")}
           </ThemedText>
         </RNView>
       }

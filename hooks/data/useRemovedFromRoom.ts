@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useWebSocket } from "../websocket/useWebSocket";
 
-const WS_URL = "http://10.132.93.195:3000";
+const WS_URL = "http://10.158.36.195:3000";
 
 export const useRemovedFromRoom = (
   accessToken: string,

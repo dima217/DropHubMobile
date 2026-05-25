@@ -1,13 +1,14 @@
 import { useThemeColors } from "@/hooks/useThemeColors";
 import React, { useEffect, useMemo, useRef } from "react";
 import { View, Text, Animated, StyleSheet } from "react-native";
-import { getUserName } from "../lib/users";
+import { useResolveChatUserName } from "../lib/ChatUserNamesContext";
 
 interface Props {
   userIds: string[];
 }
 
 export function TypingIndicator({ userIds }: Props) {
+  const resolveUserName = useResolveChatUserName();
   const anim = useRef(new Animated.Value(0)).current;
   const colors = useThemeColors();
   const s = useMemo(
@@ -45,7 +46,7 @@ export function TypingIndicator({ userIds }: Props) {
 
   if (userIds.length === 0) return null;
 
-  const names = userIds.map((id) => getUserName(id)).join(", ");
+  const names = userIds.map((id) => resolveUserName(id)).join(", ");
 
   return (
     <View style={s.container}>

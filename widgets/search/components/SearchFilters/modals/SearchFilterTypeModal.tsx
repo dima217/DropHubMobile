@@ -1,5 +1,6 @@
 import { useThemeColors } from "@/hooks/useThemeColors";
 import { ThemedText } from "@/shared/core/ThemedText";
+import { useI18n } from "@/shared/localization";
 import { Feather } from "@expo/vector-icons";
 import React, { useMemo } from "react";
 import {
@@ -23,6 +24,7 @@ export const SearchFilterTypeModal: React.FC<SearchFilterTypeModalProps> = ({
   onSelect,
   onClose,
 }) => {
+  const { tl } = useI18n();
   const colors = useThemeColors();
   const styles = useMemo(
     () =>
@@ -117,7 +119,7 @@ export const SearchFilterTypeModal: React.FC<SearchFilterTypeModalProps> = ({
       >
         <View style={styles.sheet} onStartShouldSetResponder={() => true}>
           <View style={styles.header}>
-            <ThemedText style={styles.title}>Тип файла</ThemedText>
+            <ThemedText style={styles.title}>{tl("Тип файла")}</ThemedText>
             <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
               <Feather name="x" size={24} color={colors.brightText} />
             </TouchableOpacity>
@@ -141,7 +143,7 @@ export const SearchFilterTypeModal: React.FC<SearchFilterTypeModalProps> = ({
                     style={[styles.label, isChecked && styles.labelActive]}
                     numberOfLines={1}
                   >
-                    {opt.label}
+                    {tl(opt.label)}
                   </ThemedText>
                   <View
                     style={[
