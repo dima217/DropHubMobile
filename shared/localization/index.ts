@@ -18,7 +18,13 @@ type TranslationKey =
   | "rooms.download.success"
   | "rooms.download.failed"
   | "rooms.file.downloaded"
-  | "storage.file.downloadsShort";
+  | "storage.file.downloadsShort"
+  | "notifications.title"
+  | "notifications.actor.default"
+  | "notifications.generic.body"
+  | "notifications.room_file.body"
+  | "notifications.shared_grant.body"
+  | "notifications.shared_upload.body";
 
 const TRANSLATIONS: Record<AppLanguage, Record<TranslationKey, string>> = {
   ru: {
@@ -38,6 +44,12 @@ const TRANSLATIONS: Record<AppLanguage, Record<TranslationKey, string>> = {
     "rooms.download.failed": "Не удалось скачать файлы",
     "rooms.file.downloaded": "Файл {{fileId}} загружен",
     "storage.file.downloadsShort": "скач.",
+    "notifications.title": "DropHub",
+    "notifications.actor.default": "Пользователь",
+    "notifications.generic.body": "Новое уведомление",
+    "notifications.room_file.body": "{{actorName}} добавил(а) файл в комнату",
+    "notifications.shared_grant.body": "{{actorName}} предоставил(а) вам доступ к папке",
+    "notifications.shared_upload.body": "{{actorName}} загрузил(а) файл в общую папку",
   },
   be: {
     "common.success": "Паспяхова",
@@ -56,6 +68,12 @@ const TRANSLATIONS: Record<AppLanguage, Record<TranslationKey, string>> = {
     "rooms.download.failed": "Не ўдалося спампаваць файлы",
     "rooms.file.downloaded": "Файл {{fileId}} спампаваны",
     "storage.file.downloadsShort": "загр.",
+    "notifications.title": "DropHub",
+    "notifications.actor.default": "Карыстальнік",
+    "notifications.generic.body": "Новае апавяшчэнне",
+    "notifications.room_file.body": "{{actorName}} дадаў(ла) файл у пакой",
+    "notifications.shared_grant.body": "{{actorName}} прадастаўіў(ла) вам доступ да папкі",
+    "notifications.shared_upload.body": "{{actorName}} загрузіў(ла) файл у агульную папку",
   },
   en: {
     "common.success": "Success",
@@ -74,6 +92,12 @@ const TRANSLATIONS: Record<AppLanguage, Record<TranslationKey, string>> = {
     "rooms.download.failed": "Failed to download files",
     "rooms.file.downloaded": "File {{fileId}} downloaded",
     "storage.file.downloadsShort": "downloads",
+    "notifications.title": "DropHub",
+    "notifications.actor.default": "User",
+    "notifications.generic.body": "New notification",
+    "notifications.room_file.body": "{{actorName}} added a file to the room",
+    "notifications.shared_grant.body": "{{actorName}} granted you access to a folder",
+    "notifications.shared_upload.body": "{{actorName}} uploaded a file to a shared folder",
   },
 };
 

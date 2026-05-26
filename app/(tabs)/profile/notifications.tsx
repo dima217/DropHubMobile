@@ -5,6 +5,7 @@ import type { AppNotification } from "@/api/types/notification";
 import { PushNotificationDataType } from "@/constants/pushNotifications";
 import Header from "@/shared/Header";
 import { useI18n } from "@/shared/localization";
+import { localizeNotification } from "@/shared/notifications/content";
 import View from "@/shared/View";
 import { ThemedText } from "@/shared/core/ThemedText";
 import { Href, useRouter } from "expo-router";
@@ -41,7 +42,7 @@ function navigateByNotification(router: ReturnType<typeof useRouter>, item: AppN
 
 export default function NotificationsScreen() {
   const colors = useThemeColors();
-  const { tl } = useI18n();
+  const { tl, language } = useI18n();
   const router = useRouter();
   const [offset, setOffset] = useState(0);
   const [items, setItems] = useState<AppNotification[]>([]);
@@ -171,7 +172,9 @@ export default function NotificationsScreen() {
           setHasMore(true);
           void refetch();
         }}
-        renderItem={({ item }) => (
+        renderItem={({ item }) => {
+          const content = localizeNotification(language, item);
+          return (
           <Pressable
             onPress={() => void handleOpenNotification(item)}
             style={({ pressed }) => [
@@ -181,15 +184,16 @@ export default function NotificationsScreen() {
             ]}
           >
             <RNView style={styles.rowHeader}>
-              <ThemedText style={styles.title}>{item.title}</ThemedText>
+              <ThemedText style={styles.title}>{content.title}</ThemedText>
               {!item.isRead && <RNView style={styles.unreadDot} />}
             </RNView>
-            <ThemedText style={styles.body}>{item.body}</ThemedText>
+            <ThemedText style={styles.body}>{content.body}</ThemedText>
             <ThemedText style={styles.date}>
               {new Date(item.createdAt).toLocaleString()}
             </ThemedText>
           </Pressable>
-        )}
+          );
+        }}
         ListEmptyComponent={
           isLoading ? (
             <ActivityIndicator style={styles.loader} color={colors.primary} />
