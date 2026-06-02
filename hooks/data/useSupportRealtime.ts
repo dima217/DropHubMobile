@@ -1,4 +1,4 @@
-import { API_ORIGIN } from "@/constants/apiOrigin";
+import { API_ORIGIN } from "@/constants/apiConfig";
 import { useEffect, useRef } from "react";
 import { useWebSocket } from "../websocket/useWebSocket";
 

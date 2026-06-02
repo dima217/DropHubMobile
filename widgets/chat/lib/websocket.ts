@@ -1,4 +1,4 @@
-import { API_ORIGIN } from "@/constants/apiOrigin";
+import { API_ORIGIN } from "@/constants/apiConfig";
 import { store } from "@/store/store";
 import { io, Socket } from "socket.io-client";
 

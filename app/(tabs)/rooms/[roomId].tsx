@@ -197,9 +197,10 @@ const RoomDetailsScreen = () => {
         selectedIds,
         handleDownloadFiles,
         handleDeleteFiles,
-        resetSelection
+        resetSelection,
+        tl
       ),
-    [selectedIds, handleDownloadFiles, handleDeleteFiles, resetSelection]
+    [selectedIds, handleDownloadFiles, handleDeleteFiles, resetSelection, tl]
   );
 
   const handleUpdateFile = useCallback((fileId: string, storedName: string) => {

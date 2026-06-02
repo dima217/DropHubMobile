@@ -1,7 +1,7 @@
 import { API_BASE_URL } from "@/constants/apiConfig";
 import { shouldRefreshToken } from "@/services/auth/TokenExpireChecker";
 import { secureStore } from "@/services/secureStore";
-import { clearAuth, setAccessToken } from "@/store/slices/authSlice";
+import { setAccessToken } from "@/store/slices/authSlice";
 import {
   BaseQueryFn,
   fetchBaseQuery,
@@ -54,7 +54,7 @@ const refreshTokens = async (api: any): Promise<boolean> => {
     api.dispatch(setAccessToken({ accessToken: data.accessToken }));
     return true;
   } catch (error) {
-    api.dispatch(clearAuth());
+    void import("@/store/resetAppState").then(({ resetAppState }) => resetAppState());
     console.error("Refresh tokens error:", error);
     return false;
   }
@@ -75,7 +75,9 @@ export const baseQueryWithRefresh: BaseQueryFn<
       const refreshed = await refreshTokens(api);
 
       if (!refreshed) {
-        api.dispatch(clearAuth());
+        void import("@/store/resetAppState").then(({ resetAppState }) =>
+          resetAppState()
+        );
         const error: FetchBaseQueryError = {
           status: 401,
           data: "Failed to refresh token",

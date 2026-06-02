@@ -37,7 +37,7 @@ const Header = ({
 }: HeaderProps) => {
   const colors = useThemeColors();
   const styles = useMemo(() => createFileCardStyles(colors), [colors]);
-  const { t } = useI18n();
+  const { t, tl } = useI18n();
   const iconName = getFileIconName(file.mimeType, isImage, isVideo);
 
   return (
@@ -94,7 +94,7 @@ const Header = ({
       </View>
       {menuItems && (
         <ActionMenu
-          items={menuItems.getMenuItems(file._id, file.storedName, file.mimeType)}
+          items={menuItems.getMenuItems(file._id, file.storedName, file.mimeType, tl)}
         />
       )}
     </View>

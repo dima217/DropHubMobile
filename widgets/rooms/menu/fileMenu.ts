@@ -1,6 +1,8 @@
 import { ActionMenuItemData } from "@/shared/ui/ActionMenu/ActionMenuItem";
 import { getConversionOptions } from "@/shared/fileConversion/getConversionOptions";
 
+type TranslateFn = (text: string) => string;
+
 export class FileMenuManager {
     onDownload?: (ids: string[]) => void;
     onDelete?: (ids: string[]) => void;
@@ -22,24 +24,29 @@ export class FileMenuManager {
       this.onConvert = onConvert;
     }
   
-    getMenuItems(fileId: string, storedName: string, mimeType: string): ActionMenuItemData[] {
+    getMenuItems(
+      fileId: string,
+      storedName: string,
+      mimeType: string,
+      tl: TranslateFn = (text) => text
+    ): ActionMenuItemData[] {
       const items: ActionMenuItemData[] = [
         {
           id: 'download',
           icon: 'download',
-          label: 'Download',
+          label: tl('Download'),
           onPress: () => this.onDownload?.([fileId]),
         },
         {
           id: 'share',
           icon: 'share-2',
-          label: 'Share',
+          label: tl('Share'),
           onPress: () => this.onShare?.([fileId]),
         },
         {
           id: 'edit',
           icon: 'edit',
-          label: 'Edit',
+          label: tl('Edit'),
           onPress: () => this.onEdit?.(fileId, storedName)
         },
       ];
@@ -51,7 +58,7 @@ export class FileMenuManager {
         items.push({
           id: 'convert',
           icon: 'refresh-cw',
-          label: 'Convert',
+          label: tl('Convert'),
           onPress: () => this.onConvert?.(fileId, storedName, mimeType),
         });
       }
@@ -59,7 +66,7 @@ export class FileMenuManager {
       items.push({
         id: 'delete',
         icon: 'trash-2',
-        label: 'Delete',
+        label: tl('Delete'),
         destructive: true,
         onPress: () => this.onDelete?.([fileId]),
       });

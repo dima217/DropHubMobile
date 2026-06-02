@@ -5,6 +5,7 @@ import GradientView from "@/shared/Gradient";
 import PatternBackground from "@/shared/ui/PatternBackground";
 import RadialGradientBackground from "@/shared/ui/RadialGradientBackground";
 import { RootState } from "@/store/store";
+import { useGetFriendsQuery } from "@/api/friendApi";
 import { useRouter } from "expo-router";
 import React from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
@@ -15,6 +16,7 @@ const ProfileCard = () => {
   const { tl } = useI18n();
   const profile = useSelector((state: RootState) => state.auth.user);
   const router = useRouter();
+  const { data: friends = [] } = useGetFriendsQuery();
 
   const getInitials = () => {
     if (!profile) return "?";
@@ -29,7 +31,7 @@ const ProfileCard = () => {
     return profile.firstName || profile.email || "";
   };
 
-  const connectionsCount = 5;
+  const connectionsCount = friends.length;
 
   const handleConnectionsPress = () => {
     router.push("/(tabs)/profile/connections");

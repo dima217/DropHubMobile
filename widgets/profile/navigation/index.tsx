@@ -3,14 +3,12 @@ import SignOut from "@/assets/images/SignOut.svg";
 import Support from "@/assets/images/Support.svg";
 import { useThemeColors } from "@/hooks/useThemeColors";
 import { syncFcmTokenToBackend } from "@/services/push/syncFcmTokenToBackend";
-import { secureStore } from "@/services/secureStore";
 import { useI18n } from "@/shared/localization";
 import LogoutConfirmationModal from "@/shared/Modals/LogoutConfirmationModal";
-import { clearAuth } from "@/store/slices/authSlice";
+import { resetAppState } from "@/store/resetAppState";
 import { Feather } from "@expo/vector-icons";
 import { Href } from "expo-router";
 import { ReactNode, useState } from "react";
-import { useDispatch } from "react-redux";
 
 export interface MenuItem {
   id: string;
@@ -25,7 +23,6 @@ export const useProfileMenuItems = (): {
   items: MenuItem[];
   logoutModal: ReactNode;
 } => {
-  const dispatch = useDispatch();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const { secondary } = useThemeColors();
   const { tl } = useI18n();
@@ -43,8 +40,7 @@ export const useProfileMenuItems = (): {
     } catch {
       /* токен на сервере мог не очиститься — всё равно выходим локально */
     }
-    dispatch(clearAuth());
-    await secureStore.clearAll();
+    await resetAppState();
   };
 
   const handleLogoutCancel = () => {

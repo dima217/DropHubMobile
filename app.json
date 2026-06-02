@@ -9,7 +9,8 @@
       "drophub"
     ],
     "extra": {
-      "googleWebClientId": "1093938188069-iv687vpc7vs2jenk07es4b23pj0jenkp.apps.googleusercontent.com"
+      "googleWebClientId": "1093938188069-iv687vpc7vs2jenk07es4b23pj0jenkp.apps.googleusercontent.com",
+      "apiBaseUrl": "https://app-production-7138.up.railway.app"
     },
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,

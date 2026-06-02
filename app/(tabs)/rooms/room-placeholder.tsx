@@ -3,6 +3,7 @@ import { useThemeColors } from "@/hooks/useThemeColors";
 
 import { ThemedText } from "@/shared/core/ThemedText";
 import Header from "@/shared/Header";
+import { useI18n } from "@/shared/localization";
 import WaveButton from "@/shared/ui/animated/WaveButton";
 import View from "@/shared/View";
 import { useRouter } from "expo-router";
@@ -14,6 +15,7 @@ interface RoomPlaceholderProps {
 }
 
 const RoomPlaceholder: React.FC<RoomPlaceholderProps> = ({ onAddFiles }) => {
+  const { tl } = useI18n();
   const themeColors = useThemeColors();
   const styles = useThemedStyles((c) => ({
 
@@ -79,11 +81,12 @@ const RoomPlaceholder: React.FC<RoomPlaceholderProps> = ({ onAddFiles }) => {
       <RNView style={styles.content}>
         <RNView style={styles.textContainer}>
           <ThemedText style={styles.title}>
-            Start Sharing
+            {tl("Start Sharing")}
           </ThemedText>
           <ThemedText style={styles.description}>
-            DropHub makes it easy to collaborate and share resources. 
-            Click the button below to add your first files.
+            {tl(
+              "DropHub makes it easy to collaborate and share resources. Click the button below to add your first files."
+            )}
           </ThemedText>
         </RNView>
 
@@ -96,7 +99,7 @@ const RoomPlaceholder: React.FC<RoomPlaceholderProps> = ({ onAddFiles }) => {
 
         <RNView style={styles.hintContainer}>
           <ThemedText style={styles.hint}>
-            Tap the button to upload files
+            {tl("Tap the button to upload files")}
           </ThemedText>
         </RNView>
       </RNView>

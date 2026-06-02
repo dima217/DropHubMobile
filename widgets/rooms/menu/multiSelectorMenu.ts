@@ -1,15 +1,18 @@
 import { ActionMenuItemData } from "@/shared/ui/ActionMenu/ActionMenuItem";
 
+type TranslateFn = (text: string) => string;
+
 export const createMultiSelectMenuItems = (
   selectedIds: Set<string>,
   onDownload: (ids: string[]) => void,
   onDelete: (ids: string[]) => void,
-  onReset: () => void
+  onReset: () => void,
+  tl: TranslateFn = (text) => text
 ): ActionMenuItemData[] => [
   {
     id: "download-selected",
     icon: "download",
-    label: "Download Selected",
+    label: tl("Download Selected"),
     onPress: () => {
       onDownload(Array.from(selectedIds));
       onReset();
@@ -18,7 +21,7 @@ export const createMultiSelectMenuItems = (
   {
     id: "delete-selected",
     icon: "trash-2",
-    label: "Delete Selected",
+    label: tl("Delete Selected"),
     destructive: true,
     onPress: () => {
       onDelete(Array.from(selectedIds));

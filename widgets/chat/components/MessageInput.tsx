@@ -13,6 +13,7 @@ import {
   View,
 } from "react-native";
 import { useResolveChatUserName } from "../lib/ChatUserNamesContext";
+import { useI18n } from "@/shared/localization";
 
 const EMOJI_GROUPS: Record<string, string[]> = {
   Smileys: ["😀", "😂", "🥲", "😊", "😍", "🤔"],
@@ -33,6 +34,7 @@ export function MessageInput({
   replyTo,
   onCancelReply,
 }: Props) {
+  const { tl } = useI18n();
   const resolveUserName = useResolveChatUserName();
   const themeColors = useThemeColors();
   const [text, setText] = useState("");
@@ -181,13 +183,13 @@ export function MessageInput({
           </View>
           <View style={s.replyBody}>
             <Text style={s.replyLabel}>
-              Reply to{" "}
+              {tl("Reply to")}{" "}
               <Text style={s.replyName}>
                 {resolveUserName(replyTo.sender_id, replyTo.sender_display_name)}
               </Text>
             </Text>
             <Text style={s.replyPreview} numberOfLines={2}>
-              {replyTo.deleted_at ? "(deleted)" : replyTo.content}
+              {replyTo.deleted_at ? tl("(deleted)") : replyTo.content}
             </Text>
           </View>
           <TouchableOpacity
@@ -204,7 +206,7 @@ export function MessageInput({
         <View style={s.emojiPanel}>
           {Object.entries(EMOJI_GROUPS).map(([group, emojis]) => (
             <View key={group} style={s.emojiGroup}>
-              <Text style={s.emojiGroupTitle}>{group}</Text>
+              <Text style={s.emojiGroupTitle}>{tl(group)}</Text>
               <View style={s.emojiRow}>
                 {emojis.map((emoji) => (
                   <TouchableOpacity
@@ -239,7 +241,7 @@ export function MessageInput({
             style={s.input}
             value={text}
             onChangeText={handleChange}
-            placeholder={replyTo ? "Write a reply…" : "Message…"}
+            placeholder={replyTo ? tl("Write a reply…") : tl("Message…")}
             placeholderTextColor={themeColors.secondary}
             multiline
             maxLength={2000}
